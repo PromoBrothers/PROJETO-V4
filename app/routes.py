@@ -1,0 +1,1144 @@
+# app/routes.py
+
+from flask import Blueprint, render_template, request, jsonify
+import datetime
+import pytz
+import time
+import requests # Adicionado para tratar exceções de request
+import os
+import re
+import logging
+
+# Criar logger
+logger = logging.getLogger(__name__)
+
+# Importa as funções dos outros módulos
+from . import scraping, services, database
+from . import amazon_scraping # Importa o módulo da Amazon
+
+# Importa o novo sistema unificado
+from .scraper_factory import ScraperFactory
+from .queue_manager import queue_manager
+from .monitoring import metrics_collector, health_checker, alert_manager
+from .cache_manager import cache_manager
+from .validators import product_validator
+
+main_bp = Blueprint('main', __name__)
+
+
+def extrair_link_limpo_produto(url):
+    """
+    Acessa a página do produto via ScraperAPI e extrai o link do botão Compartilhar.
+    Retorna o link limpo do produto sem parâmetros extras.
+    """
+    try:
+        from bs4 import BeautifulSoup
+        from .anti_bot import AntiBotManager
+
+        logger.info(f'🔍 Fazendo scraping para extrair link limpo de: {url[:80]}...')
+
+        # Amazon - usar regex (mais rápido e confiável)
+        if 'amazon.com' in url.lower():
+            asin_match = re.search(r'/dp/([A-Z0-9]{10})', url)
+            if not asin_match:
+                asin_match = re.search(r'/gp/product/([A-Z0-9]{10})', url)
+
+            if asin_match:
+                asin = asin_match.group(1)
+                link_limpo = f"https://www.amazon.com.br/dp/{asin}"
+                logger.info(f'✅ Link limpo Amazon extraído (regex): {link_limpo}')
+                return link_limpo
+            else:
+                logger.warning('⚠️ Não conseguiu extrair ASIN da URL Amazon')
+                return url
+
+        # Mercado Livre - fazer scraping real
+        elif 'mercadolivre.com' in url.lower() or 'mercadolibre.com' in url.lower():
+            try:
+                # Usar ScraperAPI para evitar antibot
+                anti_bot = AntiBotManager()
+                logger.info('📡 Fazendo request via ScraperAPI para Mercado Livre...')
+                response = anti_bot.make_request_via_api(url)
+
+                if response.status_code != 200:
+                    logger.warning(f'⚠️ Status {response.status_code} ao acessar Mercado Livre')
+                    return url
+
+                soup = BeautifulSoup(response.content, 'html.parser')
+
+                # SELETORES PARA O BOTÃO COMPARTILHAR DO MERCADO LIVRE
+                # Opção 1: Link com data-share-url ou similar
+                share_link = soup.find('a', {'data-testid': 'action-share'})
+                if share_link and share_link.get('href'):
+                    link_limpo = share_link.get('href')
+                    logger.info(f'✅ Link do Mercado Livre extraído (data-testid): {link_limpo}')
+                    return link_limpo
+
+                # Opção 2: Meta tag og:url (link canônico)
+                og_url = soup.find('meta', property='og:url')
+                if og_url and og_url.get('content'):
+                    link_limpo = og_url.get('content')
+                    logger.info(f'✅ Link do Mercado Livre extraído (og:url): {link_limpo}')
+                    return link_limpo
+
+                # Opção 3: Link canonical
+                canonical = soup.find('link', rel='canonical')
+                if canonical and canonical.get('href'):
+                    link_limpo = canonical.get('href')
+                    logger.info(f'✅ Link do Mercado Livre extraído (canonical): {link_limpo}')
+                    return link_limpo
+
+                # Se não encontrou nenhum, usar regex como fallback
+                mlb_match = re.search(r'(MLB-?\d+)', url, re.IGNORECASE)
+                if mlb_match:
+                    codigo = mlb_match.group(1).upper()
+                    link_limpo = f"https://www.mercadolivre.com.br/p/{codigo}"
+                    logger.info(f'✅ Link do Mercado Livre extraído (regex fallback): {link_limpo}')
+                    return link_limpo
+
+                logger.warning('⚠️ Nenhum seletor funcionou para Mercado Livre. Me avise para ajustar!')
+                logger.warning(f'URL testada: {url}')
+                return url
+
+            except Exception as ml_error:
+                logger.error(f'❌ Erro ao fazer scraping do Mercado Livre: {str(ml_error)}')
+                return url
+
+        # Outras plataformas - retornar URL original
+        return url
+
+    except Exception as e:
+        logger.error(f'❌ Erro geral ao extrair link limpo: {str(e)}')
+        import traceback
+        logger.error(traceback.format_exc())
+        return url
+
+
+def substituir_links_afiliado(mensagem):
+    """
+    Detecta links de produtos na mensagem e substitui por links de afiliado configurados.
+    Suporta: Amazon, Mercado Livre, Shopee, Magazine Luiza, Americanas
+    """
+    from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
+    # Tags de afiliado do .env
+    amazon_tag = os.getenv("AMAZON_ASSOCIATES_TAG", "promobrothers-20")
+    ml_affiliate = os.getenv("MERCADOLIVRE_AFFILIATE_ID", "")
+
+    # Regex para detectar URLs
+    url_pattern = r'https?://[^\s<>"{}|\\^`\[\]]+'
+    urls = re.findall(url_pattern, mensagem)
+
+    mensagem_modificada = mensagem
+    links_substituidos = []
+
+    for url in urls:
+        url_original = url
+        plataforma = None
+
+        # PASSO 1: Extrair link limpo do produto (remove parâmetros de afiliado de terceiros)
+        url_limpo = extrair_link_limpo_produto(url)
+
+        # PASSO 2: Adicionar SEU link de afiliado
+        url_modificada = url_limpo
+
+        # Amazon
+        if 'amazon.com' in url_limpo.lower() or 'amzn.to' in url_limpo.lower():
+            plataforma = 'Amazon'
+            if 'amzn.to' not in url_limpo:  # Links encurtados não modificamos
+                # Adicionar tag de afiliado ao link limpo
+                separator = '&' if '?' in url_limpo else '?'
+                url_modificada = f"{url_limpo}{separator}tag={amazon_tag}&linkCode=osi"
+
+        # Mercado Livre
+        elif 'mercadolivre.com' in url_limpo.lower() or 'mlb-' in url_limpo.lower():
+            plataforma = 'Mercado Livre'
+            if ml_affiliate and ml_affiliate != "seu-id-mercadolivre":
+                # Adicionar ID de afiliado do Mercado Livre
+                separator = '&' if '?' in url_limpo else '?'
+                url_modificada = f"{url_limpo}{separator}mshops={ml_affiliate}"
+
+        # Shopee
+        elif 'shopee.com' in url.lower():
+            plataforma = 'Shopee'
+            shopee_id = os.getenv("SHOPEE_AFFILIATE_ID", "")
+            if shopee_id and shopee_id != "seu-id-shopee":
+                separator = '&' if '?' in url else '?'
+                url_modificada = f"{url}{separator}affiliate={shopee_id}"
+
+        # Se houve modificação, substituir na mensagem
+        if url_modificada != url_original:
+            mensagem_modificada = mensagem_modificada.replace(url_original, url_modificada)
+            links_substituidos.append({
+                'plataforma': plataforma,
+                'original': url_original,
+                'modificada': url_modificada
+            })
+
+    return mensagem_modificada, links_substituidos
+
+
+def formatar_mensagem_marketing(produto_dados):
+    """
+    Formata a mensagem de marketing com base nas regras de categoria e promoção,
+    calculando o desconto sempre que possível.
+    """
+    def extrair_valor_numerico(preco_str):
+        """Função auxiliar para converter string de preço em float."""
+        if not preco_str:
+            return 0.0
+        try:
+            # Lógica robusta para tratar formatos como "1.079,10" e "1,079,10"
+            preco_limpo = str(preco_str).replace('R$', '').strip().replace('.', '').replace(',', '.')
+            return float(preco_limpo)
+        except (ValueError, TypeError):
+            return 0.0
+
+    titulo = produto_dados.get('titulo', '')
+    link = produto_dados.get('afiliado_link') or produto_dados.get('link', '')
+    preco_atual_str = produto_dados.get('preco_atual', '')
+    preco_original_str = produto_dados.get('preco_original')
+
+    preco_atual_num = extrair_valor_numerico(preco_atual_str)
+    preco_original_num = extrair_valor_numerico(preco_original_str)
+    
+    desconto_num = 0
+    tem_promocao = False
+
+    if preco_original_num > preco_atual_num > 0:
+        tem_promocao = True
+        desconto_num = round(((preco_original_num - preco_atual_num) / preco_original_num) * 100)
+
+    if tem_promocao and desconto_num > 0:
+        mensagem = (
+            f"⚡ *{titulo}*\n\n"
+            f"🔥 POR: *{preco_atual_str}*\n"
+            f"🛒 {link}\n\n"
+            f"👾 Grupo de ofertas: https://linktr.ee/promobrothers.shop"
+        )
+    else:
+        mensagem = (
+            f"⚡ *{titulo}*\n\n"
+            f"🔥 *{preco_atual_str}*\n"
+            f"🛒 {link}\n\n"
+            f"👾 Grupo de ofertas: https://linktr.ee/promobrothers.shop"
+        )
+        
+    return mensagem.strip()
+
+@main_bp.route('/')
+def index():
+    return render_template('index.html')
+
+@main_bp.route('/amazon')
+def amazon():
+    return render_template('amazon.html')
+
+@main_bp.route('/afiliados')
+def afiliados():
+    return render_template('afiliados.html')
+
+
+@main_bp.route('/teste')
+def teste():
+    return jsonify({'status': 'funcionando', 'mensagem': 'Flask está rodando!'})
+
+@main_bp.route('/buscar', methods=['POST'])
+def buscar():
+    try:
+        data = request.get_json()
+        produto = data.get('produto', '').strip()
+        if not produto:
+            return jsonify({'error': 'Produto não pode estar vazio'}), 400
+        max_pages = data.get('max_pages', 2)
+        resultados = scraping.scrape_mercadolivre(produto, max_pages)
+        if not resultados:
+            resultados = scraping.busca_alternativa(produto)
+        return jsonify({'success': True, 'resultados': resultados, 'total': len(resultados)})
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/buscar-amazon', methods=['POST'])
+def buscar_amazon():
+    try:
+        data = request.get_json()
+        produto = data.get('produto', '').strip()
+        if not produto:
+            return jsonify({'error': 'Produto não pode estar vazio'}), 400
+        max_pages = data.get('max_pages', 2)
+        categoria = data.get('categoria', '')
+        resultados = amazon_scraping.scrape_amazon(produto, max_pages, categoria)
+        return jsonify({'success': True, 'produtos': resultados, 'total': len(resultados)})
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/produto-amazon', methods=['POST'])
+def produto_amazon():
+    try:
+        data = request.get_json()
+        url = data.get('url', '').strip()
+        afiliado_link = data.get('afiliado_link', '').strip()
+        if not url:
+            return jsonify({'error': 'URL não pode estar vazia'}), 400
+        if not ('amazon.com' in url or 'amzn.to' in url):
+            return jsonify({'error': 'URL deve ser da Amazon'}), 400
+        produto = amazon_scraping.scrape_produto_amazon_especifico(url, afiliado_link)
+        return jsonify({'success': True, 'produto': produto})
+    except Exception as e:
+        return jsonify({'error': f'Erro ao analisar produto: {str(e)}'}), 500
+
+@main_bp.route('/buscar-afiliados', methods=['POST'])
+def buscar_afiliados():
+    try:
+        data = request.get_json()
+        produto = data.get('produto', '').strip()
+        if not produto:
+            return jsonify({'error': 'Produto não pode estar vazio'}), 400
+        max_pages = data.get('max_pages', 2)
+        plataforma = data.get('plataforma', 'todas')
+        ordenacao = data.get('ordenacao', 'relevancia')
+        preco_min = data.get('preco_min', '')
+        preco_max = data.get('preco_max', '')
+        from . import affiliate_scraping
+        resultados = affiliate_scraping.scrape_afiliados(
+            produto=produto, max_pages=max_pages, plataforma=plataforma,
+            ordenacao=ordenacao, preco_min=preco_min, preco_max=preco_max
+        )
+        return jsonify({'success': True, 'produtos': resultados, 'total': len(resultados)})
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/produto', methods=['POST'])
+def buscar_produto():
+    try:
+        data = request.get_json()
+        url = data.get('url', '').strip()
+        if not url:
+            return jsonify({'error': 'URL não pode estar vazia'}), 400
+        if 'mercadolivre.com' not in url and 'mercadolibre.com' not in url:
+            return jsonify({'error': 'URL deve ser do Mercado Livre'}), 400
+        produto = scraping.scrape_produto_especifico(url)
+        if produto:
+            return jsonify({'success': True, 'produto': produto})
+        else:
+            return jsonify({'error': 'Não foi possível extrair informações do produto'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/webhook', methods=['POST'])
+def enviar_webhook():
+    produto_para_salvar = {}
+    try:
+        data = request.get_json()
+        tipo = data.get('type', 'mensagem')
+        afiliado_link = data.get('afiliado_link', '').strip()
+        
+        if tipo == 'produto':
+            produto_dados = data.get('produto', {})
+            if not produto_dados:
+                return jsonify({'error': 'Dados do produto não podem estar vazios'}), 400
+            
+            produto_para_salvar = produto_dados.copy()
+            produto_para_salvar['afiliado_link'] = afiliado_link
+
+            original_image_url = produto_para_salvar.get('imagem')
+            if original_image_url:
+                image_bytes = services.processar_imagem_para_quadrado(original_image_url)
+                if image_bytes:
+                    produto_para_salvar['processed_image_url'] = services.upload_imagem_processada(image_bytes)
+            
+            mensagem_formatada = formatar_mensagem_marketing(produto_para_salvar)
+
+            # Preparar payload para n8n com imagem separada
+            payload = {
+                "message": mensagem_formatada,
+                "image_url": produto_para_salvar.get('processed_image_url') or produto_para_salvar.get('imagem'),
+                "produto_dados": produto_para_salvar
+            }
+
+            response = services.enviar_para_webhook(payload)
+            
+            database.salvar_promocao(produto_para_salvar, final_message=mensagem_formatada)
+
+            return jsonify({
+                'success': True, 
+                'message': 'Webhook enviado.', 
+                'final_message': mensagem_formatada,
+                'image_url': produto_para_salvar.get('processed_image_url') or original_image_url,
+                'webhook_status': response.status_code
+            })
+        else:
+            return jsonify({'error': 'Tipo de webhook inválido para esta operação'}), 400
+        
+    except Exception as e:
+        final_message_erro = f'Erro interno: {str(e)}'
+        if produto_para_salvar:
+            database.salvar_promocao(produto_para_salvar, final_message=final_message_erro)
+        return jsonify({'error': final_message_erro}), 500
+
+@main_bp.route('/webhook/processar', methods=['POST'])
+def processar_produto_webhook():
+    """Endpoint para processar produto automaticamente a partir da URL e link de afiliado"""
+    try:
+        data = request.get_json()
+        url_produto = data.get('url_produto', '').strip()
+        afiliado_link = data.get('afiliado_link', '').strip()
+        
+        if not url_produto:
+            return jsonify({'error': 'URL do produto é obrigatória'}), 400
+        
+        if not afiliado_link:
+            return jsonify({'error': 'Link de afiliado é obrigatório'}), 400
+        
+        # Detectar plataforma automaticamente
+        platform = ScraperFactory.detect_platform_from_url(url_produto)
+        if not platform:
+            return jsonify({'error': 'Plataforma não suportada'}), 400
+        
+        # Criar scraper
+        scraper = ScraperFactory.create_scraper(platform)
+        if not scraper:
+            return jsonify({'error': f'Scraper não disponível para {platform}'}), 400
+        
+        # Fazer scraping do produto
+        start_time = time.time()
+        try:
+            produto_dados = scraper.scrape_product(url_produto, afiliado_link)
+            response_time = time.time() - start_time
+            
+            print(f"DEBUG: Produto dados antes da validação: {produto_dados}")
+            print(f"DEBUG: Blocked: {produto_dados.get('_blocked')}")
+            print(f"DEBUG: Fallback: {produto_dados.get('_fallback')}")
+            
+            if not produto_dados:
+                return jsonify({'error': 'Produto não encontrado ou não foi possível extrair dados'}), 404
+            
+            # Registrar métricas
+            metrics_collector.record_scraping_metric(
+                platform=platform,
+                operation='webhook_product',
+                success=True,
+                response_time=response_time,
+                products_found=1
+            )
+            
+            # Processar imagem se disponível
+            original_image_url = produto_dados.get('imagem')
+            if original_image_url:
+                try:
+                    image_bytes = services.processar_imagem_para_quadrado(original_image_url)
+                    if image_bytes:
+                        produto_dados['processed_image_url'] = services.upload_imagem_processada(image_bytes)
+                except Exception as e:
+                    print(f"Erro ao processar imagem: {e}")
+            
+            # Formatar mensagem de marketing
+            mensagem_formatada = formatar_mensagem_marketing(produto_dados)
+
+            # Enviar para webhook com imagem separada
+            payload = {
+                "message": mensagem_formatada,
+                "image_url": produto_dados.get('processed_image_url') or produto_dados.get('imagem'),
+                "produto_dados": produto_dados
+            }
+
+            webhook_response = services.enviar_para_webhook(payload)
+            
+            # Salvar no banco de dados
+            database.salvar_promocao(produto_dados, final_message=mensagem_formatada)
+            
+            return jsonify({
+                'success': True,
+                'message': 'Produto processado e webhook enviado com sucesso!',
+                'produto': produto_dados,
+                'final_message': mensagem_formatada,
+                'image_url': produto_dados.get('processed_image_url') or original_image_url,
+                'webhook_status': webhook_response.status_code,
+                'platform': platform,
+                'response_time': round(response_time, 2)
+            })
+            
+        except Exception as e:
+            response_time = time.time() - start_time
+            metrics_collector.record_scraping_metric(
+                platform=platform,
+                operation='webhook_product',
+                success=False,
+                response_time=response_time,
+                error_message=str(e)
+            )
+            raise
+            
+    except Exception as e:
+        return jsonify({'error': f'Erro ao processar produto: {str(e)}'}), 500
+
+@main_bp.route('/produtos/<string:produto_id>', methods=['DELETE'])
+def deletar_produto(produto_id):
+    try:
+        response = database.deletar_produto_db(produto_id)
+        if response.data:
+            return jsonify({'success': True, 'message': 'Produto deletado com sucesso!'}), 200
+        else:
+            return jsonify({'success': False, 'error': 'Produto não encontrado ou não foi possível deletar.'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/agendar_produto/<string:produto_id>', methods=['POST'])
+def agendar_produto(produto_id):
+    try:
+        data = request.get_json()
+        agendamento = data.get('agendamento')
+        if not agendamento:
+            return jsonify({'error': 'Dados de agendamento são obrigatórios'}), 400
+        try:
+            naive_dt = datetime.datetime.fromisoformat(agendamento)
+            timezone_br = pytz.timezone('America/Sao_Paulo')
+            agendamento_dt_br = timezone_br.localize(naive_dt)
+            agendamento_dt_utc = agendamento_dt_br.astimezone(pytz.utc)
+            agendamento_iso = agendamento_dt_utc.isoformat()
+        except (ValueError, pytz.UnknownTimeZoneError) as ve:
+            return jsonify({'error': f'Formato de data inválido: {ve}. Use YYYY-MM-DDTHH:MM'}), 400
+        response = database.agendar_produto_db(produto_id, agendamento_iso)
+        if response.data and len(response.data) > 0:
+            return jsonify({'success': True, 'message': 'Produto agendado com sucesso!', 'agendamento': agendamento_dt_br.strftime('%Y-%m-%d %H:%M:%S')})
+        else:
+            return jsonify({'success': False, 'error': f'Produto com ID {produto_id} não encontrado.'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/agendar', methods=['POST'])
+def agendar_mensagem_whatsapp():
+    """Rota para agendar mensagens aprovadas do WhatsApp"""
+    try:
+        data = request.get_json()
+
+        # Extrair dados da mensagem
+        mensagem = data.get('mensagem_customizada', '')
+        imagem_url = data.get('imagem_url')
+        grupo_origem = data.get('grupo_origem', 'WhatsApp')
+        produto_url = data.get('produto_url', '')
+
+        logger.info(f'📱 Recebendo mensagem do WhatsApp para agendamento:')
+        logger.info(f'  - Grupo: {grupo_origem}')
+        logger.info(f'  - Tem imagem: {bool(imagem_url)}')
+        logger.info(f'  - Tamanho mensagem: {len(mensagem)} caracteres')
+        logger.info(f'  - Preview: {mensagem[:100]}...' if len(mensagem) > 100 else f'  - Mensagem: {mensagem}')
+
+        # 🔥 SUBSTITUIR LINKS DE AFILIADO AUTOMATICAMENTE
+        mensagem_com_afiliado, links_substituidos = substituir_links_afiliado(mensagem)
+
+        if links_substituidos:
+            logger.info(f'🔗 Links de afiliado substituídos:')
+            for link_info in links_substituidos:
+                logger.info(f'  - {link_info["plataforma"]}: {link_info["original"][:50]}... → {link_info["modificada"][:50]}...')
+        else:
+            logger.info('  - Nenhum link detectado na mensagem')
+
+        # 🖼️ FAZER UPLOAD DA IMAGEM BASE64 PARA SUPABASE
+        imagem_url_final = imagem_url
+        if imagem_url and imagem_url.startswith('data:image'):
+            logger.info('📤 Detectada imagem base64, fazendo upload para Supabase...')
+            titulo_simplificado = f"Mensagem do {grupo_origem}"
+
+            # Upload para Supabase
+            imagem_url_supabase = database.upload_imagem_whatsapp(imagem_url, titulo_simplificado)
+
+            if imagem_url_supabase:
+                imagem_url_final = imagem_url_supabase
+                logger.info(f'✅ Imagem do WhatsApp enviada para Supabase: {imagem_url_supabase}')
+            else:
+                logger.warning('⚠️ Falha no upload da imagem, usando base64 original')
+
+        # Criar objeto de produto para salvar no banco
+        produto_dados = {
+            "titulo": f"Mensagem do {grupo_origem}",
+            "preco_atual": None,
+            "preco_original": None,
+            "desconto": None,
+            "link": produto_url if produto_url else None,
+            "afiliado_link": None,
+            "imagem": imagem_url_final,  # URL do Supabase (não mais base64)
+            "condicao": "whatsapp",
+            "vendedor": grupo_origem,
+            "disponivel": True,
+            "descricao": mensagem_com_afiliado,  # Mensagem COM links de afiliado
+            "cupons": [],
+            "processed_image_url": imagem_url_final,  # URL do Supabase
+            "fonte": "whatsapp"
+        }
+
+        # Salvar no banco SEM agendamento (para aparecer na lista de "não agendados")
+        # A mensagem formatada com quebras de linha E links de afiliado substituídos
+        sucesso = database.salvar_promocao(produto_dados, final_message=mensagem_com_afiliado, agendamento_data=None)
+
+        if sucesso:
+            logger.info('✅ Mensagem do WhatsApp salva com sucesso no banco!')
+            return jsonify({
+                'success': True,
+                'message': 'Mensagem aprovada e salva para agendamento!',
+                'links_substituidos': len(links_substituidos),
+                'tem_imagem': bool(imagem_url),
+                'plataformas': [link['plataforma'] for link in links_substituidos]
+            }), 200
+        else:
+            logger.error('❌ Falha ao salvar mensagem no banco de dados')
+            return jsonify({
+                'success': False,
+                'error': 'Erro ao salvar mensagem no banco de dados'
+            }), 500
+
+    except Exception as e:
+        logger.error(f'❌ Erro ao agendar mensagem do WhatsApp: {str(e)}')
+        import traceback
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': f'Erro interno: {str(e)}'
+        }), 500
+
+@main_bp.route('/produtos', methods=['GET'])
+def listar_produtos():
+    try:
+        # CORREÇÃO: Lendo os parâmetros da URL da requisição
+        status_filter = request.args.get('status', 'agendado')
+        ordem_order = request.args.get('ordem', 'desc')
+        
+        produtos = database.listar_produtos_db(status_filter, ordem_order)
+        
+        # Converte as datas para o fuso horário de São Paulo para exibição
+        for produto in produtos:
+            for key in ["agendamento", "created_at"]:
+                if produto.get(key) and isinstance(produto[key], str):
+                    try:
+                        dt_utc = datetime.datetime.fromisoformat(produto[key].replace('Z', '+00:00'))
+                        dt_br = dt_utc.astimezone(pytz.timezone('America/Sao_Paulo'))
+                        produto[key] = dt_br.strftime('%Y-%m-%d %H:%M:%S')
+                    except Exception:
+                        pass # Deixa a data como está se houver erro de formato
+                        
+        return jsonify({'success': True, 'produtos': produtos})
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Erro ao listar produtos do Supabase: {str(e)}'}), 500
+    
+@main_bp.route('/produtos/<string:produto_id>', methods=['GET'])
+def obter_produto(produto_id):
+    try:
+        produto = database.obter_produto_db(produto_id)
+        if produto:
+            return jsonify({'success': True, 'produto': produto})
+        else:
+            return jsonify({'success': False, 'error': 'Produto não encontrado'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/produtos/<string:produto_id>', methods=['PUT'])
+def editar_produto(produto_id):
+    try:
+        data = request.get_json()
+        dados_atualizacao = {}
+
+        # Coleta todos os campos que podem ser atualizados
+        if 'imagem_url' in data:
+            original_image_url = data['imagem_url']
+            dados_atualizacao['imagem_url'] = original_image_url
+            
+            # Processar imagem automaticamente para 500x500
+            if original_image_url:
+                try:
+                    image_bytes = services.processar_imagem_para_quadrado(original_image_url)
+                    if image_bytes:
+                        processed_url = services.upload_imagem_processada(image_bytes)
+                        if processed_url:
+                            dados_atualizacao['processed_image_url'] = processed_url
+                            print(f"✅ Imagem processada automaticamente: {processed_url}")
+                except Exception as e:
+                    print(f"⚠️ Erro ao processar imagem automaticamente: {e}")
+        if 'final_message' in data:
+            dados_atualizacao['final_message'] = data['final_message']
+        if 'preco_com_cupom' in data:
+            dados_atualizacao['preco_com_cupom'] = data['preco_com_cupom']
+        if 'cupom_info' in data:
+            dados_atualizacao['cupom_info'] = data['cupom_info']
+
+        # Verifica se pelo menos um campo foi enviado para atualização
+        if not dados_atualizacao:
+            return jsonify({'error': 'Pelo menos um campo deve ser fornecido para edição'}), 400
+
+        # Chama a função do banco de dados para atualizar o produto
+        response = database.atualizar_produto_db(produto_id, dados_atualizacao)
+
+        if response.data:
+            return jsonify({'success': True, 'message': 'Produto atualizado com sucesso!'})
+        else:
+            return jsonify({'success': False, 'error': f'Produto com ID {produto_id} não encontrado ou não foi possível atualizar.'}), 404
+            
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/enviar_produto_agendado/<string:produto_id>', methods=['POST'])
+def enviar_produto_agendado(produto_id):
+    try:
+        data = request.get_json()
+        afiliado_link = data.get('afiliado_link', '').strip()
+        produto_db = database.obter_produto_db(produto_id)
+        if not produto_db:
+            return jsonify({'error': 'Produto não encontrado'}), 404
+        if produto_db.get('final_message'):
+            mensagem_completa = produto_db.get('final_message')
+        else:
+            produto_para_formatar = {
+                'titulo': produto_db.get('titulo'),
+                'link': produto_db.get('link_produto'),
+                'link_afiliado': afiliado_link or produto_db.get('afiliado_link'),
+                'preco_atual': produto_db.get('preco_com_cupom') or produto_db.get('preco_atual'),
+                'preco_original': produto_db.get('preco_original'),
+                'desconto': produto_db.get('desconto'),
+                'tem_promocao': produto_db.get('tem_promocao')
+            }
+            mensagem_completa = formatar_mensagem_marketing(produto_para_formatar)
+
+        # Adicionar URL da imagem ao payload
+        payload = {
+            "message": mensagem_completa.strip(),
+            "image_url": produto_db.get('processed_image_url') or produto_db.get('imagem_url')
+        }
+
+        response = services.enviar_para_webhook(payload)
+        if response.status_code in [200, 201, 202]:
+            return jsonify({
+                'success': True, 
+                'message': 'Produto enviado com sucesso!', 
+                'final_message': mensagem_completa,
+                'image_url': produto_db.get('imagem_url') or produto_db.get('processed_image_url')
+            })
+        else:
+            return jsonify({'error': f'Webhook retornou status {response.status_code}', 'webhook_response': response.text}), 400
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/storage/imagens', methods=['GET'])
+def listar_imagens():
+    try:
+        bucket_name = request.args.get('bucket', os.getenv('SUPABASE_BUCKET_NAME', 'imagens_melhoradas_tech'))
+        pasta = request.args.get('pasta', '')
+        limit = int(request.args.get('limit', 50))
+        offset = int(request.args.get('offset', 0))
+        search_term = request.args.get('search', '')
+        imagens = database.listar_imagens_bucket(
+            bucket_name=bucket_name, pasta=pasta, limit=limit,
+            offset=offset, search_term=search_term
+        )
+        return jsonify({'success': True, 'imagens': imagens})
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Erro ao listar imagens: {str(e)}'}), 500
+
+@main_bp.route('/storage/pastas', methods=['GET'])
+def listar_pastas():
+    try:
+        bucket_name = request.args.get('bucket', os.getenv('SUPABASE_BUCKET_NAME', 'imagens_melhoradas_tech'))
+        pasta_pai = request.args.get('pasta_pai', '')
+        
+        pastas = database.listar_pastas_bucket(
+            bucket_name=bucket_name,
+            pasta_pai=pasta_pai
+        )
+        
+        return jsonify({
+            'success': True,
+            'pastas': pastas
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Erro ao listar pastas: {str(e)}'}), 500
+
+@main_bp.route('/storage/url_publica', methods=['POST'])
+def obter_url_publica():
+    try:
+        data = request.get_json()
+        bucket_name = data.get('bucket', os.getenv('SUPABASE_BUCKET_NAME', 'imagens_melhoradas_tech'))
+        caminho_arquivo = data.get('caminho', '')
+        
+        if not caminho_arquivo:
+            return jsonify({'success': False, 'error': 'Caminho do arquivo é obrigatório'}), 400
+        
+        url = database.obter_url_publica_imagem(
+            bucket_name=bucket_name,
+            caminho_arquivo=caminho_arquivo
+        )
+        
+        if url:
+            return jsonify({'success': True, 'url': url})
+        else:
+            return jsonify({'success': False, 'error': 'Não foi possível obter a URL'}), 404
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Erro ao obter URL: {str(e)}'}), 500
+
+# === NOVAS ROTAS DO SISTEMA UNIFICADO ===
+
+@main_bp.route('/scrape/unified', methods=['POST'])
+def scrape_unified():
+    """Endpoint unificado para scraping de qualquer plataforma"""
+    try:
+        data = request.get_json()
+        url = data.get('url', '').strip()
+        affiliate_link = data.get('affiliate_link', '').strip()
+        
+        if not url:
+            return jsonify({'error': 'URL é obrigatória'}), 400
+        
+        # Detectar plataforma automaticamente
+        platform = ScraperFactory.detect_platform_from_url(url)
+        if not platform:
+            return jsonify({'error': 'Plataforma não suportada'}), 400
+        
+        # Criar scraper
+        scraper = ScraperFactory.create_scraper(platform)
+        if not scraper:
+            return jsonify({'error': f'Scraper não disponível para {platform}'}), 400
+        
+        # Fazer scraping
+        start_time = time.time()
+        try:
+            product_data = scraper.scrape_product(url, affiliate_link)
+            response_time = time.time() - start_time
+            
+            if product_data:
+                # Registrar métricas
+                metrics_collector.record_scraping_metric(
+                    platform=platform,
+                    operation='product',
+                    success=True,
+                    response_time=response_time,
+                    products_found=1
+                )
+                
+                return jsonify({
+                    'success': True,
+                    'product': product_data,
+                    'platform': platform,
+                    'response_time': round(response_time, 2)
+                })
+            else:
+                # Registrar falha
+                metrics_collector.record_scraping_metric(
+                    platform=platform,
+                    operation='product',
+                    success=False,
+                    response_time=response_time,
+                    error_message='Produto não encontrado'
+                )
+                
+                return jsonify({'error': 'Produto não encontrado'}), 404
+                
+        except Exception as e:
+            response_time = time.time() - start_time
+            metrics_collector.record_scraping_metric(
+                platform=platform,
+                operation='product',
+                success=False,
+                response_time=response_time,
+                error_message=str(e)
+            )
+            raise
+            
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/scrape/search', methods=['POST'])
+def search_unified():
+    """Endpoint unificado para busca em qualquer plataforma"""
+    try:
+        data = request.get_json()
+        query = data.get('query', '').strip()
+        platform = data.get('platform', 'todas')
+        max_pages = data.get('max_pages', 2)
+        
+        if not query:
+            return jsonify({'error': 'Query é obrigatória'}), 400
+        
+        products = []
+        
+        if platform == 'todas':
+            # Buscar em todas as plataformas
+            available_platforms = ScraperFactory.get_available_platforms()
+            for platform_name in available_platforms:
+                try:
+                    scraper = ScraperFactory.create_scraper(platform_name)
+                    if scraper:
+                        start_time = time.time()
+                        platform_products = scraper.scrape_search(query, max_pages)
+                        response_time = time.time() - start_time
+                        
+                        # Registrar métricas
+                        metrics_collector.record_scraping_metric(
+                            platform=platform_name,
+                            operation='search',
+                            success=True,
+                            response_time=response_time,
+                            products_found=len(platform_products)
+                        )
+                        
+                        products.extend(platform_products)
+                        
+                except Exception as e:
+                    metrics_collector.record_scraping_metric(
+                        platform=platform_name,
+                        operation='search',
+                        success=False,
+                        response_time=0,
+                        error_message=str(e)
+                    )
+                    continue
+        else:
+            # Buscar em plataforma específica
+            scraper = ScraperFactory.create_scraper(platform)
+            if not scraper:
+                return jsonify({'error': f'Plataforma {platform} não suportada'}), 400
+            
+            start_time = time.time()
+            products = scraper.scrape_search(query, max_pages)
+            response_time = time.time() - start_time
+            
+            # Registrar métricas
+            metrics_collector.record_scraping_metric(
+                platform=platform,
+                operation='search',
+                success=True,
+                response_time=response_time,
+                products_found=len(products)
+            )
+        
+        return jsonify({
+            'success': True,
+            'products': products,
+            'total': len(products),
+            'platform': platform
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/queue/add', methods=['POST'])
+def add_to_queue():
+    """Adiciona produto à fila de processamento"""
+    try:
+        data = request.get_json()
+        url = data.get('url', '').strip()
+        affiliate_link = data.get('affiliate_link', '').strip()
+        priority = data.get('priority', 0)
+        
+        if not url:
+            return jsonify({'error': 'URL é obrigatória'}), 400
+        
+        # Detectar plataforma
+        platform = ScraperFactory.detect_platform_from_url(url)
+        if not platform:
+            return jsonify({'error': 'Plataforma não suportada'}), 400
+        
+        # Adicionar à fila
+        task_id = queue_manager.add_task(url, affiliate_link, platform, priority)
+        
+        return jsonify({
+            'success': True,
+            'task_id': task_id,
+            'platform': platform,
+            'message': 'Produto adicionado à fila'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/queue/status', methods=['GET'])
+def queue_status():
+    """Retorna status da fila"""
+    try:
+        status = queue_manager.get_queue_status()
+        return jsonify({'success': True, 'status': status})
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/queue/task/<task_id>', methods=['GET'])
+def get_task_status(task_id):
+    """Retorna status de uma tarefa específica"""
+    try:
+        task = queue_manager.get_task(task_id)
+        if not task:
+            return jsonify({'error': 'Tarefa não encontrada'}), 404
+        
+        return jsonify({'success': True, 'task': task.to_dict()})
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/queue/task/<task_id>', methods=['DELETE'])
+def cancel_task(task_id):
+    """Cancela uma tarefa"""
+    try:
+        success = queue_manager.cancel_task(task_id)
+        if success:
+            return jsonify({'success': True, 'message': 'Tarefa cancelada'})
+        else:
+            return jsonify({'error': 'Tarefa não encontrada ou não pode ser cancelada'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/monitoring/stats', methods=['GET'])
+def get_monitoring_stats():
+    """Retorna estatísticas de monitoramento"""
+    try:
+        stats = metrics_collector.get_stats_summary()
+        return jsonify({'success': True, 'stats': stats})
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/monitoring/health', methods=['GET'])
+def get_health_status():
+    """Retorna status de saúde do sistema"""
+    try:
+        health = health_checker.check_health()
+        return jsonify({'success': True, 'health': health})
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/monitoring/alerts', methods=['GET'])
+def get_alerts():
+    """Retorna alertas ativos"""
+    try:
+        alerts = alert_manager.check_alerts()
+        return jsonify({'success': True, 'alerts': alerts})
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/monitoring/platform/<platform>', methods=['GET'])
+def get_platform_stats(platform):
+    """Retorna estatísticas de uma plataforma específica"""
+    try:
+        stats = metrics_collector.get_platform_stats(platform)
+        return jsonify({'success': True, 'platform': platform, 'stats': stats})
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/cache/stats', methods=['GET'])
+def get_cache_stats():
+    """Retorna estatísticas do cache"""
+    try:
+        stats = cache_manager.get_stats()
+        memory_usage = cache_manager.get_memory_usage()
+        return jsonify({
+            'success': True,
+            'cache_stats': stats,
+            'memory_usage': memory_usage
+        })
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@main_bp.route('/cache/clear', methods=['POST'])
+def clear_cache():
+    """Limpa o cache"""
+    try:
+        cache_manager.clear()
+        return jsonify({'success': True, 'message': 'Cache limpo com sucesso'})
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+# === ROTAS DO WHATSAPP MONITOR ===
+
+@main_bp.route('/whatsapp-monitor')
+def whatsapp_monitor():
+    """Página de monitoramento de grupos do WhatsApp"""
+    return render_template('whatsapp_monitor.html')
+
+@main_bp.route('/whatsapp/status', methods=['GET'])
+def whatsapp_status():
+    """Proxy para status do WhatsApp"""
+    try:
+        response = requests.get('http://localhost:3001/status', timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'WhatsApp Monitor não está rodando: {str(e)}'}), 503
+
+@main_bp.route('/whatsapp/qr', methods=['GET'])
+def whatsapp_qr():
+    """Proxy para QR Code do WhatsApp"""
+    try:
+        response = requests.get('http://localhost:3001/qr', timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'Erro ao obter QR Code: {str(e)}'}), 503
+
+@main_bp.route('/whatsapp/groups', methods=['GET'])
+def whatsapp_groups():
+    """Proxy para listar grupos do WhatsApp"""
+    try:
+        response = requests.get('http://localhost:3001/groups', timeout=10)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'Erro ao listar grupos: {str(e)}'}), 503
+
+@main_bp.route('/whatsapp/groups/monitor', methods=['POST'])
+def whatsapp_monitor_group():
+    """Proxy para adicionar grupo ao monitoramento"""
+    try:
+        data = request.get_json()
+        response = requests.post('http://localhost:3001/groups/monitor', json=data, timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'Erro ao adicionar grupo: {str(e)}'}), 503
+
+@main_bp.route('/whatsapp/groups/monitor/<group_id>', methods=['DELETE'])
+def whatsapp_unmonitor_group(group_id):
+    """Proxy para remover grupo do monitoramento"""
+    try:
+        response = requests.delete(f'http://localhost:3001/groups/monitor/{group_id}', timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'Erro ao remover grupo: {str(e)}'}), 503
+
+@main_bp.route('/whatsapp/affiliate/settings', methods=['GET'])
+def whatsapp_get_affiliate_settings():
+    """Proxy para obter configurações de afiliado"""
+    try:
+        response = requests.get('http://localhost:3001/affiliate/settings', timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'Erro ao obter configurações: {str(e)}'}), 503
+
+@main_bp.route('/whatsapp/affiliate/settings', methods=['POST'])
+def whatsapp_set_affiliate_settings():
+    """Proxy para configurar link de afiliado"""
+    try:
+        data = request.get_json()
+        response = requests.post('http://localhost:3001/affiliate/settings', json=data, timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'Erro ao salvar configuração: {str(e)}'}), 503
+
+@main_bp.route('/whatsapp/affiliate/settings/<platform>', methods=['DELETE'])
+def whatsapp_delete_affiliate_settings(platform):
+    """Proxy para deletar configuração de afiliado"""
+    try:
+        response = requests.delete(f'http://localhost:3001/affiliate/settings/{platform}', timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'Erro ao deletar configuração: {str(e)}'}), 503
+
+@main_bp.route('/whatsapp/logout', methods=['POST'])
+def whatsapp_logout():
+    """Proxy para fazer logout do WhatsApp"""
+    try:
+        response = requests.post('http://localhost:3001/logout', timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'Erro ao fazer logout: {str(e)}'}), 503
+
+@main_bp.route('/whatsapp/messages', methods=['GET'])
+def whatsapp_messages():
+    """Proxy para obter mensagens capturadas"""
+    try:
+        limit = request.args.get('limit', 100)
+        response = requests.get(f'http://localhost:3001/messages?limit={limit}', timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'Erro ao obter mensagens: {str(e)}'}), 503
+
+

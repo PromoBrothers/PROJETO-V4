@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Grupos WhatsApp - Promo Brothers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f7f7f7;
+            margin-bottom: 15px;
+        }
+
+        .status-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #10b981;
+        }
+
+        .status-dot.disconnected {
+            background: #ef4444;
+        }
+
+        .status-dot.qr {
+            background: #f59e0b;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .qr-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .qr-code {
+            max-width: 300px;
+            width: 100%;
+            margin: 20px auto;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            padding: 10px;
+            background: white;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .group-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .group-item:hover {
+            background: #e5e5e5;
+            transform: translateX(5px);
+        }
+
+        .group-info {
+            flex: 1;
+        }
+
+        .group-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .group-meta {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .group-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-monitored {
+            background: #10b981;
+            color: white;
+        }
+
+        .badge-not-monitored {
+            background: #e5e5e5;
+            color: #666;
+        }
+
+        .affiliate-form {
+            display: grid;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group select,
+        .form-group input {
+            padding: 12px;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .affiliate-list {
+            margin-top: 20px;
+        }
+
+        .affiliate-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .affiliate-platform {
+            font-weight: 600;
+            color: #667eea;
+            text-transform: capitalize;
+        }
+
+        .affiliate-link {
+            font-size: 0.85em;
+            color: #666;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: #f7f7f7;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Estilos adicionais para navegação */
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.3) !important;
+            transform: translateY(-2px);
+        }
+
+        .tab-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .tab-content-main {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 WhatsApp - Promo Brothers</h1>
+            <p>Conecte seu WhatsApp, monitore grupos e gerencie mensagens</p>
+            <nav class="nav-links" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+                <a href="/index" style="color: white; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 8px; transition: all 0.3s;">🛒 Mercado Livre</a>
+                <a href="/amazon" style="color: white; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 8px; transition: all 0.3s;">📦 Amazon</a>
+                <a href="/whatsapp-monitor" style="color: white; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.4); border-radius: 8px; font-weight: 600;">📱 WhatsApp Monitor</a>
+            </nav>
+        </div>
+
+        <!-- Tabs de navegação -->
+        <div style="margin-bottom: 20px;">
+            <div style="display: flex; gap: 10px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                <button class="tab-button active" onclick="switchTab('connection')" style="flex: 1; padding: 12px; border: none; background: #667eea; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                    🔌 Conexão
+                </button>
+                <button class="tab-button" onclick="switchTab('messages')" style="flex: 1; padding: 12px; border: none; background: #e5e5e5; color: #666; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                    💬 Mensagens Clonadas
+                </button>
+            </div>
+        </div>
+
+        <!-- Aba de Conexão -->
+        <div id="tab-connection" class="tab-content-main">
+            <div class="dashboard">
+                <!-- Status da Conexão -->
+                <div class="card">
+                <h2>🔌 Status da Conexão</h2>
+                <div id="connectionStatus" class="status-indicator">
+                    <div class="status-dot disconnected"></div>
+                    <div>
+                        <div><strong>Desconectado</strong></div>
+                        <div style="font-size: 0.85em; color: #666;">Aguardando conexão...</div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="monitoredGroupsCount">0</div>
+                        <div class="stat-label">Grupos Monitorados</div>
+                    </div>
+                </div>
+
+
+                <div id="qrSection" style="display: none;">
+                    <div class="qr-container">
+                        <h3>Escaneie o QR Code</h3>
+                        <p style="color: #666; margin: 10px 0;">Abra o WhatsApp no celular e escaneie o código</p>
+                        <img id="qrCode" class="qr-code" alt="QR Code">
+                    </div>
+                </div>
+
+                <button class="btn btn-danger" id="logoutBtn" style="display: none;">
+                    Desconectar WhatsApp
+                </button>
+            </div>
+
+            <!-- Grupos Disponíveis -->
+            <div class="card">
+                <h2>👥 Meus Grupos</h2>
+
+                <div id="groupsAlert"></div>
+
+                <button class="btn" id="loadGroupsBtn" disabled>
+                    Carregar Grupos
+                </button>
+
+                <div id="groupsList" class="group-list"></div>
+            </div>
+        </div>
+
+                <!-- Log de Atividades -->
+                <div class="card">
+                    <h2>📋 Log de Atividades</h2>
+                    <div id="activityLog" style="max-height: 300px; overflow-y: auto;">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <p>Nenhuma atividade ainda</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba de Mensagens Clonadas -->
+        <div id="tab-messages" class="tab-content-main" style="display: none;">
+            <div class="card">
+                <h2>💬 Mensagens Clonadas dos Grupos</h2>
+                <p style="color: #666; margin-bottom: 20px;">
+                    Aqui aparecem todas as mensagens capturadas dos grupos monitorados
+                </p>
+
+                <div id="messagesContainer" style="max-height: 600px; overflow-y: auto;">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💬</div>
+                        <p>Nenhuma mensagem capturada ainda</p>
+                        <small style="color: #999; margin-top: 10px; display: block;">
+                            As mensagens dos grupos monitorados aparecerão aqui em tempo real
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isConnected = false;
+        let updateInterval = null;
+        let messages = [];
+
+        // Carregar mensagens processadas do localStorage
+        let processedMessages = new Set();
+        try {
+            const stored = localStorage.getItem('processedMessages');
+            if (stored) {
+                processedMessages = new Set(JSON.parse(stored));
+                console.log(`✅ Carregado ${processedMessages.size} mensagens processadas do localStorage`);
+            }
+        } catch (e) {
+            console.error('Erro ao carregar processedMessages:', e);
+        }
+
+        // Função para salvar processedMessages no localStorage
+        function saveProcessedMessages() {
+            try {
+                localStorage.setItem('processedMessages', JSON.stringify(Array.from(processedMessages)));
+            } catch (e) {
+                console.error('Erro ao salvar processedMessages:', e);
+            }
+        }
+
+        // Função para trocar abas
+        function switchTab(tabName) {
+            // Esconder todas as abas
+            document.querySelectorAll('.tab-content-main').forEach(tab => {
+                tab.style.display = 'none';
+            });
+
+            // Remover classe active de todos os botões
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.style.background = '#e5e5e5';
+                btn.style.color = '#666';
+                btn.classList.remove('active');
+            });
+
+            // Mostrar aba selecionada
+            document.getElementById(`tab-${tabName}`).style.display = 'block';
+
+            // Adicionar classe active ao botão clicado
+            event.target.style.background = '#667eea';
+            event.target.style.color = 'white';
+            event.target.classList.add('active');
+
+            // Se abriu aba de mensagens, carregar mensagens
+            if (tabName === 'messages') {
+                loadMessages();
+            }
+        }
+
+        // Função para adicionar mensagem clonada
+        function addClonedMessage(message) {
+            const container = document.getElementById('messagesContainer');
+
+            // Remover empty state se existir
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message-card';
+            messageDiv.setAttribute('data-message-id', message.id);
+            messageDiv.style.cssText = `
+                background: white;
+                border-radius: 10px;
+                padding: 12px;
+                margin-bottom: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                transition: all 0.3s;
+                font-size: 0.9em;
+            `;
+
+            const time = new Date(message.timestamp).toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const imageHtml = message.imageUrl ? `
+                <div style="margin: 8px 0;">
+                    <img src="${message.imageUrl}"
+                         style="max-width: 100%; max-height: 150px; width: auto; height: auto; border-radius: 6px; cursor: pointer; display: block;"
+                         onclick="window.open(this.src, '_blank')">
+                </div>
+            ` : '';
+
+            messageDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div style="flex: 1; min-width: 0;">
+                        <strong style="color: #667eea; font-size: 0.95em; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${message.groupName || 'Grupo Desconhecido'}
+                        </strong>
+                        <div style="color: #999; font-size: 0.75em; margin-top: 2px;">
+                            ${message.sender || 'Desconhecido'} • ${time}
+                        </div>
+                    </div>
+                    <div id="buttons-${message.id}" style="display: flex; gap: 4px; flex-shrink: 0;">
+                        <button onclick="approveMessage('${message.id}')" title="Aprovar"
+                                class="approve-btn"
+                                style="padding: 4px 12px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em; font-weight: 600;">
+                            ✓ Aprovar
+                        </button>
+                        <button onclick="rejectMessage('${message.id}')" title="Rejeitar"
+                                class="reject-btn"
+                                style="padding: 4px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em; font-weight: 600;">
+                            ✗ Rejeitar
+                        </button>
+                    </div>
+                </div>
+                ${imageHtml}
+                <div id="text-${message.id}" style="color: #333; padding: 10px; background: #f7f7f7; border-radius: 6px; border-left: 3px solid #667eea; line-height: 1.4; font-size: 0.9em; white-space: pre-wrap; word-wrap: break-word;">
+                    ${message.text || '<em style="color: #999;">Sem texto</em>'}
+                </div>
+                <textarea id="edit-${message.id}"
+                          style="display: none; width: 100%; min-height: 80px; padding: 10px; border: 2px solid #667eea; border-radius: 6px; font-family: inherit; font-size: 0.9em; resize: vertical;"
+                          >${message.text || ''}</textarea>
+                <div id="actions-${message.id}" style="display: none; margin-top: 8px; display: flex; gap: 6px;">
+                    <button onclick="saveEdit('${message.id}')"
+                            style="padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8em;">
+                        💾 Salvar
+                    </button>
+                    <button onclick="cancelEdit('${message.id}')"
+                            style="padding: 6px 12px; background: #e5e5e5; color: #666; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8em;">
+                        ❌ Cancelar
+                    </button>
+                </div>
+                <div id="approved-actions-${message.id}" style="display: none; margin-top: 8px; display: flex; gap: 6px; justify-content: flex-end;">
+                    <button onclick="editMessage('${message.id}')"
+                            style="padding: 4px 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em;">
+                        ✏️ Editar
+                    </button>
+                </div>
+            `;
+
+            // Adicionar hover effect
+            messageDiv.onmouseenter = () => {
+                messageDiv.style.transform = 'translateY(-2px)';
+                messageDiv.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+            };
+            messageDiv.onmouseleave = () => {
+                messageDiv.style.transform = 'translateY(0)';
+                messageDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+            };
+
+            container.insertBefore(messageDiv, container.firstChild);
+
+            // Limitar a 100 mensagens
+            while (container.children.length > 100) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        // Função para editar mensagem
+        function editMessage(messageId) {
+            const textDiv = document.getElementById(`text-${messageId}`);
+            const textarea = document.getElementById(`edit-${messageId}`);
+            const actions = document.getElementById(`actions-${messageId}`);
+
+            textDiv.style.display = 'none';
+            textarea.style.display = 'block';
+            actions.style.display = 'flex';
+            textarea.focus();
+        }
+
+        // Função para salvar edição
+        function saveEdit(messageId) {
+            const textDiv = document.getElementById(`text-${messageId}`);
+            const textarea = document.getElementById(`edit-${messageId}`);
+            const actions = document.getElementById(`actions-${messageId}`);
+
+            const newText = textarea.value.trim();
+            textDiv.innerHTML = newText || '<em style="color: #999;">Sem texto</em>';
+
+            textDiv.style.display = 'block';
+            textarea.style.display = 'none';
+            actions.style.display = 'none';
+
+            addLog('Mensagem editada com sucesso', 'success');
+        }
+
+        // Função para cancelar edição
+        function cancelEdit(messageId) {
+            const textDiv = document.getElementById(`text-${messageId}`);
+            const textarea = document.getElementById(`edit-${messageId}`);
+            const actions = document.getElementById(`actions-${messageId}`);
+
+            textDiv.style.display = 'block';
+            textarea.style.display = 'none';
+            actions.style.display = 'none';
+        }
+
+        // Função para aprovar mensagem
+        async function approveMessage(messageId) {
+            try {
+                console.log('Aprovando mensagem:', messageId);
+                addLog('Processando aprovação...', 'info');
+
+                // ADICIONAR IMEDIATAMENTE à lista de processadas
+                processedMessages.add(messageId);
+                saveProcessedMessages(); // Salvar no localStorage
+
+                // Encontrar a mensagem
+                const response = await fetch('/whatsapp/messages?limit=500');
+                const data = await response.json();
+
+                const message = data.messages.find(m => m.id === messageId);
+                if (!message) {
+                    addLog('❌ Mensagem não encontrada', 'error');
+                    processedMessages.delete(messageId); // Remover se falhar
+                    return;
+                }
+
+                // Obter texto (pode ter sido editado)
+                // Usar textarea se foi editado, senão usar o texto original da mensagem
+                const textarea = document.getElementById(`edit-${messageId}`);
+                const textDiv = document.getElementById(`text-${messageId}`);
+
+                // Se o textarea tem conteúdo diferente do original, usar ele (preserva quebras)
+                // Caso contrário, usar o texto original da mensagem (que já tem as quebras)
+                let currentText = message.text;
+                if (textarea && textarea.value && textarea.value !== message.text) {
+                    currentText = textarea.value; // Texto editado
+                }
+
+                console.log('Dados da mensagem:', {
+                    text: currentText,
+                    groupName: message.groupName,
+                    imageUrl: message.imageUrl
+                });
+
+                // Preparar dados para agendamento
+                const scheduleData = {
+                    produto_url: '', // Vazio pois não temos URL
+                    mensagem_customizada: currentText,
+                    plataforma: 'whatsapp',
+                    grupo_origem: message.groupName,
+                    imagem_url: message.imageUrl || null
+                };
+
+                console.log('Enviando para agendamento:', scheduleData);
+
+                // Enviar para o agendamento
+                const scheduleResponse = await fetch('/agendar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(scheduleData)
+                });
+
+                console.log('Status da resposta:', scheduleResponse.status);
+
+                // Verificar se a resposta é ok (status 200-299)
+                if (scheduleResponse.ok) {
+                    const result = await scheduleResponse.json();
+
+                    // Mostrar informações sobre links substituídos
+                    let logMessage = '✅ Mensagem APROVADA e enviada para agendamento!';
+                    if (result.links_substituidos > 0) {
+                        logMessage += ` (${result.links_substituidos} link(s) de afiliado substituído(s): ${result.plataformas.join(', ')})`;
+                    }
+                    if (result.tem_imagem) {
+                        logMessage += ' 🖼️ Imagem incluída';
+                    }
+
+                    addLog(logMessage, 'success');
+
+                    // Remover o card da tela com animação
+                    const messageCard = document.querySelector(`[data-message-id="${messageId}"]`);
+                    if (messageCard) {
+                        // Animação de sucesso
+                        messageCard.style.transition = 'all 0.5s ease-out';
+                        messageCard.style.border = '2px solid #10b981';
+                        messageCard.style.background = '#f0fdf4';
+                        messageCard.style.transform = 'scale(1.05)';
+
+                        // Após 0.5s, deslizar para fora
+                        setTimeout(() => {
+                            messageCard.style.transform = 'translateX(100%)';
+                            messageCard.style.opacity = '0';
+
+                            // Remover do DOM após a animação
+                            setTimeout(() => {
+                                messageCard.remove();
+                            }, 500);
+                        }, 500);
+                    }
+                } else {
+                    // Tentar ler a resposta de erro
+                    let errorMsg = 'Erro desconhecido';
+                    try {
+                        const result = await scheduleResponse.json();
+                        errorMsg = result.error || result.message || errorMsg;
+                    } catch (e) {
+                        const textError = await scheduleResponse.text();
+                        errorMsg = textError || `Status ${scheduleResponse.status}`;
+                    }
+
+                    console.error('Erro na resposta:', errorMsg);
+                    addLog('❌ Erro ao aprovar: ' + errorMsg, 'error');
+                    processedMessages.delete(messageId); // Remover se falhar
+                }
+            } catch (error) {
+                console.error('Erro ao aprovar:', error);
+                addLog(`❌ Erro ao aprovar mensagem: ${error.message}`, 'error');
+                processedMessages.delete(messageId); // Remover se falhar
+            }
+        }
+
+        // Função para rejeitar mensagem
+        function rejectMessage(messageId) {
+            const messageCard = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageCard) {
+                // ADICIONAR IMEDIATAMENTE à lista de processadas para evitar recarregamento
+                processedMessages.add(messageId);
+                saveProcessedMessages(); // Salvar no localStorage
+
+                // Marcar visualmente como rejeitada
+                messageCard.style.border = '2px solid #ef4444';
+                messageCard.style.background = '#fef2f2';
+                messageCard.style.opacity = '0.6';
+
+                // Atualizar botões
+                const buttons = document.getElementById(`buttons-${messageId}`);
+                buttons.innerHTML = `
+                    <span style="padding: 4px 12px; background: #ef4444; color: white; border-radius: 4px; font-size: 0.75em; font-weight: 600;">
+                        ✗ REJEITADA
+                    </span>
+                    <button onclick="undoReject('${messageId}')"
+                            style="padding: 4px 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em;">
+                        ↶ Desfazer
+                    </button>
+                `;
+
+                addLog('❌ Mensagem REJEITADA', 'info');
+
+                // Remover após 3 segundos
+                setTimeout(() => {
+                    messageCard.style.transition = 'all 0.5s';
+                    messageCard.style.opacity = '0';
+                    messageCard.style.transform = 'translateX(-30px)';
+                    setTimeout(() => messageCard.remove(), 500);
+                }, 3000);
+            }
+        }
+
+        // Função para desfazer rejeição
+        function undoReject(messageId) {
+            const messageCard = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageCard) {
+                // Remover da lista de processadas
+                processedMessages.delete(messageId);
+                saveProcessedMessages(); // Atualizar localStorage
+
+                messageCard.style.border = 'none';
+                messageCard.style.background = 'white';
+                messageCard.style.opacity = '1';
+
+                // Restaurar botões originais
+                const buttons = document.getElementById(`buttons-${messageId}`);
+                buttons.innerHTML = `
+                    <button onclick="approveMessage('${messageId}')" title="Aprovar"
+                            class="approve-btn"
+                            style="padding: 4px 12px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em; font-weight: 600;">
+                        ✓ Aprovar
+                    </button>
+                    <button onclick="rejectMessage('${messageId}')" title="Rejeitar"
+                            class="reject-btn"
+                            style="padding: 4px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em; font-weight: 600;">
+                        ✗ Rejeitar
+                    </button>
+                `;
+
+                addLog('↶ Rejeição desfeita', 'info');
+            }
+        }
+
+
+        // Função para carregar mensagens
+        async function loadMessages() {
+            try {
+                const response = await fetch('/whatsapp/messages?limit=100');
+                const data = await response.json();
+
+                if (data.success && data.messages.length > 0) {
+                    const container = document.getElementById('messagesContainer');
+                    container.innerHTML = ''; // Limpar
+
+                    // Filtrar mensagens já processadas (aprovadas ou rejeitadas)
+                    const unprocessedMessages = data.messages.filter(msg => !processedMessages.has(msg.id));
+
+                    if (unprocessedMessages.length > 0) {
+                        unprocessedMessages.forEach(msg => {
+                            addClonedMessage(msg);
+                        });
+
+                        addLog(`${unprocessedMessages.length} mensagens carregadas (${data.messages.length - unprocessedMessages.length} já processadas)`, 'success');
+                    } else {
+                        // Se todas as mensagens foram processadas, mostrar empty state
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">✅</div>
+                                <p>Todas as mensagens foram processadas!</p>
+                                <small style="color: #999; margin-top: 10px; display: block;">
+                                    Novas mensagens aparecerão aqui automaticamente
+                                </small>
+                            </div>
+                        `;
+                        addLog('Todas as mensagens foram aprovadas ou rejeitadas', 'info');
+                    }
+                } else {
+                    console.log('Nenhuma mensagem capturada ainda');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar mensagens:', error);
+                addLog(`Erro ao carregar mensagens: ${error.message}`, 'error');
+            }
+        }
+
+        // Atualizar mensagens periodicamente se a aba estiver aberta
+        setInterval(() => {
+            const messagesTab = document.getElementById('tab-messages');
+            if (messagesTab && messagesTab.style.display !== 'none') {
+                loadMessages();
+            }
+        }, 5000); // Atualizar a cada 5 segundos
+
+        // Adicionar log de atividade
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('activityLog');
+
+            // Remover empty state se existir
+            const emptyState = logContainer.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            const logEntry = document.createElement('div');
+            logEntry.className = `alert alert-${type}`;
+            const time = new Date().toLocaleTimeString('pt-BR');
+            logEntry.innerHTML = `<strong>${time}</strong> - ${message}`;
+
+            logContainer.insertBefore(logEntry, logContainer.firstChild);
+
+            // Limitar a 50 logs
+            while (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        // Atualizar status
+        async function updateStatus() {
+            try {
+                const response = await fetch('/whatsapp/status');
+                const data = await response.json();
+
+                if (data.error) {
+                    updateConnectionUI('disconnected', 'Serviço não disponível', data.error);
+                    return;
+                }
+
+                isConnected = data.connected;
+                document.getElementById('monitoredGroupsCount').textContent = data.monitoredGroups || 0;
+
+                if (data.connected) {
+                    updateConnectionUI('connected', 'Conectado', 'WhatsApp conectado com sucesso');
+                    document.getElementById('loadGroupsBtn').disabled = false;
+                    document.getElementById('logoutBtn').style.display = 'block';
+                    document.getElementById('qrSection').style.display = 'none';
+                } else if (data.state === 'qr') {
+                    updateConnectionUI('qr', 'Aguardando QR Code', 'Escaneie o código abaixo');
+                    await loadQRCode();
+                } else {
+                    updateConnectionUI('disconnected', 'Desconectado', 'Aguardando conexão...');
+                    document.getElementById('loadGroupsBtn').disabled = true;
+                    document.getElementById('logoutBtn').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar status:', error);
+                updateConnectionUI('disconnected', 'Erro de conexão', error.message);
+            }
+        }
+
+        function updateConnectionUI(state, title, message) {
+            const statusDiv = document.getElementById('connectionStatus');
+            const dot = statusDiv.querySelector('.status-dot');
+
+            dot.className = `status-dot ${state}`;
+
+            statusDiv.querySelector('strong').textContent = title;
+            statusDiv.querySelectorAll('div')[1].querySelector('div:last-child').textContent = message;
+        }
+
+        // Carregar QR Code
+        async function loadQRCode() {
+            try {
+                const response = await fetch('/whatsapp/qr');
+                const data = await response.json();
+
+                console.log('QR Code response:', data);
+
+                if (data.qr) {
+                    document.getElementById('qrCode').src = data.qr;
+                    document.getElementById('qrSection').style.display = 'block';
+                    addLog('QR Code gerado. Escaneie com seu WhatsApp.', 'warning');
+                } else if (data.hint) {
+                    document.getElementById('qrSection').style.display = 'none';
+                    addLog(data.hint, 'info');
+                } else {
+                    document.getElementById('qrSection').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar QR Code:', error);
+                addLog(`Erro ao carregar QR Code: ${error.message}`, 'error');
+            }
+        }
+
+        // Carregar grupos
+        async function loadGroups() {
+            const btn = document.getElementById('loadGroupsBtn');
+            const listDiv = document.getElementById('groupsList');
+            const alertDiv = document.getElementById('groupsAlert');
+
+            btn.disabled = true;
+            btn.textContent = 'Carregando...';
+            listDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando grupos...</div>';
+
+            try {
+                const response = await fetch('/whatsapp/groups');
+                const data = await response.json();
+
+                if (data.error) {
+                    alertDiv.innerHTML = `<div class="alert alert-error">${data.error}</div>`;
+                    listDiv.innerHTML = '';
+                    return;
+                }
+
+                alertDiv.innerHTML = '';
+
+                if (!data.groups || data.groups.length === 0) {
+                    listDiv.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>Nenhum grupo encontrado</p></div>';
+                    return;
+                }
+
+                listDiv.innerHTML = data.groups.map(group => `
+                    <div class="group-item">
+                        <div class="group-info">
+                            <div class="group-name">${group.name}</div>
+                            <div class="group-meta">${group.participants} participantes</div>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span class="group-badge ${group.monitored ? 'badge-monitored' : 'badge-not-monitored'}">
+                                ${group.monitored ? '🔔 Monitorando' : '🔕 Não monitorado'}
+                            </span>
+                            <button class="btn btn-small ${group.monitored ? 'btn-danger' : 'btn-success'}"
+                                    onclick="toggleMonitor('${group.id}', ${group.monitored})">
+                                ${group.monitored ? 'Parar' : 'Monitorar'}
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                addLog(`${data.groups.length} grupos carregados`, 'success');
+            } catch (error) {
+                alertDiv.innerHTML = `<div class="alert alert-error">Erro ao carregar grupos: ${error.message}</div>`;
+                listDiv.innerHTML = '';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Atualizar Grupos';
+            }
+        }
+
+        // Toggle monitoramento de grupo
+        async function toggleMonitor(groupId, isCurrentlyMonitored) {
+            try {
+                if (isCurrentlyMonitored) {
+                    // Parar monitoramento
+                    const response = await fetch(`/whatsapp/groups/monitor/${encodeURIComponent(groupId)}`, {
+                        method: 'DELETE'
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        addLog('Grupo removido do monitoramento', 'info');
+                        await loadGroups();
+                        await updateStatus();
+                    } else {
+                        addLog(`Erro: ${data.error}`, 'error');
+                    }
+                } else {
+                    // Iniciar monitoramento
+                    const response = await fetch('/whatsapp/groups/monitor', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ groupId })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        addLog('Grupo adicionado ao monitoramento', 'success');
+                        await loadGroups();
+                        await updateStatus();
+                    } else {
+                        addLog(`Erro: ${data.error}`, 'error');
+                    }
+                }
+            } catch (error) {
+                addLog(`Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Logout
+        async function logout() {
+            if (!confirm('Desconectar do WhatsApp?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/whatsapp/logout', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog('Desconectado do WhatsApp', 'info');
+                    await updateStatus();
+                } else {
+                    addLog(`Erro: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('loadGroupsBtn').addEventListener('click', loadGroups);
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // Inicializar
+        async function init() {
+            addLog('Sistema iniciado', 'info');
+            await updateStatus();
+
+            // Atualizar status a cada 3 segundos
+            updateInterval = setInterval(updateStatus, 3000);
+        }
+
+        // Limpar interval ao fechar página
+        window.addEventListener('beforeunload', () => {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        });
+
+        // Iniciar quando a página carregar
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
