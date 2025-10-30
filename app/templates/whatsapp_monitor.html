@@ -969,18 +969,22 @@
                 isConnected = data.connected;
                 document.getElementById('monitoredGroupsCount').textContent = data.monitoredGroups || 0;
 
+                // SEMPRE mostrar botão de logout se já teve uma sessão (exceto no estado inicial puro)
+                const temSessao = data.connected || data.state === 'qr' || data.state === 'disconnected' || data.hasSession;
+                document.getElementById('logoutBtn').style.display = temSessao ? 'block' : 'none';
+
                 if (data.connected) {
                     updateConnectionUI('connected', 'Conectado', 'WhatsApp conectado com sucesso');
                     document.getElementById('loadGroupsBtn').disabled = false;
-                    document.getElementById('logoutBtn').style.display = 'block';
                     document.getElementById('qrSection').style.display = 'none';
                 } else if (data.state === 'qr') {
                     updateConnectionUI('qr', 'Aguardando QR Code', 'Escaneie o código abaixo');
+                    document.getElementById('loadGroupsBtn').disabled = true;
                     await loadQRCode();
                 } else {
                     updateConnectionUI('disconnected', 'Desconectado', 'Aguardando conexão...');
                     document.getElementById('loadGroupsBtn').disabled = true;
-                    document.getElementById('logoutBtn').style.display = 'none';
+                    document.getElementById('qrSection').style.display = 'none';
                 }
             } catch (error) {
                 console.error('Erro ao atualizar status:', error);
@@ -1007,9 +1011,17 @@
                 console.log('QR Code response:', data);
 
                 if (data.qr) {
+                    // Restaurar HTML correto do QR Section
+                    document.getElementById('qrSection').innerHTML = `
+                        <div class="qr-container">
+                            <h3>Escaneie o QR Code</h3>
+                            <p style="color: #666; margin: 10px 0;">Abra o WhatsApp no celular e escaneie o código</p>
+                            <img id="qrCode" class="qr-code" alt="QR Code">
+                        </div>
+                    `;
                     document.getElementById('qrCode').src = data.qr;
                     document.getElementById('qrSection').style.display = 'block';
-                    addLog('QR Code gerado. Escaneie com seu WhatsApp.', 'warning');
+                    addLog('📱 QR Code gerado! Escaneie com seu WhatsApp.', 'warning');
                 } else if (data.hint) {
                     document.getElementById('qrSection').style.display = 'none';
                     addLog(data.hint, 'info');
@@ -1123,6 +1135,8 @@
             }
 
             try {
+                addLog('Desconectando do WhatsApp...', 'info');
+
                 const response = await fetch('/whatsapp/logout', {
                     method: 'POST'
                 });
@@ -1130,8 +1144,41 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    addLog('Desconectado do WhatsApp', 'info');
-                    await updateStatus();
+                    addLog('✅ ' + data.message, 'success');
+
+                    // Mostrar mensagem de que o QR Code será gerado
+                    updateConnectionUI('qr', 'Aguardando QR Code', 'Gerando novo QR Code...');
+                    document.getElementById('qrSection').style.display = 'block';
+                    document.getElementById('qrSection').innerHTML = `
+                        <div class="qr-container">
+                            <h3>Gerando QR Code...</h3>
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p>Aguarde alguns segundos...</p>
+                            </div>
+                        </div>
+                    `;
+
+                    // Aguardar 3 segundos e então tentar carregar o QR Code
+                    setTimeout(async () => {
+                        addLog('Aguardando novo QR Code...', 'info');
+                        await updateStatus();
+
+                        // Verificar periodicamente se o QR Code está disponível
+                        let attempts = 0;
+                        const checkQR = setInterval(async () => {
+                            attempts++;
+                            await loadQRCode();
+
+                            // Se já carregou o QR ou já tentou 10 vezes (30 segundos), parar
+                            if (document.getElementById('qrCode')?.src || attempts >= 10) {
+                                clearInterval(checkQR);
+                                if (attempts >= 10 && !document.getElementById('qrCode')?.src) {
+                                    addLog('⚠️ QR Code demorando para gerar. Tente atualizar a página.', 'warning');
+                                }
+                            }
+                        }, 3000);
+                    }, 3000);
                 } else {
                     addLog(`Erro: ${data.error}`, 'error');
                 }

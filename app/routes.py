@@ -534,6 +534,17 @@ def agendar_mensagem_whatsapp():
         else:
             logger.info('  - Nenhum link detectado na mensagem')
 
+        # 🔗 ADICIONAR LINK FINAL PADRÃO (LINKTREE) SEMPRE
+        link_final = "https://linktr.ee/promobrothers.shop"
+
+        # Verificar se a mensagem já termina com este link
+        if not mensagem_com_afiliado.strip().endswith(link_final):
+            # Adicionar uma quebra de linha dupla se a mensagem não terminar com quebra
+            if not mensagem_com_afiliado.endswith('\n'):
+                mensagem_com_afiliado += '\n'
+            mensagem_com_afiliado += f'\n👾 Grupo de ofertas: {link_final}'
+            logger.info(f'✅ Link final adicionado: {link_final}')
+
         # 🖼️ FAZER UPLOAD DA IMAGEM BASE64 PARA SUPABASE
         imagem_url_final = imagem_url
         if imagem_url and imagem_url.startswith('data:image'):
