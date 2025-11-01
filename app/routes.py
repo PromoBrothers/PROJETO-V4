@@ -1177,10 +1177,27 @@ def whatsapp_qr():
 
 @main_bp.route('/whatsapp/groups', methods=['GET'])
 def whatsapp_groups():
-    """Proxy para listar grupos do WhatsApp"""
+    """Proxy para listar grupos do WhatsApp (Mais robusto)"""
     try:
-        response = requests.get(f'{WHATSAPP_MONITOR_URL}', timeout=10)
-        return jsonify(response.json())
+        # AUMENTAR O TIMEOUT (como sugerido)
+        response = requests.get(f'{WHATSAPP_MONITOR_URL}/groups', timeout=30) 
+        
+        # TENTA LER O JSON
+        try:
+            return jsonify(response.json())
+        except requests.exceptions.JSONDecodeError as json_error:
+            # SE FALHAR, RETORNA O CONTEÚDO CRU QUE QUEBROU
+            error_details = {
+                'error': 'Falha na decodificação JSON do Monitor',
+                'details': str(json_error),
+                'status_code': response.status_code,
+                # Retorna os primeiros 500 caracteres da resposta para diagnóstico
+                'raw_response_start': response.text[:500] 
+            }
+            # Loga a resposta completa no servidor
+            logger.error(f"Erro JSON na rota groups. Resposta crua: {response.text}") 
+            return jsonify(error_details), 503
+            
     except Exception as e:
         return jsonify({'error': f'Erro ao listar grupos: {str(e)}'}), 503
 
