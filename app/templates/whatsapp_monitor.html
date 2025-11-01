@@ -1682,30 +1682,38 @@
     }
 
     function fetchQRCode() {
-        // Chamando o proxy do Flask que agora retorna a string pura
-        fetch('/whatsapp/qr')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Atualiza o painel com os dados recebidos
-                updateConnectionStatus(data);
-                
-                // Se o estado for 'qr', repete a busca após um curto período para monitorar o timeout
-                if (data.state === 'qr') {
-                    setTimeout(fetchQRCode, 5000); // Tenta buscar a cada 5 segundos
-                }
-            })
-            .catch(error => {
-                console.error("Erro ao buscar QR Code:", error);
-                QR_STATUS_TEXT.innerText = '❌ Erro de comunicação com o Monitor. Verifique os logs do EasyPanel.';
-                // Repete a busca em caso de erro, caso o Monitor esteja reiniciando
-                setTimeout(fetchQRCode, 10000); 
-            });
-    }
+    fetch('/whatsapp/qr') // Chama o proxy do Flask
+        .then(response => {
+            // Se a resposta HTTP for 500 ou 503 (Monitor caindo),
+            // isso não lança exceção no 'fetch', mas sim no 'response.json()'.
+            // Vamos testar se o status é de sucesso (200) e se há conteúdo.
+            if (!response.ok) {
+                 // Trata erros de HTTP como 500 (Erro do Flask Proxy)
+                 throw new Error(`Monitor Indisponível (Status ${response.status})`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // ESTE BLOCO ESTÁ FUNCIONANDO
+            updateConnectionStatus(data);
+            
+            if (data.state === 'qr') {
+                setTimeout(fetchQRCode, 5000); 
+            } else if (data.state !== 'connected') {
+                // Continua o monitoramento se não estiver conectado ou gerando QR
+                setTimeout(fetchQRCode, 10000);
+            }
+        })
+        .catch(error => {
+            console.error("Erro ao buscar QR Code:", error);
+            // 💡 Se o App Monitor está retornando string pura, esse erro 
+            // só acontece se a REQUISIÇÃO EM SI falhar ou o Flask Proxy quebrar
+            QR_STATUS_TEXT.innerText = '❌ Erro de comunicação ou Timeout. Tentando reconectar...';
+            
+            // Continua tentando em caso de falha
+            setTimeout(fetchQRCode, 10000);
+        });
+}
 
     // Inicia o processo quando a página carregar
     document.addEventListener('DOMContentLoaded', () => {
