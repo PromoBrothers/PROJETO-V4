@@ -543,6 +543,10 @@
                     </div>
                 </div>
 
+                <div id="qrcode-container" class="text-center mt-4">
+    </div>
+
+<p id="qr-status" class="text-center text-muted mt-2">Carregando status...</p>
                 <div id="qrSection" style="display: none;">
                     <div class="qr-container">
                         <p style="color: var(--text-secondary); margin-bottom: 15px;">
@@ -1635,6 +1639,82 @@
             themeToggle.textContent = isLight ? '🌞' : '🌙';
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
         });
+    
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode.js/qrcode.min.js"></script>
+    <script>
+    const QR_CONTAINER = document.getElementById('qrcode-container');
+    const QR_STATUS_TEXT = document.getElementById('qr-status');
+    let qrGenerator = null;
+
+    function updateConnectionStatus(data) {
+        // ... (Sua lógica de atualização de status do painel)
+        
+        if (data.state === 'qr' && data.qr_string) {
+            QR_STATUS_TEXT.innerText = '📱 Escaneie o QR Code para conectar!';
+            renderQRCode(data.qr_string);
+        } else if (data.state === 'connected') {
+            QR_STATUS_TEXT.innerText = '✅ Conectado ao WhatsApp com sucesso!';
+            QR_CONTAINER.innerHTML = ''; // Limpa o container do QR
+        } else if (data.state === 'connecting') {
+             QR_STATUS_TEXT.innerText = '🔄 Conectando... Gerando novo QR Code.';
+        } else {
+             QR_STATUS_TEXT.innerText = '🚫 Desconectado. Recarregue a página se o QR não aparecer.';
+             QR_CONTAINER.innerHTML = '';
+        }
+    }
+
+    function renderQRCode(qrString) {
+        if (qrGenerator) {
+            // Se já existe, apenas limpa para redesenhar
+            QR_CONTAINER.innerHTML = '';
+        }
+        
+        // Desenha o QR Code no elemento <div id="qrcode-container">
+        qrGenerator = new QRCode(QR_CONTAINER, {
+            text: qrString,
+            width: 256,
+            height: 256,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+    }
+
+    function fetchQRCode() {
+        // Chamando o proxy do Flask que agora retorna a string pura
+        fetch('/whatsapp/qr')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Atualiza o painel com os dados recebidos
+                updateConnectionStatus(data);
+                
+                // Se o estado for 'qr', repete a busca após um curto período para monitorar o timeout
+                if (data.state === 'qr') {
+                    setTimeout(fetchQRCode, 5000); // Tenta buscar a cada 5 segundos
+                }
+            })
+            .catch(error => {
+                console.error("Erro ao buscar QR Code:", error);
+                QR_STATUS_TEXT.innerText = '❌ Erro de comunicação com o Monitor. Verifique os logs do EasyPanel.';
+                // Repete a busca em caso de erro, caso o Monitor esteja reiniciando
+                setTimeout(fetchQRCode, 10000); 
+            });
+    }
+
+    // Inicia o processo quando a página carregar
+    document.addEventListener('DOMContentLoaded', () => {
+        // Inicia a busca pelo QR Code
+        fetchQRCode();
+        
+        // Você também deve ter uma função para carregar o status geral (como grupos monitorados, etc.)
+        // fetchConnectionStatus(); 
+    });
+</script>
 </body>
 </html>
