@@ -5,7 +5,7 @@ services:
     build: .
     container_name: scraper-promo
     ports:
-      - "80:80"
+      - "80:5000"
     environment:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_KEY=${SUPABASE_KEY}

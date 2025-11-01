@@ -149,8 +149,8 @@ async function connectToWhatsApp() {
                     console.error('❌ Erro ao remover autenticação:', err);
                 }
 
-                // Tentar reconectar após 3 segundos para gerar novo QR Code
-                console.log('🔄 Tentando nova conexão em 3 segundos para gerar QR Code...');
+                // Tentar reconectar após 3 segundos
+                console.log('🔄 Tentando nova conexão em 3 segundos...');
                 setTimeout(() => connectToWhatsApp(), 3000);
                 return;
             }
@@ -162,9 +162,7 @@ async function connectToWhatsApp() {
                 console.log('🔄 Reconectando em 5 segundos...');
                 setTimeout(() => connectToWhatsApp(), 5000);
             } else {
-                // Mesmo no logout, reconectar para gerar novo QR Code
-                console.log('🚫 Logout detectado. Gerando novo QR Code em 3 segundos...');
-                setTimeout(() => connectToWhatsApp(), 3000);
+                console.log('🚫 Logout detectado. Não reconectando automaticamente.');
             }
         } else if (connection === 'open') {
             console.log('✅ Conectado ao WhatsApp com sucesso!');
@@ -488,16 +486,7 @@ app.post('/logout', async (req, res) => {
         qrCodeData = null;
         qrCodeCache.del('qrcode');
 
-        console.log('🔄 Logout realizado. Reconectando para gerar novo QR Code...');
-
-        // Reconectar automaticamente após logout para gerar novo QR Code
-        setTimeout(() => {
-            connectToWhatsApp().catch(err => {
-                console.error('Erro ao reconectar:', err);
-            });
-        }, 2000);
-
-        res.json({ success: true, message: 'Logout realizado com sucesso. Novo QR Code será gerado em breve.' });
+        res.json({ success: true, message: 'Logout realizado com sucesso' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
