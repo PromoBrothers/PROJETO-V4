@@ -7,19 +7,37 @@ services:
     ports:
       - "80:5000"
     environment:
-      # ... suas variáveis existentes
-      - WHATSAPP_MONITOR_URL=http://whatsapp-monitor:3001 # <-- NOVO/CORRIGIDO
+      # Variável para ambiente de produção: usa o NOME do serviço
+      - WHATSAPP_MONITOR_URL=http://whatsapp-monitor:3001 # <--- ESSENCIAL
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - USER_AGENT=${USER_AGENT}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - PROXY_HOST=${PROXY_HOST}
+      - PROXY_PORT=${PROXY_PORT}
+      - PROXY_USERNAME=${PROXY_USERNAME}
+      - PROXY_PASSWORD=${PROXY_PASSWORD}
+      # Outras variáveis de ambiente do Flask
     restart: unless-stopped
-    # ... healthcheck e networks
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - scraper-network
 
-  whatsapp-monitor: # <-- SERVIÇO FALTANDO (Exemplo)
-    build: ./whatsapp-monitor # Assumindo que a pasta do Node.js está aqui
+  whatsapp-monitor:
+    build: ./whatsapp-monitor # Pasta onde está o Dockerfile/código Node.js
     container_name: whatsapp-monitor
     ports:
-      - "3001:3001" # Expor a porta 3001 (opcional em produção, mas bom para debug)
+      - "3001:3001"
     environment:
       - PORT=3001
-      - FLASK_API=http://scraper-promo:5000 # O monitor precisa saber o host do Flask
+      - FLASK_API=http://scraper-promo:5000
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
     restart: unless-stopped
     networks:
       - scraper-network
@@ -27,3 +45,5 @@ services:
 networks:
   scraper-network:
     driver: bridge
+
+# NOTA: Certifique-se de que a pasta 'whatsapp-monitor' contém um Dockerfile (ou similar) e o server.js.
