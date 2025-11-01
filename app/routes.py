@@ -1157,7 +1157,7 @@ def whatsapp_status():
 def whatsapp_qr():
     """Proxy para QR Code do WhatsApp"""
     try:
-        response = requests.get('http://localhost:3001/qr', timeout=5)
+        response = requests.get(f'{WHATSAPP_MONITOR_URL}', timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao obter QR Code: {str(e)}'}), 503
@@ -1166,7 +1166,7 @@ def whatsapp_qr():
 def whatsapp_groups():
     """Proxy para listar grupos do WhatsApp"""
     try:
-        response = requests.get('http://localhost:3001/groups', timeout=10)
+        response = requests.get(f'{WHATSAPP_MONITOR_URL}', timeout=10)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao listar grupos: {str(e)}'}), 503
@@ -1176,7 +1176,7 @@ def whatsapp_monitor_group():
     """Proxy para adicionar grupo ao monitoramento"""
     try:
         data = request.get_json()
-        response = requests.post('http://localhost:3001/groups/monitor', json=data, timeout=5)
+        response = requests.post(f'{WHATSAPP_MONITOR_URL}/groups/monitor', json=data, timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao adicionar grupo: {str(e)}'}), 503
@@ -1185,7 +1185,7 @@ def whatsapp_monitor_group():
 def whatsapp_unmonitor_group(group_id):
     """Proxy para remover grupo do monitoramento"""
     try:
-        response = requests.delete(f'http://localhost:3001/groups/monitor/{group_id}', timeout=5)
+        response = requests.delete(f'{WHATSAPP_MONITOR_URL}/groups/monitor/{group_id}', timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao remover grupo: {str(e)}'}), 503
@@ -1194,7 +1194,7 @@ def whatsapp_unmonitor_group(group_id):
 def whatsapp_get_affiliate_settings():
     """Proxy para obter configurações de afiliado"""
     try:
-        response = requests.get('http://localhost:3001/affiliate/settings', timeout=5)
+        response = requests.get('{WHATSAPP_MONITOR_URL}/affiliate/settings', timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao obter configurações: {str(e)}'}), 503
@@ -1204,7 +1204,7 @@ def whatsapp_set_affiliate_settings():
     """Proxy para configurar link de afiliado"""
     try:
         data = request.get_json()
-        response = requests.post('http://localhost:3001/affiliate/settings', json=data, timeout=5)
+        response = requests.post('{WHATSAPP_MONITOR_URL}/affiliate/settings', json=data, timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao salvar configuração: {str(e)}'}), 503
@@ -1213,7 +1213,7 @@ def whatsapp_set_affiliate_settings():
 def whatsapp_delete_affiliate_settings(platform):
     """Proxy para deletar configuração de afiliado"""
     try:
-        response = requests.delete(f'http://localhost:3001/affiliate/settings/{platform}', timeout=5)
+        response = requests.delete(f'{WHATSAPP_MONITOR_URL}/affiliate/settings/{platform}', timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao deletar configuração: {str(e)}'}), 503
@@ -1222,7 +1222,7 @@ def whatsapp_delete_affiliate_settings(platform):
 def whatsapp_logout():
     """Proxy para fazer logout do WhatsApp"""
     try:
-        response = requests.post('http://localhost:3001/logout', timeout=5)
+        response = requests.post('{WHATSAPP_MONITOR_URL}/logout', timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao fazer logout: {str(e)}'}), 503
@@ -1232,7 +1232,7 @@ def whatsapp_messages():
     """Proxy para obter mensagens capturadas"""
     try:
         limit = request.args.get('limit', 100)
-        response = requests.get(f'http://localhost:3001/messages?limit={limit}', timeout=5)
+        response = requests.get(f'{WHATSAPP_MONITOR_URL}/messages?limit={limit}', timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao obter mensagens: {str(e)}'}), 503
