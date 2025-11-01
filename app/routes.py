@@ -1252,7 +1252,13 @@ def whatsapp_delete_affiliate_settings(platform):
 def whatsapp_logout():
     """Proxy para fazer logout do WhatsApp"""
     try:
-        response = requests.post('{WHATSAPP_MONITOR_URL}/logout', timeout=5)
+        # ⚠️ CORREÇÃO DE SEGURANÇA: RE-LER A VARIÁVEL AQUI PARA EVITAR ERROS DE ESCOPO/INICIALIZAÇÃO
+        WHATSAPP_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001')
+
+        # Constrói a URL de forma segura (garantindo o scheme 'http://')
+        full_url = f'{WHATSAPP_URL}/logout'
+
+        response = requests.post(full_url, timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao fazer logout: {str(e)}'}), 503
