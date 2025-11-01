@@ -7,21 +7,20 @@ services:
     ports:
       - "80:5000"
     environment:
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
-      - USER_AGENT=${USER_AGENT}
-      - WEBHOOK_URL=${WEBHOOK_URL}
-      - PROXY_HOST=${PROXY_HOST}
-      - PROXY_PORT=${PROXY_PORT}
-      - PROXY_USERNAME=${PROXY_USERNAME}
-      - PROXY_PASSWORD=${PROXY_PASSWORD}
+      # ... suas variáveis existentes
+      - WHATSAPP_MONITOR_URL=http://whatsapp-monitor:3001 # <-- NOVO/CORRIGIDO
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    # ... healthcheck e networks
+
+  whatsapp-monitor: # <-- SERVIÇO FALTANDO (Exemplo)
+    build: ./whatsapp-monitor # Assumindo que a pasta do Node.js está aqui
+    container_name: whatsapp-monitor
+    ports:
+      - "3001:3001" # Expor a porta 3001 (opcional em produção, mas bom para debug)
+    environment:
+      - PORT=3001
+      - FLASK_API=http://scraper-promo:5000 # O monitor precisa saber o host do Flask
+    restart: unless-stopped
     networks:
       - scraper-network
 

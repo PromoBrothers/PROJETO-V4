@@ -11,7 +11,7 @@ import re
 import logging
 
 
-WHATSAPP_MONITOR_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001') # <-- CORRIGIDO para ambiente local
+WHATSAPP_MONITOR_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://whatsapp-monitor:3001')# Criar logger
 # Criar logger
 logger = logging.getLogger(__name__)
 
