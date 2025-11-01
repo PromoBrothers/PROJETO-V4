@@ -109,14 +109,14 @@ async function connectToWhatsApp() {
             qrCodeData = qr;
             connectionState = 'qr';
             console.log('📱 QR Code gerado! Aguardando escaneamento...');
-            console.log('   Tamanho do QR:', qr.length, 'caracteres');
+            console.log('   Tamanho do QR:', qr.length, 'caracteres');
 
             // Gerar QR Code como imagem
             try {
                 const qrImage = await QRCode.toDataURL(qr);
                 qrCodeCache.set('qrcode', qrImage);
                 console.log('✅ QR Code convertido para imagem e armazenado no cache');
-                console.log('   Tamanho da imagem:', qrImage.length, 'caracteres');
+                console.log('   Tamanho da imagem:', qrImage.length, 'caracteres');
             } catch (err) {
                 console.error('❌ Erro ao gerar QR Code:', err);
             }
@@ -127,8 +127,8 @@ async function connectToWhatsApp() {
             const errorMessage = lastDisconnect?.error?.message;
 
             console.log('❌ Conexão fechada.');
-            console.log('   Status Code:', statusCode);
-            console.log('   Erro:', errorMessage);
+            console.log('   Status Code:', statusCode);
+            console.log('   Erro:', errorMessage);
 
             isConnected = false;
             connectionState = 'disconnected';
@@ -137,13 +137,13 @@ async function connectToWhatsApp() {
 
             // Se o status code é undefined ou erro de crypto, limpar autenticação
             if (statusCode === undefined || errorMessage?.includes('crypto')) {
-                console.log('⚠️  Erro de conexão detectado - limpando autenticação...');
-                console.log('   Mensagem de erro:', errorMessage);
+                console.log('⚠️  Erro de conexão detectado - limpando autenticação...');
+                console.log('   Mensagem de erro:', errorMessage);
                 const authPath = path.join(__dirname, 'auth_info_baileys');
                 try {
                     if (fs.existsSync(authPath)) {
                         fs.rmSync(authPath, { recursive: true, force: true });
-                        console.log('🗑️  Autenticação removida.');
+                        console.log('🗑️  Autenticação removida.');
                     }
                 } catch (err) {
                     console.error('❌ Erro ao remover autenticação:', err);
@@ -156,7 +156,7 @@ async function connectToWhatsApp() {
             }
 
             const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-            console.log('   Reconectar?', shouldReconnect);
+            console.log('   Reconectar?', shouldReconnect);
 
             if (shouldReconnect) {
                 console.log('🔄 Reconectando em 5 segundos...');
@@ -196,9 +196,9 @@ async function connectToWhatsApp() {
 
                 // Extrair texto da mensagem
                 const text = message.message?.conversation ||
-                            message.message?.extendedTextMessage?.text ||
-                            message.message?.imageMessage?.caption ||
-                            '';
+                             message.message?.extendedTextMessage?.text ||
+                             message.message?.imageMessage?.caption ||
+                             '';
 
                 // Extrair imagem se existir
                 let imageUrl = null;
@@ -215,9 +215,9 @@ async function connectToWhatsApp() {
                         );
                         // Converter buffer para base64
                         imageUrl = `data:image/jpeg;base64,${buffer.toString('base64')}`;
-                        console.log('   📷 Imagem capturada');
+                        console.log('   📷 Imagem capturada');
                     } catch (err) {
-                        console.error('   ❌ Erro ao baixar imagem:', err.message);
+                        console.error('   ❌ Erro ao baixar imagem:', err.message);
                     }
                 }
 
@@ -236,9 +236,9 @@ async function connectToWhatsApp() {
                 let senderName = message.pushName || 'Desconhecido';
 
                 console.log(`\n📩 Nova mensagem no grupo monitorado:`);
-                console.log(`   Grupo: ${groupName}`);
-                console.log(`   De: ${senderName}`);
-                console.log(`   Texto: ${text.substring(0, 100)}${text.length > 100 ? '...' : ''}`);
+                console.log(`   Grupo: ${groupName}`);
+                console.log(`   De: ${senderName}`);
+                console.log(`   Texto: ${text.substring(0, 100)}${text.length > 100 ? '...' : ''}`);
 
                 // Armazenar mensagem
                 const capturedMessage = {
@@ -292,18 +292,18 @@ app.get('/qr', (req, res) => {
     const qrImage = qrCodeCache.get('qrcode');
 
     console.log('📲 Requisição de QR Code recebida');
-    console.log('   Estado atual:', connectionState);
-    console.log('   Conectado:', isConnected);
-    console.log('   QR no cache:', !!qrImage);
+    console.log('   Estado atual:', connectionState);
+    console.log('   Conectado:', isConnected);
+    console.log('   QR no cache:', !!qrImage);
 
     if (qrImage) {
-        console.log('   ✅ Retornando QR Code do cache');
+        console.log('   ✅ Retornando QR Code do cache');
         res.json({ qr: qrImage, state: connectionState });
     } else if (isConnected) {
-        console.log('   ✅ Já conectado');
+        console.log('   ✅ Já conectado');
         res.json({ message: 'Já conectado', state: 'connected' });
     } else {
-        console.log('   ⚠️ QR Code não disponível ainda');
+        console.log('   ⚠️ QR Code não disponível ainda');
         res.json({
             message: 'QR Code não disponível. Aguardando conexão...',
             state: connectionState,
@@ -329,17 +329,18 @@ app.get('/groups', async (req, res) => {
 
         res.json({ groups: groupList });
     } catch (error) {
+        // Garantir que o erro retorna JSON
         res.status(500).json({ error: error.message });
     }
 });
 
-// Adicionar grupo ao monitoramento
-app.post('/groups/monitor', (req, res) => {
+// CORRIGIDO: Rota para adicionar grupo ao monitoramento
+app.post('/monitor', (req, res) => {
     try {
         const { groupId } = req.body;
 
         if (!groupId) {
-            return res.status(400).json({ error: 'groupId é obrigatório' });
+            return res.status(400).json({ success: false, error: 'groupId é obrigatório' });
         }
 
         monitoredGroups.add(groupId);
@@ -353,27 +354,39 @@ app.post('/groups/monitor', (req, res) => {
             monitoredGroups: monitoredGroups.size
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        // Garantir que o erro retorna JSON
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// Remover grupo do monitoramento
-app.delete('/groups/monitor/:groupId', (req, res) => {
+// CORRIGIDO: Rota para remover grupo do monitoramento
+app.post('/unmonitor', (req, res) => {
     try {
-        const { groupId} = req.params;
+        const { groupId } = req.body;
 
-        monitoredGroups.delete(groupId);
-        saveMonitoredGroups();
+        if (!groupId) {
+            return res.status(400).json({ success: false, error: 'groupId é obrigatório' });
+        }
 
-        console.log(`🗑️ Grupo removido do monitoramento: ${groupId}`);
-
-        res.json({
-            success: true,
-            message: 'Grupo removido do monitoramento',
-            monitoredGroups: monitoredGroups.size
-        });
+        const wasMonitored = monitoredGroups.delete(groupId);
+        
+        if (wasMonitored) {
+            saveMonitoredGroups();
+            console.log(`🗑️ Grupo removido do monitoramento: ${groupId}`);
+            res.json({
+                success: true,
+                message: 'Grupo removido do monitoramento',
+                monitoredGroups: monitoredGroups.size
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                error: 'Grupo não estava monitorado'
+            });
+        }
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        // Garantir que o erro retorna JSON
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
@@ -547,11 +560,11 @@ app.listen(PORT, () => {
     console.log(`🚀 Servidor WhatsApp Monitor rodando na porta ${PORT}`);
     console.log(`📡 Flask API: ${FLASK_API}`);
     console.log(`\n📱 Funcionalidades disponíveis:`);
-    console.log(`   - Leitura de QR Code`);
-    console.log(`   - Criação de grupos`);
-    console.log(`   - Monitoramento de mensagens`);
-    console.log(`   - Envio de mensagens`);
-    console.log(`   - Integração com scraper`);
+    console.log(`   - Leitura de QR Code`);
+    console.log(`   - Criação de grupos`);
+    console.log(`   - Monitoramento de mensagens`);
+    console.log(`   - Envio de mensagens`);
+    console.log(`   - Integração com scraper`);
 
     // Carregar grupos monitorados
     loadMonitoredGroups();

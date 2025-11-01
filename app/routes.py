@@ -11,7 +11,7 @@ import re
 import logging
 
 
-WHATSAPP_MONITOR_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001')
+WHATSAPP_MONITOR_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001') # <-- CORRIGIDO para ambiente local
 # Criar logger
 logger = logging.getLogger(__name__)
 
@@ -1157,19 +1157,11 @@ def whatsapp_status():
 def whatsapp_qr():
     """Proxy para QR Code do WhatsApp"""
     try:
-        # WHATSAPP_MONITOR_URL deve ser 'http://qrcode:3001'
+        # WHATSAPP_MONITOR_URL deve ser 'http://localhost:3001'
         response = requests.get(f'{WHATSAPP_MONITOR_URL}/qr', timeout=5)
         
-        # AQUI É O PONTO CRÍTICO: SE O MONITOR RETORNOU ALGO INVÁLIDO, O FLASK VAI QUEBRAR.
-        # Vamos apenas retornar a resposta crua para garantir que o erro de rede sumiu.
-        
-        # Se a resposta NÃO FOR JSON, response.json() vai quebrar.
-        # Por enquanto, assumimos que o código do Monitor agora é estável o suficiente para retornar JSON.
-        
-        # Se o erro 'Expecting value' persistir, pode ser necessário 
-        # envolver a conversão JSON em um bloco try/except mais robusto.
-        
-        return jsonify(response.json()) # <--- Esta linha agora deve funcionar, retornando a string pura
+        # Tenta ler o JSON (o erro 'Unexpected token <' foi causado por um erro 404/500 no Flask)
+        return jsonify(response.json()) 
 
     except Exception as e:
         # Se você ainda receber o erro 'Expecting value', significa que o JSON está quebrado
@@ -1201,30 +1193,64 @@ def whatsapp_groups():
     except Exception as e:
         return jsonify({'error': f'Erro ao listar grupos: {str(e)}'}), 503
 
-@main_bp.route('/whatsapp/groups/monitor', methods=['POST'])
+@main_bp.route('/whatsapp/monitor', methods=['POST'])
 def whatsapp_monitor_group():
-    """Proxy para adicionar grupo ao monitoramento"""
+    """Proxy para adicionar grupo ao monitoramento (rota que o JS chama)"""
     try:
         data = request.get_json()
-        response = requests.post(f'{WHATSAPP_MONITOR_URL}/groups/monitor', json=data, timeout=5)
+        # Proxy para o serviço Node.js. Assumindo que o Node.js tem um endpoint /monitor
+        response = requests.post(f'{WHATSAPP_MONITOR_URL}/monitor', json=data, timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao adicionar grupo: {str(e)}'}), 503
 
-@main_bp.route('/whatsapp/groups/monitor/<group_id>', methods=['DELETE'])
-def whatsapp_unmonitor_group(group_id):
-    """Proxy para remover grupo do monitoramento"""
+@main_bp.route('/whatsapp/unmonitor', methods=['POST'])
+def whatsapp_unmonitor():
+    """Proxy para remover grupo do monitoramento (rota que o JS chama)"""
     try:
-        response = requests.delete(f'{WHATSAPP_MONITOR_URL}/groups/monitor/{group_id}', timeout=5)
+        data = request.get_json()
+        group_id = data.get('groupId')
+        
+        if not group_id:
+            return jsonify({'success': False, 'error': 'ID do grupo ausente'}), 400
+
+        # Proxy para o serviço Node.js. Assumindo que o Node.js tem um endpoint /unmonitor
+        response = requests.post(f'{WHATSAPP_MONITOR_URL}/unmonitor', json={'groupId': group_id}, timeout=5)
+        
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao remover grupo: {str(e)}'}), 503
+
+@main_bp.route('/whatsapp/messages', methods=['GET'])
+def whatsapp_messages():
+    """Proxy para obter mensagens capturadas"""
+    try:
+        limit = request.args.get('limit', 100)
+        response = requests.get(f'{WHATSAPP_MONITOR_URL}/messages?limit={limit}', timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'Erro ao obter mensagens: {str(e)}'}), 503
+
+@main_bp.route('/whatsapp/logout', methods=['POST'])
+def whatsapp_logout():
+    """Proxy para fazer logout do WhatsApp"""
+    try:
+        # O valor de WHATSAPP_MONITOR_URL já foi corrigido no topo do arquivo.
+        WHATSAPP_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001')
+
+        # Constrói a URL de forma segura (garantindo o scheme 'http://')
+        full_url = f'{WHATSAPP_URL}/logout'
+
+        response = requests.post(full_url, timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': f'Erro ao fazer logout: {str(e)}'}), 503
 
 @main_bp.route('/whatsapp/affiliate/settings', methods=['GET'])
 def whatsapp_get_affiliate_settings():
     """Proxy para obter configurações de afiliado"""
     try:
-        response = requests.get('{WHATSAPP_MONITOR_URL}/affiliate/settings', timeout=5)
+        response = requests.get(f'{WHATSAPP_MONITOR_URL}/affiliate/settings', timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao obter configurações: {str(e)}'}), 503
@@ -1234,7 +1260,7 @@ def whatsapp_set_affiliate_settings():
     """Proxy para configurar link de afiliado"""
     try:
         data = request.get_json()
-        response = requests.post('{WHATSAPP_MONITOR_URL}/affiliate/settings', json=data, timeout=5)
+        response = requests.post(f'{WHATSAPP_MONITOR_URL}/affiliate/settings', json=data, timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao salvar configuração: {str(e)}'}), 503
@@ -1247,31 +1273,6 @@ def whatsapp_delete_affiliate_settings(platform):
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao deletar configuração: {str(e)}'}), 503
-
-@main_bp.route('/whatsapp/logout', methods=['POST'])
-def whatsapp_logout():
-    """Proxy para fazer logout do WhatsApp"""
-    try:
-        # ⚠️ CORREÇÃO DE SEGURANÇA: RE-LER A VARIÁVEL AQUI PARA EVITAR ERROS DE ESCOPO/INICIALIZAÇÃO
-        WHATSAPP_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001')
-
-        # Constrói a URL de forma segura (garantindo o scheme 'http://')
-        full_url = f'{WHATSAPP_URL}/logout'
-
-        response = requests.post(full_url, timeout=5)
-        return jsonify(response.json())
-    except Exception as e:
-        return jsonify({'error': f'Erro ao fazer logout: {str(e)}'}), 503
-
-@main_bp.route('/whatsapp/messages', methods=['GET'])
-def whatsapp_messages():
-    """Proxy para obter mensagens capturadas"""
-    try:
-        limit = request.args.get('limit', 100)
-        response = requests.get(f'{WHATSAPP_MONITOR_URL}/messages?limit={limit}', timeout=5)
-        return jsonify(response.json())
-    except Exception as e:
-        return jsonify({'error': f'Erro ao obter mensagens: {str(e)}'}), 503
 
 @main_bp.route('/upload-image', methods=['POST'])
 def upload_image():
@@ -1316,5 +1317,3 @@ def upload_image():
             'success': False,
             'error': f'Erro interno: {str(e)}'
         }), 500
-
-

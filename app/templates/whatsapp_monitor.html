@@ -500,13 +500,11 @@
     </style>
 </head>
 <body>
-    <!-- Botão de toggle do modo escuro -->
     <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro">
         🌙
     </button>
 
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <h1>📱 Monitor WhatsApp</h1>
             <p>Monitore grupos e clone mensagens automaticamente</p>
@@ -517,7 +515,6 @@
             </nav>
         </div>
 
-        <!-- Navegação de Abas -->
         <div class="tabs-navigation">
             <button class="tab-button active" onclick="switchTab('connection')">
                 🔌 Conexão
@@ -530,7 +527,6 @@
             </button>
         </div>
 
-        <!-- Aba: Conexão -->
         <div id="tab-connection" class="tab-content-main active">
             <div class="status-card">
                 <h2 style="margin-bottom: 20px; color: var(--text-primary);">Status da Conexão</h2>
@@ -576,7 +572,6 @@
                 </div>
             </div>
 
-            <!-- Lista de Grupos -->
             <div class="status-card">
                 <h2 style="margin-bottom: 20px; color: var(--text-primary);">Meus Grupos</h2>
                 <div id="groupsAlert"></div>
@@ -588,7 +583,6 @@
                 </div>
             </div>
 
-            <!-- Logs -->
             <div class="status-card">
                 <h2 style="margin-bottom: 20px; color: var(--text-primary);">📋 Logs de Atividade</h2>
                 <div id="logsContainer" class="logs-container">
@@ -600,7 +594,6 @@
             </div>
         </div>
 
-        <!-- Aba: Mensagens Clonadas -->
         <div id="tab-messages" class="tab-content-main">
             <div class="status-card">
                 <h2 style="margin-bottom: 20px; color: var(--text-primary);">💬 Mensagens Monitoradas</h2>
@@ -616,7 +609,6 @@
             </div>
         </div>
 
-        <!-- Aba: Agendamento -->
         <div id="tab-scheduled" class="tab-content-main">
             <div class="search-section" style="background: var(--bg-card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);">
                 <form class="search-form" id="filtroAgendamentoFormWhatsapp" style="margin-bottom: 30px;">
@@ -658,7 +650,6 @@
         </div>
     </div>
 
-    <!-- Modal de Agendamento -->
     <div id="agendamentoModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -683,7 +674,6 @@
         </div>
     </div>
 
-    <!-- Modal de Edição -->
     <div id="editarModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1331,6 +1321,7 @@
                     return;
                 }
 
+                // *** Lógica corrigida para exibir botões Adicionar/Remover ***
                 listDiv.innerHTML = data.groups.map(group => `
                     <div class="group-item">
                         <div class="group-info">
@@ -1341,7 +1332,10 @@
                             <span class="group-badge ${group.monitored ? 'badge-monitored' : 'badge-not-monitored'}">
                                 ${group.monitored ? '🔔 Monitorando' : '🔕 Não monitorado'}
                             </span>
-                            ${!group.monitored ? `<button class="btn btn-primary" onclick="monitorGroup('${group.id}')">Adicionar</button>` : ''}
+                            ${group.monitored 
+                                ? `<button class="btn btn-danger" onclick="unmonitorGroup('${group.id}')">Remover</button>` 
+                                : `<button class="btn btn-primary" onclick="monitorGroup('${group.id}')">Adicionar</button>`
+                            }
                         </div>
                     </div>
                 `).join('');
@@ -1357,10 +1351,37 @@
             }
         }
 
+        // *** Função para DESMONITORAR grupo (endpoint POST /whatsapp/unmonitor) ***
+        async function unmonitorGroup(groupId) {
+            try {
+                if (confirm('Deseja realmente REMOVER este grupo do monitoramento?')) {
+                    const response = await fetch('/whatsapp/unmonitor', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ groupId })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        addLog('❌ Grupo removido do monitoramento', 'info');
+                        await loadGroups();
+                        await updateStatus();
+                    } else {
+                        addLog(`❌ Erro ao remover: ${data.error}`, 'error');
+                    }
+                }
+            } catch (error) {
+                addLog(`❌ Erro ao remover grupo: ${error.message}`, 'error');
+            }
+        }
+
         // Monitorar grupo
         async function monitorGroup(groupId) {
             try {
                 if (confirm('Adicionar este grupo ao monitoramento?')) {
+                    // Endpoint corrigido para /whatsapp/monitor (POST)
                     const response = await fetch('/whatsapp/monitor', {
                         method: 'POST',
                         headers: {
