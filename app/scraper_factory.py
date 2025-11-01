@@ -34,42 +34,93 @@ class MercadoLivreScraper(BaseScraper):
     def __init__(self):
         super().__init__('mercadolivre')
 
+    def _extract_real_affiliate_link(self, affiliate_url: str) -> tuple[str, str]:
+        """
+        Extrai o link real do produto seguindo o link de afiliado
+        Retorna (product_url, real_affiliate_link)
+        """
+        try:
+            logger.info(f"🔗 Extraindo link real de afiliado: {affiliate_url[:80]}...")
+
+            import requests
+            from urllib.parse import urlparse, parse_qs, unquote
+
+            session = requests.Session()
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1'
+            }
+
+            # Seguir redirects e capturar URLs intermediárias
+            response = session.get(affiliate_url, headers=headers, allow_redirects=True, timeout=30)
+            final_url = response.url
+
+            logger.info(f"📍 URL final após redirects: {final_url[:80]}...")
+
+            # Verificar se chegou em uma página de produto
+            if '/p/MLB' in final_url or re.search(r'/MLB\d+', final_url):
+                # Extrair ID do produto
+                product_match = re.search(r'(MLB\d+)', final_url)
+                if product_match:
+                    product_id = product_match.group(1)
+                    logger.info(f"✅ Produto encontrado: {product_id}")
+
+                    # Construir URL limpa do produto
+                    product_url = f"https://produto.mercadolivre.com.br/{product_id}"
+
+                    # Usar o link de afiliado original para compartilhamento
+                    return (product_url, affiliate_url)
+
+            # Se caiu em página social, tentar extrair do histórico de redirects
+            if '/social/' in final_url:
+                logger.info("🔍 Detectada página social, buscando URL do produto...")
+
+                # Tentar extrair do parâmetro ref
+                parsed = urlparse(final_url)
+                params = parse_qs(parsed.query)
+
+                if 'ref' in params:
+                    ref_url = unquote(params['ref'][0])
+                    product_match = re.search(r'(MLB\d+)', ref_url)
+                    if product_match:
+                        product_id = product_match.group(1)
+                        product_url = f"https://produto.mercadolivre.com.br/{product_id}"
+                        logger.info(f"✅ Produto extraído do ref: {product_id}")
+                        return (product_url, affiliate_url)
+
+                # Tentar buscar no histórico de redirects
+                if hasattr(response, 'history') and response.history:
+                    for resp in response.history:
+                        if '/p/MLB' in resp.url or re.search(r'/MLB\d+', resp.url):
+                            product_match = re.search(r'(MLB\d+)', resp.url)
+                            if product_match:
+                                product_id = product_match.group(1)
+                                product_url = f"https://produto.mercadolivre.com.br/{product_id}"
+                                logger.info(f"✅ Produto encontrado no histórico: {product_id}")
+                                return (product_url, affiliate_url)
+
+            # Se não conseguiu extrair, retornar a URL final
+            logger.warning("⚠️ Não foi possível extrair ID do produto, usando URL final")
+            return (final_url, affiliate_url)
+
+        except Exception as e:
+            logger.error(f"❌ Erro ao extrair link de afiliado: {e}")
+            return (affiliate_url, affiliate_url)
+
     def _follow_redirect_if_needed(self, url: str) -> str:
         """
         Segue redirects de links curtos de afiliado do ML
         Retorna a URL final do produto
         """
         try:
-            # Detectar se é link curto de afiliado (mercadolivre.com/sec/...)
-            if 'mercadolivre.com/sec/' in url or 'mercadolivre.com.br/sec/' in url:
-                logger.info(f"🔗 Link de afiliado detectado, seguindo redirect...")
-
-                import requests
-                session = requests.Session()
-                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-
-                response = session.get(url, headers=headers, allow_redirects=True, timeout=30)
-                final_url = response.url
-
-                logger.info(f"📍 Redirect: {url[:50]}... -> {final_url[:50]}...")
-
-                # Se redirecionou para página social, tentar extrair o produto da URL ref
-                if '/social/' in final_url:
-                    from urllib.parse import urlparse, parse_qs, unquote
-                    parsed = urlparse(final_url)
-                    params = parse_qs(parsed.query)
-
-                    # Tentar decodificar o parâmetro ref que pode conter a URL do produto
-                    if 'ref' in params:
-                        ref = unquote(params['ref'][0])
-                        logger.info(f"🔍 Referência encontrada no redirect social")
-                        # O ref pode conter informações do produto, mas precisamos da URL base
-                        # Retornar a URL original se não conseguir extrair produto específico
-                        return url
-
-                # Se redirecionou para um produto específico, usar essa URL
-                if '/p/MLB' in final_url or '/MLB' in final_url:
-                    return final_url
+            # Se for link de afiliado, usar método especializado
+            if 'mercadolivre.com/sec/' in url or 'mercadolivre.com.br/sec/' in url or '/s/c/' in url:
+                product_url, _ = self._extract_real_affiliate_link(url)
+                return product_url
 
             return url
         except Exception as e:
@@ -79,8 +130,24 @@ class MercadoLivreScraper(BaseScraper):
     @cached_scraper
     def scrape_product(self, url: str, affiliate_link: str = "") -> Optional[Dict[str, Any]]:
         try:
-            # Seguir redirects se for link de afiliado
-            final_url = self._follow_redirect_if_needed(url)
+            # Determinar se a URL fornecida é um link de afiliado
+            is_affiliate_link = ('mercadolivre.com/sec/' in url or
+                               'mercadolivre.com.br/sec/' in url or
+                               '/s/c/' in url)
+
+            # Se for link de afiliado, extrair URL do produto E manter link de afiliado
+            if is_affiliate_link:
+                logger.info("🔗 Link de afiliado detectado, extraindo informações...")
+                product_url, real_affiliate_link = self._extract_real_affiliate_link(url)
+                final_url = product_url
+                affiliate_to_use = real_affiliate_link
+            else:
+                # Se não for link de afiliado, seguir fluxo normal
+                final_url = self._follow_redirect_if_needed(url)
+                affiliate_to_use = affiliate_link or url
+
+            logger.info(f"📦 Fazendo scraping de: {final_url}")
+            logger.info(f"🔗 Link de afiliado a ser usado: {affiliate_to_use[:80]}...")
 
             # Tentar primeiro com requisição direta (ML geralmente permite)
             response = self.anti_bot.make_request(final_url)
@@ -90,7 +157,7 @@ class MercadoLivreScraper(BaseScraper):
             if not soup:
                 logger.error("Página de produto não encontrada")
                 return None
-            product_data = self._extract_product_data(soup, final_url, affiliate_link or url)
+            product_data = self._extract_product_data(soup, final_url, affiliate_to_use)
 
             # Verificar se conseguiu extrair dados válidos
             if product_data.get('titulo') == 'Produto sem título' or product_data.get('preco_atual') == 'Preço não disponível':
@@ -98,7 +165,7 @@ class MercadoLivreScraper(BaseScraper):
                 try:
                     response = self.anti_bot.make_request_via_api(final_url)
                     soup = BeautifulSoup(response.text, 'html.parser')
-                    product_data = self._extract_product_data(soup, final_url, affiliate_link or url)
+                    product_data = self._extract_product_data(soup, final_url, affiliate_to_use)
                 except Exception as api_error:
                     logger.error(f"ScraperAPI também falhou: {api_error}")
 

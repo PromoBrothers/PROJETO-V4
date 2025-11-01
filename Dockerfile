@@ -23,17 +23,13 @@ COPY . .
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Expose port 3000 (EasyPanel default)
-EXPOSE 3000
+# Expose port 5000
+EXPOSE 5000
 
-# Set environment variables for EasyPanel
-ENV PORT=3000
+# Set environment variables
+ENV PORT=5000
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/teste || exit 1
 
 # Run the application
 CMD ["python", "run.py"]

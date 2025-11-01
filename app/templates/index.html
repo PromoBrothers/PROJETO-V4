@@ -25,7 +25,12 @@
     <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro">
       🌙
     </button>
-    
+
+    <!-- Botão de Logout -->
+    <a href="/logout" class="btn btn-danger" style="position: fixed; top: 20px; right: 80px; z-index: 1000; padding: 10px 20px; text-decoration: none; border-radius: 8px;">
+      🚪 Sair
+    </a>
+
     <div class="container">
       <div class="header">
         <h1>🛒 Mercado Livre Scraper</h1>
@@ -88,12 +93,12 @@
         <div id="tab-link" class="tab-content">
           <form class="search-form" id="linkForm">
             <div class="form-group">
-              <label for="produtoUrl">Link do Produto (Mercado Livre)</label>
+              <label for="produtoUrl">🔗 Link do Produto ou Link de Afiliado</label>
               <input
                 type="url"
                 id="produtoUrl"
                 name="produtoUrl"
-                placeholder="https://produto.mercadolivre.com.br/..."
+                placeholder="Cole aqui o link do produto ou seu link de afiliado do Mercado Livre..."
                 required
               />
             </div>
@@ -129,22 +134,12 @@
                 <div class="add-product-card">
                   <div class="add-product-form">
                     <div class="form-row">
-                      <div class="form-group">
-                        <label for="productUrl">🔗 Link do Produto</label>
+                      <div class="form-group" style="flex: 1;">
+                        <label for="productUrl">🔗 Link do Produto ou Link de Afiliado</label>
                         <input
                           type="url"
                           id="productUrl"
-                          placeholder="https://produto.mercadolivre.com.br/..."
-                        />
-                      </div>
-                      <div class="form-group">
-                        <label for="affiliateUrl"
-                          >💰 Link de Afiliado (opcional)</label
-                        >
-                        <input
-                          type="url"
-                          id="affiliateUrl"
-                          placeholder="https://link.afiliado..."
+                          placeholder="Cole aqui o link do produto ou seu link de afiliado..."
                         />
                       </div>
                     </div>
@@ -458,8 +453,62 @@
                 </button>
               </div>
               <small style="color: #666; margin-top: 5px; display: block">
-                Cole aqui o novo link da imagem ou use o botão para buscar no Supabase Storage
+                Cole aqui o link da imagem ou use o botão para buscar no Supabase Storage
               </small>
+
+              <!-- 🔥 NOVA ÁREA PARA COLAR IMAGEM DO CLIPBOARD -->
+              <div
+                id="imagePasteZone"
+                style="
+                  margin-top: 15px;
+                  border: 3px dashed #667eea;
+                  border-radius: 12px;
+                  padding: 30px;
+                  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                  text-align: center;
+                  cursor: pointer;
+                  transition: all 0.3s ease;
+                  position: relative;
+                  min-height: 120px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                "
+                onclick="focusOnPasteArea()"
+              >
+                <div style="font-size: 48px; margin-bottom: 10px;">📋</div>
+                <div style="font-weight: 600; color: #667eea; font-size: 16px; margin-bottom: 5px;">
+                  Cole uma imagem aqui
+                </div>
+                <div style="color: #666; font-size: 13px;">
+                  Copie uma imagem (Ctrl+C) e clique aqui para colar (Ctrl+V)
+                </div>
+                <input
+                  type="file"
+                  id="imageFileInput"
+                  accept="image/*"
+                  style="display: none;"
+                  onchange="handleFileSelect(event)"
+                />
+                <button
+                  type="button"
+                  onclick="event.stopPropagation(); document.getElementById('imageFileInput').click();"
+                  style="
+                    margin-top: 15px;
+                    padding: 8px 16px;
+                    background: #667eea;
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 13px;
+                    font-weight: 500;
+                  "
+                >
+                  📁 Ou escolher arquivo
+                </button>
+              </div>
 
               <div
                 id="imagePreviewContainer"

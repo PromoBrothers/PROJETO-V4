@@ -3,176 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor de Grupos WhatsApp - Promo Brothers</title>
+    <title>Monitor WhatsApp - Promo Brothers</title>
+    <link rel="stylesheet" href="/static/style.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Estilos específicos do WhatsApp Monitor */
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
+        /* Navegação de Abas */
+        .tabs-navigation {
+            display: flex;
+            gap: 10px;
             margin-bottom: 30px;
+            background: var(--bg-card);
+            padding: 15px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
         }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .card h2 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.5em;
+        .tab-button {
+            flex: 1;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Conteúdo das Abas */
+        .tab-content-main {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content-main.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card de Status */
+        .status-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
         }
 
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             padding: 15px;
-            border-radius: 10px;
-            background: #f7f7f7;
-            margin-bottom: 15px;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.03);
+            margin-bottom: 20px;
         }
 
         .status-dot {
-            width: 15px;
-            height: 15px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
 
-        .status-dot.connected {
-            background: #10b981;
-        }
-
-        .status-dot.disconnected {
-            background: #ef4444;
-        }
-
-        .status-dot.qr {
-            background: #f59e0b;
-        }
+        .status-dot.connected { background: #10b981; }
+        .status-dot.disconnected { background: #ef4444; }
+        .status-dot.qr { background: #f59e0b; }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
         }
 
+        .status-text {
+            flex: 1;
+        }
+
+        .status-text h3 {
+            font-size: 16px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .status-text p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* QR Code */
         .qr-container {
             text-align: center;
             padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-sm);
+            margin: 20px 0;
         }
 
-        .qr-code {
-            max-width: 300px;
-            width: 100%;
-            margin: 20px auto;
-            border: 3px solid #667eea;
-            border-radius: 10px;
-            padding: 10px;
-            background: white;
+        .qr-container img {
+            max-width: 280px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow);
         }
 
-        .btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: all 0.3s;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-danger {
-            background: #ef4444;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .btn-success {
-            background: #10b981;
-        }
-
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        .group-list {
-            max-height: 400px;
-            overflow-y: auto;
-            margin-top: 15px;
+        /* Grupos */
+        .groups-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .group-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            background: #f7f7f7;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            transition: all 0.3s;
+            gap: 15px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
         }
 
         .group-item:hover {
-            background: #e5e5e5;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
             transform: translateX(5px);
         }
 
@@ -181,168 +159,203 @@
         }
 
         .group-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
         }
 
         .group-meta {
-            font-size: 0.85em;
-            color: #666;
+            font-size: 13px;
+            color: var(--text-secondary);
         }
 
         .group-badge {
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 500;
         }
 
         .badge-monitored {
-            background: #10b981;
-            color: white;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
         }
 
         .badge-not-monitored {
-            background: #e5e5e5;
-            color: #666;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
         }
 
-        .affiliate-form {
-            display: grid;
-            gap: 15px;
-        }
-
-        .form-group {
+        /* Mensagens Clonadas */
+        .messages-container {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 16px;
         }
 
-        .form-group label {
-            font-weight: 600;
-            color: #333;
+        .message-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
         }
 
-        .form-group select,
-        .form-group input {
-            padding: 12px;
-            border: 2px solid #e5e5e5;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.3s;
+        .message-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(102, 126, 234, 0.3);
         }
 
-        .form-group select:focus,
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .affiliate-list {
-            margin-top: 20px;
-        }
-
-        .affiliate-item {
+        .message-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
-            background: #f7f7f7;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .affiliate-platform {
+        .message-group {
+            font-size: 14px;
             font-weight: 600;
-            color: #667eea;
-            text-transform: capitalize;
+            color: var(--text-primary);
         }
 
-        .affiliate-link {
-            font-size: 0.85em;
-            color: #666;
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        .message-time {
+            font-size: 12px;
+            color: var(--text-secondary);
         }
 
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 0.85em;
+        .message-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 12px 0;
+            white-space: pre-wrap;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .stat-card {
-            background: #f7f7f7;
-            padding: 15px;
-            border-radius: 8px;
+        .message-image {
+            margin: 12px 0;
             text-align: center;
         }
 
-        .stat-number {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
+        .message-image img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow);
         }
 
-        .stat-label {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 5px;
+        .message-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .message-actions button {
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .message-actions button:disabled {
+            cursor: not-allowed;
+            transform: scale(0.95);
+        }
+
+        .message-actions button:not(:disabled):active {
+            transform: scale(0.95);
+        }
+
+        .edit-textarea {
+            width: 100%;
+            min-height: 80px;
+            background: var(--bg-input);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            margin: 12px 0;
+        }
+
+        /* Logs */
+        .logs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .alert-info {
-            background: #dbeafe;
-            color: #1e40af;
-            border-left: 4px solid #3b82f6;
-        }
-
-        .alert-warning {
-            background: #fef3c7;
-            color: #92400e;
-            border-left: 4px solid #f59e0b;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            border-left: 3px solid;
         }
 
         .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border-left: 4px solid #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+            color: #10b981;
         }
 
         .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border-left: 4px solid #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #ef4444;
         }
 
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        /* Estados Vazios */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 15px;
+        }
+
+        /* Loading */
         .loading {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: var(--text-secondary);
         }
 
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--primary);
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            margin: 0 auto 16px;
         }
 
         @keyframes spin {
@@ -350,151 +363,347 @@
             100% { transform: rotate(360deg); }
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
+        /* Agendamento usa os estilos do style.css */
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
         }
 
-        .empty-state-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
         }
 
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.8em;
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
             }
-
-            .dashboard {
-                grid-template-columns: 1fr;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        /* Estilos adicionais para navegação */
-        .nav-links a:hover {
-            background: rgba(255,255,255,0.3) !important;
-            transform: translateY(-2px);
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .tab-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        .modal-header h2 {
+            font-size: 20px;
+            color: var(--text-primary);
+            margin: 0;
         }
 
-        .tab-content-main {
-            animation: fadeIn 0.3s ease-in;
+        .close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 50%;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .close:hover {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ef4444;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-input);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15);
         }
     </style>
 </head>
 <body>
+    <!-- Botão de toggle do modo escuro -->
+    <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro">
+        🌙
+    </button>
+
     <div class="container">
+        <!-- Header -->
         <div class="header">
-            <h1>📱 WhatsApp - Promo Brothers</h1>
-            <p>Conecte seu WhatsApp, monitore grupos e gerencie mensagens</p>
-            <nav class="nav-links" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
-                <a href="/index" style="color: white; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 8px; transition: all 0.3s;">🛒 Mercado Livre</a>
-                <a href="/amazon" style="color: white; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 8px; transition: all 0.3s;">📦 Amazon</a>
-                <a href="/whatsapp-monitor" style="color: white; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.4); border-radius: 8px; font-weight: 600;">📱 WhatsApp Monitor</a>
+            <h1>📱 Monitor WhatsApp</h1>
+            <p>Monitore grupos e clone mensagens automaticamente</p>
+            <nav class="nav-links" style="margin-top: 15px;">
+                <a href="/">Mercado Livre</a>
+                <a href="/amazon">Amazon</a>
+                <a href="/whatsapp-monitor" class="active">📱 WhatsApp Monitor</a>
             </nav>
         </div>
 
-        <!-- Tabs de navegação -->
-        <div style="margin-bottom: 20px;">
-            <div style="display: flex; gap: 10px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-                <button class="tab-button active" onclick="switchTab('connection')" style="flex: 1; padding: 12px; border: none; background: #667eea; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
-                    🔌 Conexão
-                </button>
-                <button class="tab-button" onclick="switchTab('messages')" style="flex: 1; padding: 12px; border: none; background: #e5e5e5; color: #666; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
-                    💬 Mensagens Clonadas
-                </button>
-            </div>
+        <!-- Navegação de Abas -->
+        <div class="tabs-navigation">
+            <button class="tab-button active" onclick="switchTab('connection')">
+                🔌 Conexão
+            </button>
+            <button class="tab-button" onclick="switchTab('messages')">
+                💬 Mensagens Clonadas
+            </button>
+            <button class="tab-button" onclick="switchTab('scheduled')">
+                📅 Agendamento
+            </button>
         </div>
 
-        <!-- Aba de Conexão -->
-        <div id="tab-connection" class="tab-content-main">
-            <div class="dashboard">
-                <!-- Status da Conexão -->
-                <div class="card">
-                <h2>🔌 Status da Conexão</h2>
-                <div id="connectionStatus" class="status-indicator">
-                    <div class="status-dot disconnected"></div>
-                    <div>
-                        <div><strong>Desconectado</strong></div>
-                        <div style="font-size: 0.85em; color: #666;">Aguardando conexão...</div>
+        <!-- Aba: Conexão -->
+        <div id="tab-connection" class="tab-content-main active">
+            <div class="status-card">
+                <h2 style="margin-bottom: 20px; color: var(--text-primary);">Status da Conexão</h2>
+
+                <div class="status-indicator" id="statusIndicator">
+                    <div class="status-dot disconnected" id="statusDot"></div>
+                    <div class="status-text">
+                        <h3 id="statusTitle">Desconectado</h3>
+                        <p id="statusMessage">Aguardando conexão...</p>
                     </div>
                 </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="monitoredGroupsCount">0</div>
-                        <div class="stat-label">Grupos Monitorados</div>
-                    </div>
-                </div>
-
 
                 <div id="qrSection" style="display: none;">
                     <div class="qr-container">
-                        <h3>Escaneie o QR Code</h3>
-                        <p style="color: #666; margin: 10px 0;">Abra o WhatsApp no celular e escaneie o código</p>
-                        <img id="qrCode" class="qr-code" alt="QR Code">
+                        <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                            Escaneie o QR Code abaixo com seu WhatsApp
+                        </p>
+                        <img id="qrCode" alt="QR Code" style="display: none;">
+                        <div class="loading" id="qrLoading">
+                            <div class="spinner"></div>
+                            <p>Gerando QR Code...</p>
+                        </div>
                     </div>
                 </div>
 
-                <button class="btn btn-danger" id="logoutBtn" style="display: none;">
-                    Desconectar WhatsApp
-                </button>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-primary" id="loadGroupsBtn" onclick="loadGroups()" disabled>
+                        📋 Carregar Grupos
+                    </button>
+                    <button class="btn btn-danger" id="logoutBtn" onclick="logout()" style="display: none;">
+                        🚪 Desconectar
+                    </button>
+                </div>
+
+                <div style="margin-top: 15px; padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-sm);">
+                    <p style="font-size: 14px; color: var(--text-secondary);">
+                        📊 Grupos monitorados: <strong id="monitoredGroupsCount" style="color: var(--primary);">0</strong>
+                    </p>
+                </div>
             </div>
 
-            <!-- Grupos Disponíveis -->
-            <div class="card">
-                <h2>👥 Meus Grupos</h2>
-
+            <!-- Lista de Grupos -->
+            <div class="status-card">
+                <h2 style="margin-bottom: 20px; color: var(--text-primary);">Meus Grupos</h2>
                 <div id="groupsAlert"></div>
+                <div id="groupsList" class="groups-list">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <p>Carregue seus grupos para começar</p>
+                    </div>
+                </div>
+            </div>
 
-                <button class="btn" id="loadGroupsBtn" disabled>
-                    Carregar Grupos
-                </button>
-
-                <div id="groupsList" class="group-list"></div>
+            <!-- Logs -->
+            <div class="status-card">
+                <h2 style="margin-bottom: 20px; color: var(--text-primary);">📋 Logs de Atividade</h2>
+                <div id="logsContainer" class="logs-container">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p>Nenhum log ainda</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-                <!-- Log de Atividades -->
-                <div class="card">
-                    <h2>📋 Log de Atividades</h2>
-                    <div id="activityLog" style="max-height: 300px; overflow-y: auto;">
+        <!-- Aba: Mensagens Clonadas -->
+        <div id="tab-messages" class="tab-content-main">
+            <div class="status-card">
+                <h2 style="margin-bottom: 20px; color: var(--text-primary);">💬 Mensagens Monitoradas</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    As mensagens dos grupos monitorados aparecerão aqui em tempo real.
+                </p>
+                <div id="messagesContainer" class="messages-container">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💬</div>
+                        <p>Nenhuma mensagem recebida ainda</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba: Agendamento -->
+        <div id="tab-scheduled" class="tab-content-main">
+            <div class="search-section" style="background: var(--bg-card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);">
+                <form class="search-form" id="filtroAgendamentoFormWhatsapp" style="margin-bottom: 30px;">
+                    <div class="form-group">
+                        <label for="filtroPlataformaWhatsapp">Plataforma</label>
+                        <select id="filtroPlataformaWhatsapp" name="plataforma" onchange="loadClonedScheduled()">
+                            <option value="todas">Todas</option>
+                            <option value="whatsapp" selected>WhatsApp</option>
+                            <option value="mercadolivre">Mercado Livre</option>
+                            <option value="amazon">Amazon</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filtroStatusWhatsapp">Status</label>
+                        <select id="filtroStatusWhatsapp" name="status" onchange="loadClonedScheduled()">
+                            <option value="agendado">Agendado</option>
+                            <option value="nao-agendado">Não Agendado</option>
+                            <option value="todos">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filtroOrdemWhatsapp">Ordenar por</label>
+                        <select id="filtroOrdemWhatsapp" name="ordem" onchange="loadClonedScheduled()">
+                            <option value="desc">Mais Recentes</option>
+                            <option value="asc">Mais Antigos</option>
+                        </select>
+                    </div>
+                </form>
+                <div id="agendamento-list-container-whatsapp">
+                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">Produtos na Base de Dados:</h3>
+                    <div id="clonedScheduledGrid" class="products-grid">
                         <div class="empty-state">
-                            <div class="empty-state-icon">📝</div>
-                            <p>Nenhuma atividade ainda</p>
+                            <div class="empty-state-icon">📦</div>
+                            <p>Nenhum produto agendado</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Aba de Mensagens Clonadas -->
-        <div id="tab-messages" class="tab-content-main" style="display: none;">
-            <div class="card">
-                <h2>💬 Mensagens Clonadas dos Grupos</h2>
-                <p style="color: #666; margin-bottom: 20px;">
-                    Aqui aparecem todas as mensagens capturadas dos grupos monitorados
-                </p>
-
-                <div id="messagesContainer" style="max-height: 600px; overflow-y: auto;">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">💬</div>
-                        <p>Nenhuma mensagem capturada ainda</p>
-                        <small style="color: #999; margin-top: 10px; display: block;">
-                            As mensagens dos grupos monitorados aparecerão aqui em tempo real
-                        </small>
+    <!-- Modal de Agendamento -->
+    <div id="agendamentoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📅 Agendar Envio</h2>
+                <span class="close" onclick="closeAgendamentoModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="agendamentoForm" onsubmit="salvarAgendamento(event)">
+                    <div class="form-group">
+                        <label for="dataHoraAgendamento">Data e Hora</label>
+                        <input type="datetime-local" id="dataHoraAgendamento" required>
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label for="mensagemCustomizadaAgendamento">Mensagem Customizada (opcional)</label>
+                        <textarea id="mensagemCustomizadaAgendamento" placeholder="Digite uma mensagem personalizada..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        💾 Salvar Agendamento
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div id="editarModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Editar Produto</h2>
+                <span class="close" onclick="closeEditarModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editarForm" onsubmit="salvarEdicao(event)">
+                    <div class="form-group">
+                        <label for="tituloEdicao">Título</label>
+                        <input type="text" id="tituloEdicao" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="precoAtualEdicao">Preço Atual</label>
+                        <input type="number" step="0.01" id="precoAtualEdicao" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mensagemCustomizadaEdicao">Mensagem Customizada</label>
+                        <textarea id="mensagemCustomizadaEdicao"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        💾 Salvar Alterações
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -502,62 +711,288 @@
     <script>
         let isConnected = false;
         let updateInterval = null;
-        let messages = [];
+        let processedMessages = new Set(); // Armazenar IDs de mensagens já processadas
 
         // Carregar mensagens processadas do localStorage
-        let processedMessages = new Set();
-        try {
-            const stored = localStorage.getItem('processedMessages');
+        function loadProcessedMessages() {
+            const stored = localStorage.getItem('processedWhatsappMessages');
             if (stored) {
-                processedMessages = new Set(JSON.parse(stored));
-                console.log(`✅ Carregado ${processedMessages.size} mensagens processadas do localStorage`);
+                try {
+                    const parsed = JSON.parse(stored);
+                    processedMessages = new Set(parsed);
+                } catch (e) {
+                    console.error('Erro ao carregar mensagens processadas:', e);
+                    processedMessages = new Set();
+                }
             }
-        } catch (e) {
-            console.error('Erro ao carregar processedMessages:', e);
         }
 
-        // Função para salvar processedMessages no localStorage
+        // Salvar mensagens processadas no localStorage
         function saveProcessedMessages() {
             try {
-                localStorage.setItem('processedMessages', JSON.stringify(Array.from(processedMessages)));
+                localStorage.setItem('processedWhatsappMessages', JSON.stringify([...processedMessages]));
             } catch (e) {
-                console.error('Erro ao salvar processedMessages:', e);
+                console.error('Erro ao salvar mensagens processadas:', e);
             }
         }
 
-        // Função para trocar abas
+        // Marcar mensagem como processada
+        function markMessageAsProcessed(messageId) {
+            processedMessages.add(messageId);
+            saveProcessedMessages();
+        }
+
+        // Verificar se mensagem já foi processada
+        function isMessageProcessed(messageId) {
+            return processedMessages.has(messageId);
+        }
+
+        // Alternar entre abas
         function switchTab(tabName) {
-            // Esconder todas as abas
-            document.querySelectorAll('.tab-content-main').forEach(tab => {
-                tab.style.display = 'none';
-            });
+            // Remover classe active de todos os botões e conteúdos
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content-main').forEach(content => content.classList.remove('active'));
 
-            // Remover classe active de todos os botões
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.style.background = '#e5e5e5';
-                btn.style.color = '#666';
-                btn.classList.remove('active');
-            });
-
-            // Mostrar aba selecionada
-            document.getElementById(`tab-${tabName}`).style.display = 'block';
-
-            // Adicionar classe active ao botão clicado
-            event.target.style.background = '#667eea';
-            event.target.style.color = 'white';
+            // Adicionar classe active ao botão e conteúdo selecionados
             event.target.classList.add('active');
 
-            // Se abriu aba de mensagens, carregar mensagens
-            if (tabName === 'messages') {
-                loadMessages();
+            if (tabName === 'connection') {
+                document.getElementById('tab-connection').classList.add('active');
+            } else if (tabName === 'messages') {
+                document.getElementById('tab-messages').classList.add('active');
+                loadClonedMessages();
+            } else if (tabName === 'scheduled') {
+                document.getElementById('tab-scheduled').classList.add('active');
+                loadClonedScheduled();
             }
         }
 
-        // Função para adicionar mensagem clonada
+        // Carregar mensagens clonadas do backend
+        async function loadClonedMessages() {
+            const container = document.getElementById('messagesContainer');
+
+            // Mostrar loading apenas na primeira vez
+            if (!container.querySelector('.message-card') && !container.querySelector('.empty-state')) {
+                container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando mensagens...</p></div>';
+            }
+
+            try {
+                const response = await fetch('/whatsapp/messages?limit=50');
+                const data = await response.json();
+
+                if (data.error) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">❌</div>
+                            <p>${data.error}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (!data.messages || data.messages.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">💬</div>
+                            <p>Nenhuma mensagem recebida ainda</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Filtrar mensagens já processadas
+                const unprocessedMessages = data.messages.filter(msg => !isMessageProcessed(msg.id));
+
+                if (unprocessedMessages.length === 0) {
+                    // Manter mensagens existentes ou mostrar empty state
+                    const existingMessages = container.querySelectorAll('.message-card');
+                    if (existingMessages.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">✅</div>
+                                <p>Todas as mensagens foram processadas</p>
+                            </div>
+                        `;
+                    }
+                    return;
+                }
+
+                // Limpar container apenas se houver novas mensagens
+                const existingMessages = container.querySelectorAll('.message-card');
+                if (existingMessages.length === 0) {
+                    container.innerHTML = '';
+                }
+
+                // Adicionar apenas mensagens não processadas
+                let newMessagesAdded = 0;
+                unprocessedMessages.forEach(message => {
+                    // Verificar se a mensagem já existe no DOM
+                    if (!document.querySelector(`[data-message-id="${message.id}"]`)) {
+                        addClonedMessage(message);
+                        newMessagesAdded++;
+                    }
+                });
+
+                if (newMessagesAdded > 0) {
+                    addLog(`📥 ${newMessagesAdded} nova(s) mensagem(ns) recebida(s)`, 'success');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar mensagens:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <p>Erro ao carregar mensagens: ${error.message}</p>
+                    </div>
+                `;
+                addLog(`❌ Erro ao carregar mensagens: ${error.message}`, 'error');
+            }
+        }
+
+        // Atualizar UI de conexão
+        function updateConnectionUI(status, title, message) {
+            const dot = document.getElementById('statusDot');
+            const titleEl = document.getElementById('statusTitle');
+            const messageEl = document.getElementById('statusMessage');
+
+            dot.className = `status-dot ${status}`;
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+        }
+
+        // Carregar produtos agendados (todas as plataformas ou filtrado)
+        async function loadClonedScheduled() {
+            const grid = document.getElementById('clonedScheduledGrid');
+            const plataformaFilter = document.getElementById('filtroPlataformaWhatsapp').value;
+            const statusFilter = document.getElementById('filtroStatusWhatsapp').value;
+            const orderFilter = document.getElementById('filtroOrdemWhatsapp').value;
+
+            grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando produtos...</p></div>';
+
+            try {
+                // Construir URL baseado nos filtros
+                let url = '/produtos?';
+
+                // Aplicar filtro de plataforma
+                if (plataformaFilter !== 'todas') {
+                    url += `plataforma=${plataformaFilter}&`;
+                }
+
+                // Aplicar filtro de status
+                if (statusFilter === 'agendado') {
+                    url += 'agendado=true&';
+                } else if (statusFilter === 'nao-agendado') {
+                    url += 'agendado=false&';
+                }
+                // 'todos' não adiciona filtro
+
+                // Aplicar ordenação
+                url += `order=${orderFilter}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                // Verificar se houve erro na resposta
+                if (!data.success) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">❌</div>
+                            <p>Erro: ${data.error || 'Erro ao carregar produtos'}</p>
+                        </div>
+                    `;
+                    addLog(`❌ ${data.error || 'Erro ao carregar produtos'}`, 'error');
+                    return;
+                }
+
+                const produtos = data.produtos || [];
+
+                if (produtos.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📦</div>
+                            <p>Nenhum produto encontrado</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = '';
+                produtos.forEach(produto => {
+                    const card = createProductCard(produto);
+                    grid.appendChild(card);
+                });
+
+                addLog(`📦 ${produtos.length} produto(s) carregado(s)`, 'success');
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <p>Erro ao carregar produtos</p>
+                    </div>
+                `;
+                addLog(`❌ Erro ao carregar produtos: ${error.message}`, 'error');
+            }
+        }
+
+        // Criar card de produto (compatível com o index.html)
+        function createProductCard(produto) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+
+            // Formatar preço
+            let precoFormatado = produto.preco_atual || '';
+            if (precoFormatado && !precoFormatado.toString().includes('R$')) {
+                const precoNum = typeof precoFormatado === 'string' ? parseFloat(precoFormatado) : precoFormatado;
+                if (!isNaN(precoNum)) {
+                    precoFormatado = `R$ ${precoNum.toFixed(2).replace('.', ',')}`;
+                }
+            }
+
+            // Informação de data
+            let dataInfo = produto.agendamento
+                ? `Agendado para: <b>${produto.agendamento}</b>`
+                : `Criado em: <b>${produto.created_at || "N/A"}</b>`;
+
+            // Determinar plataforma e badge
+            const plataforma = produto.plataforma || produto.fonte || 'whatsapp';
+            let platformText = plataforma;
+            if (plataforma === 'mercadolivre') {
+                platformText = 'Mercado Livre';
+            } else if (plataforma === 'whatsapp') {
+                platformText = 'WhatsApp';
+            } else if (plataforma === 'amazon') {
+                platformText = 'Amazon';
+            }
+
+            // Imagem com cache busting
+            const imagemUrl = produto.imagem_url || produto.processed_image_url || '/static/placeholder.png';
+            const imagemComCache = imagemUrl !== '/static/placeholder.png' ? `${imagemUrl}?t=${Date.now()}` : imagemUrl;
+
+            card.innerHTML = `
+                <div class="product-header">
+                    <img src="${imagemComCache}" alt="${produto.titulo}" class="product-image" onerror="this.src='/static/placeholder.png'">
+                    <div class="platform-badge" data-platform="${plataforma}">${platformText}</div>
+                    <div class="product-info">
+                        <div class="product-title">${produto.titulo || 'Sem título'}</div>
+                        <div class="product-price-atual">${precoFormatado || 'Preço não disponível'}</div>
+                    </div>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 13px; margin: 12px 18px;">${dataInfo}</p>
+                <div class="product-actions">
+                    <button class="btn btn-reagendar" onclick="openAgendamentoForm('${produto.id}')">${produto.agendamento ? 'Reagendar' : 'Agendar'}</button>
+                    <button class="btn btn-editar" onclick="openEditarForm('${produto.id}')">Editar</button>
+                    <button class="btn btn-excluir" onclick="deletarAgendamento('${produto.id}', this)">Excluir</button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Adicionar mensagem clonada
         function addClonedMessage(message) {
             const container = document.getElementById('messagesContainer');
 
-            // Remover empty state se existir
+            // Remover empty state
             const emptyState = container.querySelector('.empty-state');
             if (emptyState) {
                 emptyState.remove();
@@ -566,15 +1001,6 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message-card';
             messageDiv.setAttribute('data-message-id', message.id);
-            messageDiv.style.cssText = `
-                background: white;
-                border-radius: 10px;
-                padding: 12px;
-                margin-bottom: 12px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-                transition: all 0.3s;
-                font-size: 0.9em;
-            `;
 
             const time = new Date(message.timestamp).toLocaleString('pt-BR', {
                 day: '2-digit',
@@ -583,71 +1009,33 @@
                 minute: '2-digit'
             });
 
-            const imageHtml = message.imageUrl ? `
-                <div style="margin: 8px 0;">
-                    <img src="${message.imageUrl}"
-                         style="max-width: 100%; max-height: 150px; width: auto; height: auto; border-radius: 6px; cursor: pointer; display: block;"
-                         onclick="window.open(this.src, '_blank')">
-                </div>
-            ` : '';
+            let imageHtml = '';
+            if (message.imageUrl) {
+                imageHtml = `
+                    <div class="message-image">
+                        <img src="${message.imageUrl}" alt="Imagem da mensagem" onerror="this.style.display='none'">
+                    </div>
+                `;
+            }
 
             messageDiv.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <div style="flex: 1; min-width: 0;">
-                        <strong style="color: #667eea; font-size: 0.95em; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            ${message.groupName || 'Grupo Desconhecido'}
-                        </strong>
-                        <div style="color: #999; font-size: 0.75em; margin-top: 2px;">
-                            ${message.sender || 'Desconhecido'} • ${time}
-                        </div>
-                    </div>
-                    <div id="buttons-${message.id}" style="display: flex; gap: 4px; flex-shrink: 0;">
-                        <button onclick="approveMessage('${message.id}')" title="Aprovar"
-                                class="approve-btn"
-                                style="padding: 4px 12px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em; font-weight: 600;">
-                            ✓ Aprovar
-                        </button>
-                        <button onclick="rejectMessage('${message.id}')" title="Rejeitar"
-                                class="reject-btn"
-                                style="padding: 4px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em; font-weight: 600;">
-                            ✗ Rejeitar
-                        </button>
-                    </div>
+                <div class="message-header">
+                    <span class="message-group">📱 ${message.groupName}</span>
+                    <span class="message-time">🕐 ${time}</span>
                 </div>
+                <div class="message-text" id="text-${message.id}">${message.text || '<em style="color: var(--text-muted);">Sem texto</em>'}</div>
                 ${imageHtml}
-                <div id="text-${message.id}" style="color: #333; padding: 10px; background: #f7f7f7; border-radius: 6px; border-left: 3px solid #667eea; line-height: 1.4; font-size: 0.9em; white-space: pre-wrap; word-wrap: break-word;">
-                    ${message.text || '<em style="color: #999;">Sem texto</em>'}
+                <textarea class="edit-textarea" id="edit-${message.id}" style="display: none;">${message.text || ''}</textarea>
+                <div class="message-actions" id="actions-${message.id}" style="display: none;">
+                    <button class="btn btn-primary" onclick="saveEdit('${message.id}')">💾 Salvar</button>
+                    <button class="btn" onclick="cancelEdit('${message.id}')">❌ Cancelar</button>
                 </div>
-                <textarea id="edit-${message.id}"
-                          style="display: none; width: 100%; min-height: 80px; padding: 10px; border: 2px solid #667eea; border-radius: 6px; font-family: inherit; font-size: 0.9em; resize: vertical;"
-                          >${message.text || ''}</textarea>
-                <div id="actions-${message.id}" style="display: none; margin-top: 8px; display: flex; gap: 6px;">
-                    <button onclick="saveEdit('${message.id}')"
-                            style="padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8em;">
-                        💾 Salvar
-                    </button>
-                    <button onclick="cancelEdit('${message.id}')"
-                            style="padding: 6px 12px; background: #e5e5e5; color: #666; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8em;">
-                        ❌ Cancelar
-                    </button>
-                </div>
-                <div id="approved-actions-${message.id}" style="display: none; margin-top: 8px; display: flex; gap: 6px; justify-content: flex-end;">
-                    <button onclick="editMessage('${message.id}')"
-                            style="padding: 4px 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em;">
-                        ✏️ Editar
-                    </button>
+                <div class="message-actions">
+                    <button class="btn btn-primary" onclick="editMessage('${message.id}')">✏️ Editar</button>
+                    <button class="btn btn-success" onclick="approveMessage('${message.id}')">✅ Aprovar</button>
+                    <button class="btn btn-danger" onclick="deleteMessage('${message.id}')">🗑️ Excluir</button>
                 </div>
             `;
-
-            // Adicionar hover effect
-            messageDiv.onmouseenter = () => {
-                messageDiv.style.transform = 'translateY(-2px)';
-                messageDiv.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
-            };
-            messageDiv.onmouseleave = () => {
-                messageDiv.style.transform = 'translateY(0)';
-                messageDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-            };
 
             container.insertBefore(messageDiv, container.firstChild);
 
@@ -657,7 +1045,7 @@
             }
         }
 
-        // Função para editar mensagem
+        // Editar mensagem
         function editMessage(messageId) {
             const textDiv = document.getElementById(`text-${messageId}`);
             const textarea = document.getElementById(`edit-${messageId}`);
@@ -669,23 +1057,23 @@
             textarea.focus();
         }
 
-        // Função para salvar edição
+        // Salvar edição de mensagem
         function saveEdit(messageId) {
             const textDiv = document.getElementById(`text-${messageId}`);
             const textarea = document.getElementById(`edit-${messageId}`);
             const actions = document.getElementById(`actions-${messageId}`);
 
             const newText = textarea.value.trim();
-            textDiv.innerHTML = newText || '<em style="color: #999;">Sem texto</em>';
+            textDiv.innerHTML = newText || '<em style="color: var(--text-muted);">Sem texto</em>';
 
             textDiv.style.display = 'block';
             textarea.style.display = 'none';
             actions.style.display = 'none';
 
-            addLog('Mensagem editada com sucesso', 'success');
+            addLog('✏️ Mensagem editada com sucesso', 'success');
         }
 
-        // Função para cancelar edição
+        // Cancelar edição
         function cancelEdit(messageId) {
             const textDiv = document.getElementById(`text-${messageId}`);
             const textarea = document.getElementById(`edit-${messageId}`);
@@ -696,58 +1084,76 @@
             actions.style.display = 'none';
         }
 
-        // Função para aprovar mensagem
+        // Deletar mensagem (Rejeitar)
+        async function deleteMessage(messageId) {
+            if (!confirm('Deseja realmente rejeitar esta mensagem?')) {
+                return;
+            }
+
+            const messageDiv = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageDiv) {
+                // Marcar como processada para não reaparecer
+                markMessageAsProcessed(messageId);
+
+                // Remover com animação
+                messageDiv.style.transition = 'all 0.3s ease';
+                messageDiv.style.opacity = '0';
+                messageDiv.style.transform = 'translateX(-20px)';
+
+                setTimeout(() => {
+                    messageDiv.remove();
+                    addLog('🗑️ Mensagem rejeitada', 'info');
+
+                    // Verificar se não há mais mensagens
+                    const container = document.getElementById('messagesContainer');
+                    if (container.querySelectorAll('.message-card').length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">✅</div>
+                                <p>Todas as mensagens foram processadas</p>
+                            </div>
+                        `;
+                    }
+                }, 300);
+            }
+        }
+
+        // Aprovar mensagem
         async function approveMessage(messageId) {
+            const messageDiv = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (!messageDiv) return;
+
+            // Desabilitar botões durante o processamento
+            const buttons = messageDiv.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+            });
+
+            const textarea = document.getElementById(`edit-${messageId}`);
+            const textDiv = document.getElementById(`text-${messageId}`);
+
+            // Obter o texto editado ou original
+            let messageText = textarea && textarea.value ? textarea.value : textDiv.textContent;
+
+            // Obter a imagem se existir
+            const imageElement = messageDiv.querySelector('.message-image img');
+            const imageUrl = imageElement ? imageElement.src : null;
+
+            // Obter o nome do grupo
+            const groupNameElement = messageDiv.querySelector('.message-group');
+            const groupName = groupNameElement ? groupNameElement.textContent.replace('📱 ', '') : '';
+
             try {
-                console.log('Aprovando mensagem:', messageId);
-                addLog('Processando aprovação...', 'info');
-
-                // ADICIONAR IMEDIATAMENTE à lista de processadas
-                processedMessages.add(messageId);
-                saveProcessedMessages(); // Salvar no localStorage
-
-                // Encontrar a mensagem
-                const response = await fetch('/whatsapp/messages?limit=500');
-                const data = await response.json();
-
-                const message = data.messages.find(m => m.id === messageId);
-                if (!message) {
-                    addLog('❌ Mensagem não encontrada', 'error');
-                    processedMessages.delete(messageId); // Remover se falhar
-                    return;
-                }
-
-                // Obter texto (pode ter sido editado)
-                // Usar textarea se foi editado, senão usar o texto original da mensagem
-                const textarea = document.getElementById(`edit-${messageId}`);
-                const textDiv = document.getElementById(`text-${messageId}`);
-
-                // Se o textarea tem conteúdo diferente do original, usar ele (preserva quebras)
-                // Caso contrário, usar o texto original da mensagem (que já tem as quebras)
-                let currentText = message.text;
-                if (textarea && textarea.value && textarea.value !== message.text) {
-                    currentText = textarea.value; // Texto editado
-                }
-
-                console.log('Dados da mensagem:', {
-                    text: currentText,
-                    groupName: message.groupName,
-                    imageUrl: message.imageUrl
-                });
-
-                // Preparar dados para agendamento
                 const scheduleData = {
-                    produto_url: '', // Vazio pois não temos URL
-                    mensagem_customizada: currentText,
+                    produto_url: '',
+                    mensagem_customizada: messageText,
                     plataforma: 'whatsapp',
-                    grupo_origem: message.groupName,
-                    imagem_url: message.imageUrl || null
+                    grupo_origem: groupName,
+                    imagem_url: imageUrl
                 };
 
-                console.log('Enviando para agendamento:', scheduleData);
-
-                // Enviar para o agendamento
-                const scheduleResponse = await fetch('/agendar', {
+                const response = await fetch('/agendar', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -755,188 +1161,66 @@
                     body: JSON.stringify(scheduleData)
                 });
 
-                console.log('Status da resposta:', scheduleResponse.status);
-
-                // Verificar se a resposta é ok (status 200-299)
-                if (scheduleResponse.ok) {
-                    const result = await scheduleResponse.json();
-
-                    // Mostrar informações sobre links substituídos
+                if (response.ok) {
+                    const result = await response.json();
                     let logMessage = '✅ Mensagem APROVADA e enviada para agendamento!';
                     if (result.links_substituidos > 0) {
-                        logMessage += ` (${result.links_substituidos} link(s) de afiliado substituído(s): ${result.plataformas.join(', ')})`;
+                        logMessage += ` (${result.links_substituidos} link(s) substituído(s))`;
                     }
                     if (result.tem_imagem) {
                         logMessage += ' 🖼️ Imagem incluída';
                     }
-
                     addLog(logMessage, 'success');
 
-                    // Remover o card da tela com animação
-                    const messageCard = document.querySelector(`[data-message-id="${messageId}"]`);
-                    if (messageCard) {
-                        // Animação de sucesso
-                        messageCard.style.transition = 'all 0.5s ease-out';
-                        messageCard.style.border = '2px solid #10b981';
-                        messageCard.style.background = '#f0fdf4';
-                        messageCard.style.transform = 'scale(1.05)';
+                    // Marcar como processada para não reaparecer
+                    markMessageAsProcessed(messageId);
 
-                        // Após 0.5s, deslizar para fora
-                        setTimeout(() => {
-                            messageCard.style.transform = 'translateX(100%)';
-                            messageCard.style.opacity = '0';
+                    // Remover com animação
+                    messageDiv.style.transition = 'all 0.3s ease';
+                    messageDiv.style.opacity = '0';
+                    messageDiv.style.transform = 'translateY(-20px)';
 
-                            // Remover do DOM após a animação
-                            setTimeout(() => {
-                                messageCard.remove();
-                            }, 500);
-                        }, 500);
-                    }
+                    setTimeout(() => {
+                        messageDiv.remove();
+
+                        // Verificar se não há mais mensagens
+                        const container = document.getElementById('messagesContainer');
+                        if (container.querySelectorAll('.message-card').length === 0) {
+                            container.innerHTML = `
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">✅</div>
+                                    <p>Todas as mensagens foram processadas</p>
+                                </div>
+                            `;
+                        }
+                    }, 300);
                 } else {
-                    // Tentar ler a resposta de erro
-                    let errorMsg = 'Erro desconhecido';
-                    try {
-                        const result = await scheduleResponse.json();
-                        errorMsg = result.error || result.message || errorMsg;
-                    } catch (e) {
-                        const textError = await scheduleResponse.text();
-                        errorMsg = textError || `Status ${scheduleResponse.status}`;
-                    }
+                    const error = await response.json();
+                    addLog(`❌ Erro ao aprovar: ${error.error}`, 'error');
 
-                    console.error('Erro na resposta:', errorMsg);
-                    addLog('❌ Erro ao aprovar: ' + errorMsg, 'error');
-                    processedMessages.delete(messageId); // Remover se falhar
+                    // Reabilitar botões em caso de erro
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    });
                 }
             } catch (error) {
-                console.error('Erro ao aprovar:', error);
+                console.error('Erro ao aprovar mensagem:', error);
                 addLog(`❌ Erro ao aprovar mensagem: ${error.message}`, 'error');
-                processedMessages.delete(messageId); // Remover se falhar
+
+                // Reabilitar botões em caso de erro
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                });
             }
         }
 
-        // Função para rejeitar mensagem
-        function rejectMessage(messageId) {
-            const messageCard = document.querySelector(`[data-message-id="${messageId}"]`);
-            if (messageCard) {
-                // ADICIONAR IMEDIATAMENTE à lista de processadas para evitar recarregamento
-                processedMessages.add(messageId);
-                saveProcessedMessages(); // Salvar no localStorage
-
-                // Marcar visualmente como rejeitada
-                messageCard.style.border = '2px solid #ef4444';
-                messageCard.style.background = '#fef2f2';
-                messageCard.style.opacity = '0.6';
-
-                // Atualizar botões
-                const buttons = document.getElementById(`buttons-${messageId}`);
-                buttons.innerHTML = `
-                    <span style="padding: 4px 12px; background: #ef4444; color: white; border-radius: 4px; font-size: 0.75em; font-weight: 600;">
-                        ✗ REJEITADA
-                    </span>
-                    <button onclick="undoReject('${messageId}')"
-                            style="padding: 4px 10px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em;">
-                        ↶ Desfazer
-                    </button>
-                `;
-
-                addLog('❌ Mensagem REJEITADA', 'info');
-
-                // Remover após 3 segundos
-                setTimeout(() => {
-                    messageCard.style.transition = 'all 0.5s';
-                    messageCard.style.opacity = '0';
-                    messageCard.style.transform = 'translateX(-30px)';
-                    setTimeout(() => messageCard.remove(), 500);
-                }, 3000);
-            }
-        }
-
-        // Função para desfazer rejeição
-        function undoReject(messageId) {
-            const messageCard = document.querySelector(`[data-message-id="${messageId}"]`);
-            if (messageCard) {
-                // Remover da lista de processadas
-                processedMessages.delete(messageId);
-                saveProcessedMessages(); // Atualizar localStorage
-
-                messageCard.style.border = 'none';
-                messageCard.style.background = 'white';
-                messageCard.style.opacity = '1';
-
-                // Restaurar botões originais
-                const buttons = document.getElementById(`buttons-${messageId}`);
-                buttons.innerHTML = `
-                    <button onclick="approveMessage('${messageId}')" title="Aprovar"
-                            class="approve-btn"
-                            style="padding: 4px 12px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em; font-weight: 600;">
-                        ✓ Aprovar
-                    </button>
-                    <button onclick="rejectMessage('${messageId}')" title="Rejeitar"
-                            class="reject-btn"
-                            style="padding: 4px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75em; font-weight: 600;">
-                        ✗ Rejeitar
-                    </button>
-                `;
-
-                addLog('↶ Rejeição desfeita', 'info');
-            }
-        }
-
-
-        // Função para carregar mensagens
-        async function loadMessages() {
-            try {
-                const response = await fetch('/whatsapp/messages?limit=100');
-                const data = await response.json();
-
-                if (data.success && data.messages.length > 0) {
-                    const container = document.getElementById('messagesContainer');
-                    container.innerHTML = ''; // Limpar
-
-                    // Filtrar mensagens já processadas (aprovadas ou rejeitadas)
-                    const unprocessedMessages = data.messages.filter(msg => !processedMessages.has(msg.id));
-
-                    if (unprocessedMessages.length > 0) {
-                        unprocessedMessages.forEach(msg => {
-                            addClonedMessage(msg);
-                        });
-
-                        addLog(`${unprocessedMessages.length} mensagens carregadas (${data.messages.length - unprocessedMessages.length} já processadas)`, 'success');
-                    } else {
-                        // Se todas as mensagens foram processadas, mostrar empty state
-                        container.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-state-icon">✅</div>
-                                <p>Todas as mensagens foram processadas!</p>
-                                <small style="color: #999; margin-top: 10px; display: block;">
-                                    Novas mensagens aparecerão aqui automaticamente
-                                </small>
-                            </div>
-                        `;
-                        addLog('Todas as mensagens foram aprovadas ou rejeitadas', 'info');
-                    }
-                } else {
-                    console.log('Nenhuma mensagem capturada ainda');
-                }
-            } catch (error) {
-                console.error('Erro ao carregar mensagens:', error);
-                addLog(`Erro ao carregar mensagens: ${error.message}`, 'error');
-            }
-        }
-
-        // Atualizar mensagens periodicamente se a aba estiver aberta
-        setInterval(() => {
-            const messagesTab = document.getElementById('tab-messages');
-            if (messagesTab && messagesTab.style.display !== 'none') {
-                loadMessages();
-            }
-        }, 5000); // Atualizar a cada 5 segundos
-
-        // Adicionar log de atividade
+        // Adicionar log
         function addLog(message, type = 'info') {
-            const logContainer = document.getElementById('activityLog');
+            const logContainer = document.getElementById('logsContainer');
 
-            // Remover empty state se existir
+            // Remover empty state
             const emptyState = logContainer.querySelector('.empty-state');
             if (emptyState) {
                 emptyState.remove();
@@ -969,37 +1253,23 @@
                 isConnected = data.connected;
                 document.getElementById('monitoredGroupsCount').textContent = data.monitoredGroups || 0;
 
-                // SEMPRE mostrar botão de logout se já teve uma sessão (exceto no estado inicial puro)
-                const temSessao = data.connected || data.state === 'qr' || data.state === 'disconnected' || data.hasSession;
-                document.getElementById('logoutBtn').style.display = temSessao ? 'block' : 'none';
-
                 if (data.connected) {
                     updateConnectionUI('connected', 'Conectado', 'WhatsApp conectado com sucesso');
                     document.getElementById('loadGroupsBtn').disabled = false;
+                    document.getElementById('logoutBtn').style.display = 'block';
                     document.getElementById('qrSection').style.display = 'none';
                 } else if (data.state === 'qr') {
                     updateConnectionUI('qr', 'Aguardando QR Code', 'Escaneie o código abaixo');
-                    document.getElementById('loadGroupsBtn').disabled = true;
                     await loadQRCode();
                 } else {
                     updateConnectionUI('disconnected', 'Desconectado', 'Aguardando conexão...');
                     document.getElementById('loadGroupsBtn').disabled = true;
-                    document.getElementById('qrSection').style.display = 'none';
+                    document.getElementById('logoutBtn').style.display = 'none';
                 }
             } catch (error) {
                 console.error('Erro ao atualizar status:', error);
-                updateConnectionUI('disconnected', 'Erro de conexão', error.message);
+                updateConnectionUI('disconnected', 'Erro de Conexão', error.message);
             }
-        }
-
-        function updateConnectionUI(state, title, message) {
-            const statusDiv = document.getElementById('connectionStatus');
-            const dot = statusDiv.querySelector('.status-dot');
-
-            dot.className = `status-dot ${state}`;
-
-            statusDiv.querySelector('strong').textContent = title;
-            statusDiv.querySelectorAll('div')[1].querySelector('div:last-child').textContent = message;
         }
 
         // Carregar QR Code
@@ -1008,29 +1278,25 @@
                 const response = await fetch('/whatsapp/qr');
                 const data = await response.json();
 
-                console.log('QR Code response:', data);
+                const qrSection = document.getElementById('qrSection');
+                const qrImg = document.getElementById('qrCode');
+                const qrLoading = document.getElementById('qrLoading');
 
                 if (data.qr) {
-                    // Restaurar HTML correto do QR Section
-                    document.getElementById('qrSection').innerHTML = `
-                        <div class="qr-container">
-                            <h3>Escaneie o QR Code</h3>
-                            <p style="color: #666; margin: 10px 0;">Abra o WhatsApp no celular e escaneie o código</p>
-                            <img id="qrCode" class="qr-code" alt="QR Code">
-                        </div>
-                    `;
-                    document.getElementById('qrCode').src = data.qr;
-                    document.getElementById('qrSection').style.display = 'block';
-                    addLog('📱 QR Code gerado! Escaneie com seu WhatsApp.', 'warning');
+                    qrSection.style.display = 'block';
+                    qrImg.src = data.qr;
+                    qrImg.style.display = 'block';
+                    qrLoading.style.display = 'none';
+                    addLog('📱 QR Code gerado. Escaneie com seu WhatsApp.', 'warning');
                 } else if (data.hint) {
-                    document.getElementById('qrSection').style.display = 'none';
+                    qrSection.style.display = 'none';
                     addLog(data.hint, 'info');
                 } else {
-                    document.getElementById('qrSection').style.display = 'none';
+                    qrSection.style.display = 'none';
                 }
             } catch (error) {
                 console.error('Erro ao carregar QR Code:', error);
-                addLog(`Erro ao carregar QR Code: ${error.message}`, 'error');
+                addLog(`❌ Erro ao carregar QR Code: ${error.message}`, 'error');
             }
         }
 
@@ -1071,60 +1337,45 @@
                             <span class="group-badge ${group.monitored ? 'badge-monitored' : 'badge-not-monitored'}">
                                 ${group.monitored ? '🔔 Monitorando' : '🔕 Não monitorado'}
                             </span>
-                            <button class="btn btn-small ${group.monitored ? 'btn-danger' : 'btn-success'}"
-                                    onclick="toggleMonitor('${group.id}', ${group.monitored})">
-                                ${group.monitored ? 'Parar' : 'Monitorar'}
-                            </button>
+                            ${!group.monitored ? `<button class="btn btn-primary" onclick="monitorGroup('${group.id}')">Adicionar</button>` : ''}
                         </div>
                     </div>
                 `).join('');
 
-                addLog(`${data.groups.length} grupos carregados`, 'success');
+                addLog(`📋 ${data.groups.length} grupos carregados`, 'success');
             } catch (error) {
+                console.error('Erro ao carregar grupos:', error);
                 alertDiv.innerHTML = `<div class="alert alert-error">Erro ao carregar grupos: ${error.message}</div>`;
                 listDiv.innerHTML = '';
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Atualizar Grupos';
+                btn.textContent = '📋 Carregar Grupos';
             }
         }
 
-        // Toggle monitoramento de grupo
-        async function toggleMonitor(groupId, isCurrentlyMonitored) {
+        // Monitorar grupo
+        async function monitorGroup(groupId) {
             try {
-                if (isCurrentlyMonitored) {
-                    // Parar monitoramento
-                    const response = await fetch(`/whatsapp/groups/monitor/${encodeURIComponent(groupId)}`, {
-                        method: 'DELETE'
-                    });
-                    const data = await response.json();
-
-                    if (data.success) {
-                        addLog('Grupo removido do monitoramento', 'info');
-                        await loadGroups();
-                        await updateStatus();
-                    } else {
-                        addLog(`Erro: ${data.error}`, 'error');
-                    }
-                } else {
-                    // Iniciar monitoramento
-                    const response = await fetch('/whatsapp/groups/monitor', {
+                if (confirm('Adicionar este grupo ao monitoramento?')) {
+                    const response = await fetch('/whatsapp/monitor', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
                         body: JSON.stringify({ groupId })
                     });
                     const data = await response.json();
 
                     if (data.success) {
-                        addLog('Grupo adicionado ao monitoramento', 'success');
+                        addLog('✅ Grupo adicionado ao monitoramento', 'success');
                         await loadGroups();
                         await updateStatus();
                     } else {
-                        addLog(`Erro: ${data.error}`, 'error');
+                        addLog(`❌ Erro: ${data.error}`, 'error');
                     }
                 }
             } catch (error) {
-                addLog(`Erro: ${error.message}`, 'error');
+                addLog(`❌ Erro: ${error.message}`, 'error');
             }
         }
 
@@ -1135,8 +1386,6 @@
             }
 
             try {
-                addLog('Desconectando do WhatsApp...', 'info');
-
                 const response = await fetch('/whatsapp/logout', {
                     method: 'POST'
                 });
@@ -1144,46 +1393,182 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    addLog('✅ ' + data.message, 'success');
-
-                    // Mostrar mensagem de que o QR Code será gerado
-                    updateConnectionUI('qr', 'Aguardando QR Code', 'Gerando novo QR Code...');
-                    document.getElementById('qrSection').style.display = 'block';
-                    document.getElementById('qrSection').innerHTML = `
-                        <div class="qr-container">
-                            <h3>Gerando QR Code...</h3>
-                            <div class="loading">
-                                <div class="spinner"></div>
-                                <p>Aguarde alguns segundos...</p>
-                            </div>
-                        </div>
-                    `;
-
-                    // Aguardar 3 segundos e então tentar carregar o QR Code
-                    setTimeout(async () => {
-                        addLog('Aguardando novo QR Code...', 'info');
-                        await updateStatus();
-
-                        // Verificar periodicamente se o QR Code está disponível
-                        let attempts = 0;
-                        const checkQR = setInterval(async () => {
-                            attempts++;
-                            await loadQRCode();
-
-                            // Se já carregou o QR ou já tentou 10 vezes (30 segundos), parar
-                            if (document.getElementById('qrCode')?.src || attempts >= 10) {
-                                clearInterval(checkQR);
-                                if (attempts >= 10 && !document.getElementById('qrCode')?.src) {
-                                    addLog('⚠️ QR Code demorando para gerar. Tente atualizar a página.', 'warning');
-                                }
-                            }
-                        }, 3000);
-                    }, 3000);
+                    addLog('🚪 Desconectado do WhatsApp', 'info');
+                    await updateStatus();
                 } else {
-                    addLog(`Erro: ${data.error}`, 'error');
+                    addLog(`❌ Erro: ${data.error}`, 'error');
                 }
             } catch (error) {
-                addLog(`Erro: ${error.message}`, 'error');
+                addLog(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Funções do Agendamento
+
+        // Abrir modal de agendamento
+        function openAgendamentoForm(produtoId) {
+            const modal = document.getElementById('agendamentoModal');
+            modal.style.display = 'flex';
+            modal.dataset.produtoId = produtoId;
+
+            // Preencher data/hora padrão (agora + 1 hora)
+            const agora = new Date();
+            agora.setHours(agora.getHours() + 1);
+            const dataFormatada = agora.toISOString().slice(0, 16);
+            document.getElementById('dataHoraAgendamento').value = dataFormatada;
+        }
+
+        // Fechar modal de agendamento
+        function closeAgendamentoModal() {
+            const modal = document.getElementById('agendamentoModal');
+            modal.style.display = 'none';
+            document.getElementById('agendamentoForm').reset();
+        }
+
+        // Salvar agendamento
+        async function salvarAgendamento(event) {
+            event.preventDefault();
+
+            const modal = document.getElementById('agendamentoModal');
+            const produtoId = modal.dataset.produtoId;
+            const dataHora = document.getElementById('dataHoraAgendamento').value;
+            const mensagemCustomizada = document.getElementById('mensagemCustomizadaAgendamento').value;
+
+            try {
+                const response = await fetch(`/produtos/${produtoId}/agendar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        data_hora: dataHora,
+                        mensagem_customizada: mensagemCustomizada
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    addLog('✅ Agendamento salvo com sucesso!', 'success');
+                    closeAgendamentoModal();
+                    loadClonedScheduled();
+                } else {
+                    addLog(`❌ Erro ao salvar agendamento: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar agendamento:', error);
+                addLog(`❌ Erro ao salvar agendamento: ${error.message}`, 'error');
+            }
+        }
+
+        // Abrir modal de edição
+        async function openEditarForm(produtoId) {
+            const modal = document.getElementById('editarModal');
+            modal.style.display = 'flex';
+            modal.dataset.produtoId = produtoId;
+
+            try {
+                const response = await fetch(`/produtos/${produtoId}`);
+                const produto = await response.json();
+
+                document.getElementById('tituloEdicao').value = produto.titulo || '';
+                document.getElementById('precoAtualEdicao').value = produto.preco_atual || '';
+                document.getElementById('mensagemCustomizadaEdicao').value = produto.mensagem_customizada || '';
+            } catch (error) {
+                console.error('Erro ao carregar produto:', error);
+                addLog(`❌ Erro ao carregar produto: ${error.message}`, 'error');
+                closeEditarModal();
+            }
+        }
+
+        // Fechar modal de edição
+        function closeEditarModal() {
+            const modal = document.getElementById('editarModal');
+            modal.style.display = 'none';
+            document.getElementById('editarForm').reset();
+        }
+
+        // Salvar edição
+        async function salvarEdicao(event) {
+            event.preventDefault();
+
+            const modal = document.getElementById('editarModal');
+            const produtoId = modal.dataset.produtoId;
+            const titulo = document.getElementById('tituloEdicao').value;
+            const precoAtual = document.getElementById('precoAtualEdicao').value;
+            const mensagemCustomizada = document.getElementById('mensagemCustomizadaEdicao').value;
+
+            try {
+                const response = await fetch(`/produtos/${produtoId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        titulo: titulo,
+                        preco_atual: parseFloat(precoAtual),
+                        mensagem_customizada: mensagemCustomizada
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    addLog('✅ Produto atualizado com sucesso!', 'success');
+                    closeEditarModal();
+                    loadClonedScheduled();
+                } else {
+                    addLog(`❌ Erro ao atualizar produto: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar produto:', error);
+                addLog(`❌ Erro ao atualizar produto: ${error.message}`, 'error');
+            }
+        }
+
+        // Deletar agendamento
+        async function deletarAgendamento(produtoId, button) {
+            if (!confirm('Deseja realmente excluir este agendamento?')) {
+                return;
+            }
+
+            const originalText = button.textContent;
+            button.textContent = 'Excluindo...';
+            button.disabled = true;
+
+            try {
+                const response = await fetch(`/produtos/${produtoId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    addLog('✅ Agendamento excluído com sucesso!', 'success');
+                    loadClonedScheduled();
+                } else {
+                    addLog(`❌ Erro ao excluir agendamento: ${result.error}`, 'error');
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            } catch (error) {
+                console.error('Erro ao excluir agendamento:', error);
+                addLog(`❌ Erro ao excluir agendamento: ${error.message}`, 'error');
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        }
+
+        // Fechar modais ao clicar fora
+        window.onclick = function(event) {
+            const agendamentoModal = document.getElementById('agendamentoModal');
+            const editarModal = document.getElementById('editarModal');
+
+            if (event.target === agendamentoModal) {
+                closeAgendamentoModal();
+            }
+            if (event.target === editarModal) {
+                closeEditarModal();
             }
         }
 
@@ -1193,11 +1578,28 @@
 
         // Inicializar
         async function init() {
-            addLog('Sistema iniciado', 'info');
+            // Carregar mensagens processadas do localStorage
+            loadProcessedMessages();
+
+            addLog('🚀 Sistema iniciado', 'info');
             await updateStatus();
 
             // Atualizar status a cada 3 segundos
             updateInterval = setInterval(updateStatus, 3000);
+
+            // Carregar mensagens inicialmente se estiver na aba de mensagens
+            const messagesTab = document.getElementById('tab-messages');
+            if (messagesTab && messagesTab.classList.contains('active')) {
+                loadClonedMessages();
+            }
+
+            // Auto-refresh de mensagens a cada 10 segundos se estiver na aba de mensagens
+            setInterval(() => {
+                const messagesTab = document.getElementById('tab-messages');
+                if (messagesTab && messagesTab.classList.contains('active')) {
+                    loadClonedMessages();
+                }
+            }, 10000);
         }
 
         // Limpar interval ao fechar página
@@ -1209,6 +1611,30 @@
 
         // Iniciar quando a página carregar
         window.addEventListener('load', init);
+
+        // Receber mensagens do WhatsApp via postMessage
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'whatsapp_message') {
+                addClonedMessage(event.data.message);
+            }
+        });
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+
+        // Aplicar tema inicial
+        if (currentTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeToggle.textContent = '🌞';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            themeToggle.textContent = isLight ? '🌞' : '🌙';
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        });
     </script>
 </body>
 </html>

@@ -186,9 +186,63 @@
                             "
                         />
                         <small style="color: #666; margin-top: 5px; display: block;">
-                            Cole aqui o novo link da imagem do produto
+                            Cole aqui o link da imagem ou use a área abaixo
                         </small>
-                        
+
+                        <!-- 🔥 ÁREA PARA COLAR IMAGEM DO CLIPBOARD -->
+                        <div
+                            id="imagePasteZone"
+                            style="
+                                margin-top: 15px;
+                                border: 3px dashed #667eea;
+                                border-radius: 12px;
+                                padding: 30px;
+                                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                                text-align: center;
+                                cursor: pointer;
+                                transition: all 0.3s ease;
+                                position: relative;
+                                min-height: 120px;
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                            "
+                            onclick="focusOnPasteArea()"
+                        >
+                            <div style="font-size: 48px; margin-bottom: 10px;">📋</div>
+                            <div style="font-weight: 600; color: #667eea; font-size: 16px; margin-bottom: 5px;">
+                                Cole uma imagem aqui
+                            </div>
+                            <div style="color: #666; font-size: 13px;">
+                                Copie uma imagem (Ctrl+C) e clique aqui para colar (Ctrl+V)
+                            </div>
+                            <input
+                                type="file"
+                                id="imageFileInput"
+                                accept="image/*"
+                                style="display: none;"
+                                onchange="handleFileSelect(event)"
+                            />
+                            <button
+                                type="button"
+                                onclick="event.stopPropagation(); document.getElementById('imageFileInput').click();"
+                                style="
+                                    margin-top: 15px;
+                                    padding: 8px 16px;
+                                    background: #667eea;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 6px;
+                                    cursor: pointer;
+                                    font-size: 13px;
+                                    font-weight: 500;
+                                "
+                            >
+                                📁 Ou escolher arquivo
+                            </button>
+                        </div>
+
                         <div id="imagePreviewContainer" style="margin-top: 15px; text-align: center;">
                             <div id="imagePreviewLabel" style="font-weight: 500; margin-bottom: 8px; color: #333;">
                                 Preview da Imagem:

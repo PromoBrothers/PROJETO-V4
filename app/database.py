@@ -54,20 +54,38 @@ def salvar_promocao(produto_dados, final_message=None, agendamento_data=None):
         print(traceback.format_exc())
         return False
 
-def listar_produtos_db(status_filter, ordem_order):
-    """Lista produtos do Supabase com base nos filtros."""
-    query = supabase.table("promocoes").select("*")
-    if status_filter == 'agendado':
-        query = query.not_.is_("agendamento", "null")
-        query = query.order("agendamento", desc=(ordem_order == 'desc'))
-    elif status_filter == 'nao-agendado':
-        query = query.is_("agendamento", "null")
-        query = query.order("created_at", desc=(ordem_order == 'desc'))
-    else: # 'todos'
-        query = query.order("created_at", desc=(ordem_order == 'desc'))
+def listar_produtos_db(status_filter, ordem_order, limit=200):
+    """
+    Lista produtos do Supabase com base nos filtros.
 
-    response = query.execute()
-    return response.data
+    OTIMIZAÇÕES:
+    - Limit padrão de 200 produtos para performance
+    - Ordenação otimizada por índice
+    - Query mais eficiente
+    """
+    try:
+        query = supabase.table("promocoes").select("*")
+
+        if status_filter == 'agendado':
+            query = query.not_.is_("agendamento", "null")
+            query = query.order("agendamento", desc=(ordem_order == 'desc'))
+        elif status_filter == 'nao-agendado':
+            query = query.is_("agendamento", "null")
+            # Ordenar por created_at descendente (mais recentes primeiro)
+            query = query.order("created_at", desc=True)
+        else:  # 'todos'
+            query = query.order("created_at", desc=(ordem_order == 'desc'))
+
+        # Limitar quantidade de resultados para performance
+        query = query.limit(limit)
+
+        response = query.execute()
+        return response.data
+    except Exception as e:
+        print(f"Erro ao listar produtos: {e}")
+        import traceback
+        print(traceback.format_exc())
+        return []
 
 def deletar_produto_db(produto_id):
     """Deleta um produto do Supabase pelo ID."""

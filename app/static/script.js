@@ -604,44 +604,83 @@ function createAgendamentoCard(produto) {
           </div>
         </div>
         <p>${dataInfo}</p>
-        <div class="agendamento-acoes">
-            <button class="btn" onclick="openAgendamentoForm('${produto.id}')">${produto.agendamento ? 'Reagendar' : 'Agendar'}</button>
-            <button class="btn" onclick="openEditarForm('${produto.id}')" style="background-color: #28a745;">Editar</button>
-            <button class="btn-excluir" onclick="deletarAgendamento('${produto.id}', this)">Excluir</button>
+        <div class="product-actions">
+            <button class="btn btn-reagendar" onclick="openAgendamentoForm('${produto.id}')">${produto.agendamento ? 'Reagendar' : 'Agendar'}</button>
+            <button class="btn btn-editar" onclick="openEditarForm('${produto.id}')">Editar</button>
+            <button class="btn btn-excluir" onclick="deletarAgendamento('${produto.id}', this)">Excluir</button>
         </div>
       `;
     return card;
 }
 
-async function loadAgendamentos() {
+// Cache para otimização de carregamento
+let lastLoadTime = 0;
+let lastLoadedData = null;
+const CACHE_DURATION = 5000; // 5 segundos de cache
+
+async function loadAgendamentos(forceRefresh = false) {
   const agendamentoList = document.getElementById("agendamento-list");
   if (!agendamentoList) return;
 
   const status = document.getElementById("filtroStatus").value;
   const ordem = document.getElementById("filtroOrdem").value;
 
-  agendamentoList.innerHTML = "<p>Carregando produtos...</p>";
+  // 🔥 OTIMIZAÇÃO: Usar cache se não forçar refresh e cache ainda válido
+  const now = Date.now();
+  if (!forceRefresh && lastLoadedData && (now - lastLoadTime) < CACHE_DURATION) {
+    console.log('✅ Usando cache de produtos (mais rápido)');
+    renderProducts(lastLoadedData.produtos);
+    return;
+  }
+
+  // Mostrar indicador de carregamento suave
+  if (!agendamentoList.querySelector('.loading-indicator')) {
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading-indicator';
+    loadingDiv.innerHTML = '<p style="color: #667eea; text-align: center;">⏳ Carregando produtos...</p>';
+    agendamentoList.innerHTML = '';
+    agendamentoList.appendChild(loadingDiv);
+  }
 
   try {
+    const startTime = performance.now();
     const response = await fetch(`/produtos?status=${status}&ordem=${ordem}`);
     const data = await response.json();
+    const loadTime = (performance.now() - startTime).toFixed(0);
+
+    console.log(`📊 Produtos carregados em ${loadTime}ms`);
 
     if (data.success) {
-      if (data.produtos.length > 0) {
-        agendamentoList.innerHTML = "";
-        data.produtos.forEach((produto) => {
-          const card = createAgendamentoCard(produto);
-          agendamentoList.appendChild(card);
-        });
-      } else {
-        agendamentoList.innerHTML = "<p>Nenhum produto encontrado com os filtros selecionados.</p>";
-      }
+      // Atualizar cache
+      lastLoadedData = data;
+      lastLoadTime = Date.now();
+
+      renderProducts(data.produtos);
     } else {
       throw new Error(data.error);
     }
   } catch (error) {
     console.error("Erro ao carregar agendamentos:", error);
     agendamentoList.innerHTML = `<p style="color: #e74c3c;">Erro ao carregar produtos: ${error.message}</p>`;
+  }
+}
+
+// Função auxiliar para renderizar produtos
+function renderProducts(produtos) {
+  const agendamentoList = document.getElementById("agendamento-list");
+  if (!agendamentoList) return;
+
+  if (produtos.length > 0) {
+    agendamentoList.innerHTML = "";
+    // Usar DocumentFragment para performance
+    const fragment = document.createDocumentFragment();
+    produtos.forEach((produto) => {
+      const card = createAgendamentoCard(produto);
+      fragment.appendChild(card);
+    });
+    agendamentoList.appendChild(fragment);
+  } else {
+    agendamentoList.innerHTML = "<p>Nenhum produto encontrado com os filtros selecionados.</p>";
   }
 }
 
@@ -702,7 +741,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const inputContents = document.querySelectorAll('.input-content');
   const addProductBtn = document.getElementById('addProductBtn');
   const productUrlInput = document.getElementById('productUrl');
-  const affiliateUrlInput = document.getElementById('affiliateUrl');
   const queueList = document.getElementById('queueList');
   const queueCount = document.querySelector('.queue-count');
   const processCount = document.getElementById('processCount');
@@ -738,10 +776,9 @@ document.addEventListener("DOMContentLoaded", function () {
   if(addProductBtn) {
     addProductBtn.addEventListener('click', () => {
         const productUrl = productUrlInput.value.trim();
-        const affiliateUrl = affiliateUrlInput.value.trim();
 
         if (!productUrl) {
-        showAlert('Por favor, insira um link de produto', 'error');
+        showAlert('Por favor, insira um link de produto ou link de afiliado', 'error');
         return;
         }
 
@@ -759,14 +796,12 @@ document.addEventListener("DOMContentLoaded", function () {
         productQueue.push({
         id: Date.now(),
         productUrl: productUrl,
-        affiliateUrl: affiliateUrl || '',
         addedAt: new Date().toLocaleTimeString()
         });
 
         updateQueueDisplay();
-        
+
         productUrlInput.value = '';
-        affiliateUrlInput.value = '';
         productUrlInput.focus();
 
         showAlert('Produto adicionado à fila!', 'success');
@@ -785,9 +820,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let imported = 0;
         lines.forEach(line => {
-        const parts = line.split(',');
-        const productUrl = parts[0] ? parts[0].trim() : '';
-        const affiliateUrl = parts[1] ? parts[1].trim() : '';
+        const productUrl = line.trim();
 
         if (productUrl && (productUrl.includes('mercadolivre.com') || productUrl.includes('mercadolibre.com'))) {
             const exists = productQueue.some(item => item.productUrl === productUrl);
@@ -795,7 +828,6 @@ document.addEventListener("DOMContentLoaded", function () {
             productQueue.push({
                 id: Date.now() + imported,
                 productUrl: productUrl,
-                affiliateUrl: affiliateUrl,
                 addedAt: new Date().toLocaleTimeString()
             });
             imported++;
@@ -804,7 +836,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         updateQueueDisplay();
-        
+
         if (imported > 0) {
         showAlert(`${imported} produtos importados para a fila!`, 'success');
         document.querySelector('[data-method="visual"]').click();
@@ -850,7 +882,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ${item.productUrl.length > 60 ? item.productUrl.substring(0, 60) + '...' : item.productUrl}
           </div>
           <div class="queue-item-subtitle">
-            ${item.affiliateUrl ? `Afiliado: ${item.affiliateUrl.length > 40 ? item.affiliateUrl.substring(0, 40) + '...' : item.affiliateUrl}` : 'Sem link de afiliado'} • ${item.addedAt}
+            Adicionado às ${item.addedAt}
           </div>
         </div>
         <div class="queue-item-actions">
@@ -1016,11 +1048,11 @@ document.addEventListener("DOMContentLoaded", function () {
         e.preventDefault();
 
         let itemsToProcess = [];
-        
+
         if (productQueue.length > 0) {
         itemsToProcess = productQueue.map(item => ({
             productUrl: item.productUrl,
-            affiliateLink: item.affiliateUrl
+            affiliateLink: ''
         }));
         } else {
         const urlsText = document.getElementById("webhookUrls").value.trim();
@@ -1032,10 +1064,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         itemsToProcess = lines.map(line => {
-            const parts = line.split(",");
             return {
-            productUrl: parts[0] ? parts[0].trim() : "",
-            affiliateLink: parts[1] ? parts[1].trim() : ""
+            productUrl: line.trim(),
+            affiliateLink: ''
             };
         });
         }
@@ -1286,8 +1317,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const filtroOrdem = document.getElementById("filtroOrdem");
 
   if (filtroStatus && filtroOrdem) {
-    filtroStatus.addEventListener("change", loadAgendamentos);
-    filtroOrdem.addEventListener("change", loadAgendamentos);
+    // Forçar refresh ao mudar filtros (invalidar cache)
+    filtroStatus.addEventListener("change", () => {
+      lastLoadTime = 0; // Invalidar cache
+      loadAgendamentos(true);
+    });
+    filtroOrdem.addEventListener("change", () => {
+      lastLoadTime = 0; // Invalidar cache
+      loadAgendamentos(true);
+    });
   }
 
   if (editarForm) {
@@ -1621,4 +1659,305 @@ document.addEventListener("DOMContentLoaded", function () {
   window.proximaPagina = function() {
     showAlert('Próxima página - funcionalidade em desenvolvimento', 'info');
   };
+
+  // 🔥 LISTENER PARA ATUALIZAÇÃO AUTOMÁTICA QUANDO PRODUTO FOR APROVADO
+  window.addEventListener('message', (event) => {
+    // Verificar se é uma mensagem de aprovação de produto
+    if (event.data && event.data.type === 'PRODUTO_APROVADO') {
+      console.log('✅ Produto aprovado detectado! Atualizando lista...', event.data);
+
+      // Se estiver na aba de agendamento, atualizar imediatamente
+      const agendamentoTab = document.getElementById('agendamento');
+      if (agendamentoTab && agendamentoTab.style.display !== 'none') {
+        console.log('🔄 Atualizando lista de agendamentos...');
+        loadAgendamentos(true); // Forçar refresh do servidor
+        showAlert('✅ Novo produto aprovado adicionado à lista!', 'success');
+      } else {
+        console.log('ℹ️ Aguardando usuário abrir aba de agendamento');
+        // Marcar que há atualização pendente
+        window.pendingProductUpdate = true;
+      }
+    }
+  });
+
+  // 🔥 AUTO-REFRESH QUANDO ABRIR A ABA DE AGENDAMENTO
+  const originalOpenTab = window.openTab;
+  window.openTab = function(evt, tabName) {
+    originalOpenTab(evt, tabName);
+
+    // Se abriu a aba de agendamento e há atualização pendente
+    if (tabName === 'agendamento') {
+      if (window.pendingProductUpdate) {
+        console.log('🔄 Atualizando lista com produtos pendentes...');
+        loadAgendamentos(true); // Forçar refresh do servidor
+        showAlert('✅ Lista atualizada com novos produtos!', 'success');
+        window.pendingProductUpdate = false;
+      }
+    }
+  };
+
+  // 🔥 AUTO-REFRESH PERIÓDICO NA ABA DE AGENDAMENTO (A CADA 15 SEGUNDOS)
+  setInterval(() => {
+    const agendamentoTab = document.getElementById('agendamento');
+    if (agendamentoTab && agendamentoTab.style.display !== 'none') {
+      console.log('🔄 Auto-refresh: Atualizando lista de agendamentos...');
+      loadAgendamentos(true); // Forçar refresh do servidor
+    }
+  }, 15000); // 15 segundos (mais frequente)
+
+  // 🔥 CONFIGURAR ÁREA DE PASTE DE IMAGEM
+  setupImagePasteArea();
 });
+
+// ==================== FUNÇÕES PARA COPIAR E COLAR IMAGENS ====================
+
+let currentPastedImage = null; // Armazena a imagem colada
+
+function setupImagePasteArea() {
+  const pasteZone = document.getElementById('imagePasteZone');
+  if (!pasteZone) return;
+
+  // Listener para paste em qualquer lugar do modal quando aberto
+  document.addEventListener('paste', handlePasteEvent);
+
+  // Efeito visual ao passar mouse
+  pasteZone.addEventListener('mouseenter', function() {
+    this.style.borderColor = '#764ba2';
+    this.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    this.style.transform = 'scale(1.02)';
+    const texts = this.querySelectorAll('div');
+    texts.forEach(t => t.style.color = 'white');
+  });
+
+  pasteZone.addEventListener('mouseleave', function() {
+    this.style.borderColor = '#667eea';
+    this.style.background = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+    this.style.transform = 'scale(1)';
+    const texts = this.querySelectorAll('div');
+    texts[1].style.color = '#667eea';
+    texts[2].style.color = '#666';
+  });
+}
+
+function focusOnPasteArea() {
+  showAlert('✨ Área ativa! Use Ctrl+V para colar uma imagem', 'info');
+}
+
+async function handlePasteEvent(e) {
+  // Verificar se o modal de edição está aberto
+  const modal = document.getElementById('editarModal');
+  if (!modal || modal.style.display !== 'block') return;
+
+  const items = e.clipboardData?.items;
+  if (!items) return;
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+
+    // Verificar se é uma imagem
+    if (item.type.indexOf('image') !== -1) {
+      e.preventDefault();
+
+      const file = item.getAsFile();
+      console.log('📋 Imagem colada:', file.name, file.type, file.size);
+
+      showAlert('📸 Imagem detectada! Processando...', 'info');
+
+      await processImageFile(file);
+      break;
+    }
+  }
+}
+
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showAlert('❌ Por favor, selecione um arquivo de imagem', 'error');
+    return;
+  }
+
+  console.log('📁 Arquivo selecionado:', file.name, file.type, file.size);
+  showAlert('📸 Imagem selecionada! Processando...', 'info');
+
+  processImageFile(file);
+}
+
+async function processImageFile(file) {
+  try {
+    // Mostrar preview imediato
+    const reader = new FileReader();
+
+    reader.onload = async function(e) {
+      const base64Image = e.target.result;
+      currentPastedImage = base64Image;
+
+      // Atualizar preview
+      const preview = document.getElementById('imagePreview');
+      const placeholder = document.getElementById('imagePreviewPlaceholder');
+
+      if (preview && placeholder) {
+        preview.src = base64Image;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+      }
+
+      // Atualizar visual da paste zone
+      updatePasteZoneWithImage(file.name);
+
+      // Fazer upload para Supabase automaticamente
+      showAlert('⬆️ Fazendo upload da imagem...', 'info');
+
+      const uploadedUrl = await uploadImageToSupabase(base64Image, file.name);
+
+      if (uploadedUrl) {
+        // Atualizar campo de URL
+        const urlInput = document.getElementById('editarImagemUrl');
+        if (urlInput) {
+          urlInput.value = uploadedUrl;
+        }
+
+        showAlert('✅ Imagem enviada com sucesso para o Supabase!', 'success');
+        console.log('✅ URL da imagem:', uploadedUrl);
+      } else {
+        showAlert('⚠️ Imagem carregada mas não foi enviada ao Supabase', 'warning');
+      }
+    };
+
+    reader.onerror = function(error) {
+      console.error('Erro ao ler arquivo:', error);
+      showAlert('❌ Erro ao processar imagem', 'error');
+    };
+
+    reader.readAsDataURL(file);
+
+  } catch (error) {
+    console.error('Erro ao processar imagem:', error);
+    showAlert('❌ Erro ao processar imagem: ' + error.message, 'error');
+  }
+}
+
+function updatePasteZoneWithImage(fileName) {
+  const pasteZone = document.getElementById('imagePasteZone');
+  if (!pasteZone) return;
+
+  pasteZone.innerHTML = `
+    <div style="font-size: 48px; margin-bottom: 10px;">✅</div>
+    <div style="font-weight: 600; color: #10b981; font-size: 16px; margin-bottom: 5px;">
+      Imagem carregada!
+    </div>
+    <div style="color: #666; font-size: 13px; margin-bottom: 10px;">
+      ${fileName}
+    </div>
+    <button
+      type="button"
+      onclick="resetPasteZone()"
+      style="
+        padding: 8px 16px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+      "
+    >
+      🗑️ Remover
+    </button>
+  `;
+
+  pasteZone.style.background = 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)';
+  pasteZone.style.borderColor = '#10b981';
+}
+
+function resetPasteZone() {
+  const pasteZone = document.getElementById('imagePasteZone');
+  if (!pasteZone) return;
+
+  pasteZone.innerHTML = `
+    <div style="font-size: 48px; margin-bottom: 10px;">📋</div>
+    <div style="font-weight: 600; color: #667eea; font-size: 16px; margin-bottom: 5px;">
+      Cole uma imagem aqui
+    </div>
+    <div style="color: #666; font-size: 13px;">
+      Copie uma imagem (Ctrl+C) e clique aqui para colar (Ctrl+V)
+    </div>
+    <input
+      type="file"
+      id="imageFileInput"
+      accept="image/*"
+      style="display: none;"
+      onchange="handleFileSelect(event)"
+    />
+    <button
+      type="button"
+      onclick="event.stopPropagation(); document.getElementById('imageFileInput').click();"
+      style="
+        margin-top: 15px;
+        padding: 8px 16px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+      "
+    >
+      📁 Ou escolher arquivo
+    </button>
+  `;
+
+  pasteZone.style.background = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+  pasteZone.style.borderColor = '#667eea';
+  pasteZone.onclick = focusOnPasteArea;
+
+  currentPastedImage = null;
+
+  // Limpar preview
+  const preview = document.getElementById('imagePreview');
+  const placeholder = document.getElementById('imagePreviewPlaceholder');
+  if (preview && placeholder) {
+    preview.style.display = 'none';
+    placeholder.style.display = 'block';
+  }
+
+  // Limpar campo de URL
+  const urlInput = document.getElementById('editarImagemUrl');
+  if (urlInput) {
+    urlInput.value = '';
+  }
+
+  showAlert('🗑️ Imagem removida', 'info');
+}
+
+async function uploadImageToSupabase(base64Image, fileName) {
+  try {
+    // Fazer upload via endpoint do Flask
+    const response = await fetch('/upload-image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        image: base64Image,
+        filename: fileName || 'pasted-image.png'
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success && result.url) {
+      console.log('✅ Upload para Supabase concluído:', result.url);
+      return result.url;
+    } else {
+      console.error('❌ Erro no upload:', result.error);
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ Erro ao fazer upload:', error);
+    return null;
+  }
+}

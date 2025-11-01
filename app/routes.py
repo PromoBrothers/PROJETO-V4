@@ -1,6 +1,7 @@
 # app/routes.py
 
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
+from functools import wraps
 import datetime
 import pytz
 import time
@@ -24,6 +25,74 @@ from .cache_manager import cache_manager
 from .validators import product_validator
 
 main_bp = Blueprint('main', __name__)
+
+# Credenciais de login (em produção, use variáveis de ambiente)
+LOGIN_USERNAME = os.getenv('LOGIN_USERNAME', 'promobrothers')
+LOGIN_PASSWORD = os.getenv('LOGIN_PASSWORD', 'Bro46mo01')
+
+# Decorator para proteger rotas
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('main.login_page'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+# ============================================
+# ROTAS DE AUTENTICAÇÃO
+# ============================================
+
+@main_bp.route('/login', methods=['GET'])
+def login_page():
+    """Exibe a página de login"""
+    # Se já estiver logado, redireciona para home
+    if session.get('logged_in'):
+        return redirect(url_for('main.index'))
+    return render_template('login.html')
+
+@main_bp.route('/login', methods=['POST'])
+def login():
+    """Processa o login"""
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+
+        # Validar credenciais
+        if username == LOGIN_USERNAME and password == LOGIN_PASSWORD:
+            session['logged_in'] = True
+            session['username'] = username
+            session.permanent = True  # Manter sessão ativa
+
+            logger.info(f'Login bem-sucedido: {username}')
+
+            return jsonify({
+                'success': True,
+                'message': 'Login realizado com sucesso',
+                'redirect': url_for('main.index')
+            })
+        else:
+            logger.warning(f'Tentativa de login falhou: {username}')
+
+            return jsonify({
+                'success': False,
+                'error': 'Usuário ou senha incorretos'
+            }), 401
+
+    except Exception as e:
+        logger.error(f'Erro no login: {e}')
+        return jsonify({
+            'success': False,
+            'error': 'Erro interno no servidor'
+        }), 500
+
+@main_bp.route('/logout')
+def logout():
+    """Faz logout do usuário"""
+    session.clear()
+    return redirect(url_for('main.login_page'))
 
 
 def extrair_link_limpo_produto(url):
@@ -227,10 +296,12 @@ def formatar_mensagem_marketing(produto_dados):
     return mensagem.strip()
 
 @main_bp.route('/')
+@login_required
 def index():
     return render_template('index.html')
 
 @main_bp.route('/amazon')
+@login_required
 def amazon():
     return render_template('amazon.html')
 
@@ -534,17 +605,6 @@ def agendar_mensagem_whatsapp():
         else:
             logger.info('  - Nenhum link detectado na mensagem')
 
-        # 🔗 ADICIONAR LINK FINAL PADRÃO (LINKTREE) SEMPRE
-        link_final = "https://linktr.ee/promobrothers.shop"
-
-        # Verificar se a mensagem já termina com este link
-        if not mensagem_com_afiliado.strip().endswith(link_final):
-            # Adicionar uma quebra de linha dupla se a mensagem não terminar com quebra
-            if not mensagem_com_afiliado.endswith('\n'):
-                mensagem_com_afiliado += '\n'
-            mensagem_com_afiliado += f'\n👾 Grupo de ofertas: {link_final}'
-            logger.info(f'✅ Link final adicionado: {link_final}')
-
         # 🖼️ FAZER UPLOAD DA IMAGEM BASE64 PARA SUPABASE
         imagem_url_final = imagem_url
         if imagem_url and imagem_url.startswith('data:image'):
@@ -610,12 +670,34 @@ def agendar_mensagem_whatsapp():
 @main_bp.route('/produtos', methods=['GET'])
 def listar_produtos():
     try:
-        # CORREÇÃO: Lendo os parâmetros da URL da requisição
-        status_filter = request.args.get('status', 'agendado')
-        ordem_order = request.args.get('ordem', 'desc')
-        
+        # Aceitar múltiplos formatos de parâmetros para compatibilidade
+        # Formato 1: status/ordem (usado pelo index.html antigo)
+        # Formato 2: agendado/order/plataforma (usado pelo WhatsApp Monitor)
+
+        # Determinar formato baseado nos parâmetros recebidos
+        if request.args.get('agendado') is not None:
+            # Novo formato
+            agendado_param = request.args.get('agendado', '').lower()
+            if agendado_param == 'true':
+                status_filter = 'agendado'
+            elif agendado_param == 'false':
+                status_filter = 'nao-agendado'
+            else:
+                status_filter = 'todos'
+            ordem_order = request.args.get('order', 'desc')
+        else:
+            # Formato antigo
+            status_filter = request.args.get('status', 'agendado')
+            ordem_order = request.args.get('ordem', 'desc')
+
+        plataforma_filter = request.args.get('plataforma', None)
+
         produtos = database.listar_produtos_db(status_filter, ordem_order)
-        
+
+        # Filtrar por plataforma se especificado
+        if plataforma_filter:
+            produtos = [p for p in produtos if p.get('plataforma') == plataforma_filter]
+
         # Converte as datas para o fuso horário de São Paulo para exibição
         for produto in produtos:
             for key in ["agendamento", "created_at"]:
@@ -626,7 +708,7 @@ def listar_produtos():
                         produto[key] = dt_br.strftime('%Y-%m-%d %H:%M:%S')
                     except Exception:
                         pass # Deixa a data como está se houver erro de formato
-                        
+
         return jsonify({'success': True, 'produtos': produtos})
     except Exception as e:
         return jsonify({'success': False, 'error': f'Erro ao listar produtos do Supabase: {str(e)}'}), 500
@@ -1055,6 +1137,7 @@ def clear_cache():
 # === ROTAS DO WHATSAPP MONITOR ===
 
 @main_bp.route('/whatsapp-monitor')
+@login_required
 def whatsapp_monitor():
     """Página de monitoramento de grupos do WhatsApp"""
     return render_template('whatsapp_monitor.html')
@@ -1151,5 +1234,49 @@ def whatsapp_messages():
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'Erro ao obter mensagens: {str(e)}'}), 503
+
+@main_bp.route('/upload-image', methods=['POST'])
+def upload_image():
+    """
+    Endpoint para fazer upload de imagens coladas/selecionadas do modal de edição.
+    Recebe imagem em base64 e faz upload para o Supabase Storage.
+    """
+    try:
+        data = request.get_json()
+        base64_image = data.get('image', '')
+        filename = data.get('filename', 'pasted-image.png')
+
+        if not base64_image:
+            return jsonify({'success': False, 'error': 'Imagem não fornecida'}), 400
+
+        logger.info(f'📤 Recebendo upload de imagem: {filename}')
+
+        # Usar a função existente para upload de imagem do WhatsApp
+        # (ela já suporta base64)
+        titulo_produto = f"Edição Manual - {filename}"
+        public_url = database.upload_imagem_whatsapp(base64_image, titulo_produto)
+
+        if public_url:
+            logger.info(f'✅ Upload concluído: {public_url}')
+            return jsonify({
+                'success': True,
+                'url': public_url,
+                'message': 'Imagem enviada com sucesso!'
+            })
+        else:
+            logger.error('❌ Falha no upload da imagem')
+            return jsonify({
+                'success': False,
+                'error': 'Erro ao fazer upload da imagem para o Supabase'
+            }), 500
+
+    except Exception as e:
+        logger.error(f'❌ Erro no endpoint de upload: {str(e)}')
+        import traceback
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': f'Erro interno: {str(e)}'
+        }), 500
 
 
