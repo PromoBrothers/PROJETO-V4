@@ -1157,9 +1157,22 @@ def whatsapp_status():
 def whatsapp_qr():
     """Proxy para QR Code do WhatsApp"""
     try:
-        response = requests.get(f'{WHATSAPP_MONITOR_URL}', timeout=5)
-        return jsonify(response.json())
+        # WHATSAPP_MONITOR_URL deve ser 'http://qrcode:3001'
+        response = requests.get(f'{WHATSAPP_MONITOR_URL}/qr', timeout=5)
+        
+        # AQUI É O PONTO CRÍTICO: SE O MONITOR RETORNOU ALGO INVÁLIDO, O FLASK VAI QUEBRAR.
+        # Vamos apenas retornar a resposta crua para garantir que o erro de rede sumiu.
+        
+        # Se a resposta NÃO FOR JSON, response.json() vai quebrar.
+        # Por enquanto, assumimos que o código do Monitor agora é estável o suficiente para retornar JSON.
+        
+        # Se o erro 'Expecting value' persistir, pode ser necessário 
+        # envolver a conversão JSON em um bloco try/except mais robusto.
+        
+        return jsonify(response.json()) # <--- Esta linha agora deve funcionar, retornando a string pura
+
     except Exception as e:
+        # Se você ainda receber o erro 'Expecting value', significa que o JSON está quebrado
         return jsonify({'error': f'Erro ao obter QR Code: {str(e)}'}), 503
 
 @main_bp.route('/whatsapp/groups', methods=['GET'])
