@@ -10,6 +10,8 @@ import os
 import re
 import logging
 
+
+WHATSAPP_MONITOR_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001')
 # Criar logger
 logger = logging.getLogger(__name__)
 
@@ -1146,7 +1148,7 @@ def whatsapp_monitor():
 def whatsapp_status():
     """Proxy para status do WhatsApp"""
     try:
-        response = requests.get('http://localhost:3001/status', timeout=5)
+        response = requests.get(f'{WHATSAPP_MONITOR_URL}/status', timeout=5)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': f'WhatsApp Monitor não está rodando: {str(e)}'}), 503
