@@ -152,6 +152,38 @@ async function listImagesDirect(bucketName = null, path = '', limit = 20, offset
   }
 }
 
+// ⭐ NOVA FUNÇÃO: Envia mensagem e imagem geradas para o serviço Baileys via proxy Flask
+async function sendGeneratedMessage(message, imageUrl) {
+    // Note: Removemos o controle de "loading" daqui para evitar conflito com loops
+    try {
+        const response = await fetch('/whatsapp/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: message,
+                imageUrl: imageUrl
+            })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            console.log('✅ Mensagem enviada com sucesso via Baileys!');
+            return { success: true, message: data.message };
+        } else {
+            const errorMsg = data.error || 'Erro desconhecido no envio Baileys';
+            console.error(`❌ Falha no envio: ${errorMsg}`);
+            // Retorna o erro e a resposta completa para o log no console
+            return { success: false, error: errorMsg, response: data }; 
+        }
+
+    } catch (error) {
+        console.error('Erro de rede ao tentar enviar via Baileys:', error);
+        return { success: false, error: 'Erro de conexão de rede.' };
+    }
+}
+
+
 window.openAgendamentoForm = function (produtoId) {
   document.getElementById("agendarProdutoId").value = produtoId;
   document.getElementById("agendamentoModal").style.display = "block";
@@ -210,7 +242,7 @@ window.closeEditModal = function () {
 window.enviarProdutoAgendado = async function (produtoId) {
   if (
     !confirm(
-      "Deseja enviar este produto para o webhook? Isso irá usar os dados editados (imagem e mensagem personalizadas)."
+      "Deseja gerar e ENVIAR a mensagem final deste produto para o WhatsApp?" // Texto atualizado
     )
   ) {
     return;
@@ -218,7 +250,7 @@ window.enviarProdutoAgendado = async function (produtoId) {
 
   const loading = document.getElementById("loading");
   loading.style.display = "block";
-  loading.querySelector("p").textContent = "Enviando produto para webhook...";
+  loading.querySelector("p").textContent = "Gerando mensagem final..."; // Texto atualizado
 
   try {
     const afiliadoLink = prompt("Cole o link de afiliado (opcional):");
@@ -234,17 +266,28 @@ window.enviarProdutoAgendado = async function (produtoId) {
     const data = await response.json();
 
     if (response.ok) {
-      showAlert("Produto enviado com sucesso! ✅", "success");
+      // Mensagem gerada com sucesso
+      showAlert("Mensagem gerada com sucesso! ✅", "success");
 
       if (data.final_message) {
+        // Exibir a mensagem gerada
         displayWebhookResponse(data.final_message, 'success', data.image_url);
+
+        // ⭐ NOVO PASSO: Enviar a mensagem gerada via Baileys
+        const sendResult = await sendGeneratedMessage(data.final_message, data.image_url);
+        
+        if (sendResult.success) {
+            showAlert("✅ Envio para o WhatsApp concluído!", "success");
+        } else {
+            showAlert(`⚠️ Mensagem gerada, mas falha no envio: ${sendResult.error}`, "warning");
+        }
       }
     } else {
-      showAlert(`Erro ao enviar: ${data.error}`, "error");
+      showAlert(`Erro ao gerar mensagem: ${data.error}`, "error"); // Mensagem atualizada
     }
   } catch (error) {
-    console.error("Erro ao enviar produto:", error);
-    showAlert("Erro de conexão ao enviar produto.", "error");
+    console.error("Erro ao gerar mensagem:", error);
+    showAlert("Erro de conexão ao gerar mensagem.", "error");
   } finally {
     loading.style.display = "none";
   }
@@ -262,7 +305,8 @@ function displayWebhookResponse(message, status, imageUrl, append = false) {
 
     const isSuccess = status === 'success';
     const containerClass = isSuccess ? 'success' : 'error';
-    const headerText = isSuccess ? '✅ Produto Processado com Sucesso' : '❌ Erro ao Processar';
+    // O texto do header é atualizado para refletir o novo fluxo (processamento/geração)
+    const headerText = isSuccess ? '✅ Produto Processado (Mensagem Gerada)' : '❌ Erro ao Processar';
     const statusText = isSuccess ? 'SUCCESS' : 'ERROR';
 
     const messageHtml = `
@@ -503,29 +547,23 @@ function extrairValorNumerico(precoTexto) {
 
 function construirMensagemComCupom(produto, cupomTexto, cupomTipo, cupomValor, precoOriginal, novoPreco, desconto, linkAfiliado) {
   const linkProduto = linkAfiliado || produto.afiliado_link || produto.link_produto || produto.link || 'Link não disponível';
-  
-  let descontoDescricao;
-  if (cupomTipo === "porcentagem") {
-    descontoDescricao = `🔥 *${cupomValor}% DE DESCONTO*`;
-  } else {
-    const valorFmt = cupomValor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    descontoDescricao = `🔥 *R$ ${valorFmt} DE DESCONTO*`;
-  }
+  const vendedor_info = produto.vendedor || produto.condicao || '* Informação não disponível';
 
   const precoOriginalFmt = precoOriginal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const novoPrecoFmt = novoPreco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const descontoFmt = desconto.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   
-  return `🛒 *${produto.titulo}*
+  const precoOriginalComRS = `R$ ${precoOriginalFmt}`;
+  const novoPrecoComRS = `R$ ${novoPrecoFmt}`;
 
-🔥 POR: *R$${novoPrecoFmt}*
+  // Usando o novo padrão de mensagem
+  return `🔥 ${produto.titulo}
+* ${vendedor_info}
 
-🎟️ *CUPOM: ${cupomTexto}*
-🛒 Link: ${linkProduto}
+✅ De ${precoOriginalComRS} → Por ${novoPrecoComRS}
+🎟️ Cupom: ${cupomTexto}
+🛒 ${linkProduto}
 
-⚡ *Oferta por tempo limitado!*
-
-👾 *Grupo de ofertas:* https://linktr.ee/promobrothers.shop `;
+👥 Link do grupo: https://linktr.ee/promobrothers.shop `;
 
 }
 
@@ -703,8 +741,6 @@ document.addEventListener("DOMContentLoaded", function () {
     
     document.documentElement.setAttribute("data-theme", newTheme);
     localStorage.setItem("theme", newTheme);
-    
-    themeToggle.textContent = newTheme === "dark" ? "☀️" : "🌙";
     
     showAlert(
       `Modo ${newTheme === "dark" ? "escuro" : "claro"} ativado!`,
@@ -1078,6 +1114,8 @@ document.addEventListener("DOMContentLoaded", function () {
         webhookMessageContent.innerHTML = "";
         webhookMessageSection.style.display = "block";
 
+        let totalProcessedCount = 0;
+
         for (let i = 0; i < itemsToProcess.length; i++) {
         const { productUrl, affiliateLink } = itemsToProcess[i];
 
@@ -1099,6 +1137,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         try {
+            // 1. ANÁLISE DO PRODUTO
             const produtoResponse = await fetch("/produto", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1113,13 +1152,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!produto) throw new Error(`Não foi possível extrair dados`);
 
+            // 2. CHAMA O NOVO ENDPOINT DE PROCESSAMENTO (Gera Mensagem e Salva)
             const payload = {
             type: "produto",
             produto: produto,
             afiliado_link: affiliateLink,
             };
 
-            const finalResponse = await fetch("/webhook", {
+            const finalResponse = await fetch("/processar_para_envio", { 
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
@@ -1128,17 +1168,34 @@ document.addEventListener("DOMContentLoaded", function () {
             const finalResult = await finalResponse.json();
 
             if (finalResponse.ok) {
-            // --- CORREÇÃO APLICADA AQUI ---
-            displayWebhookResponse(
-                finalResult.final_message || "Sucesso!",
-                "success",
-                finalResult.image_url || produto.imagem,
-                true
-            );
+                totalProcessedCount++;
+                const message = finalResult.final_message || "Mensagem gerada com sucesso!";
+                const imageUrl = finalResult.image_url || produto.imagem;
+
+                // Mensagem gerada: Exibir o resultado
+                displayWebhookResponse(
+                    message,
+                    "success",
+                    imageUrl,
+                    true
+                );
+                
+                // ⭐ NOVO PASSO: Enviar a mensagem gerada via Baileys
+                loading.querySelector("p").textContent = `Enviando ${i + 1} de ${itemsToProcess.length} para o WhatsApp...`;
+
+                const sendResult = await sendGeneratedMessage(message, imageUrl);
+
+                if (sendResult.success) {
+                    console.log(`✅ Produto ${i + 1} enviado com sucesso via Baileys.`);
+                } else {
+                    console.error(`❌ Produto ${i + 1} falhou no envio via Baileys: ${sendResult.error}`);
+                    showAlert(`Falha no envio do produto ${i + 1} para o WhatsApp.`, "error");
+                }
+
             } else {
-            // --- CORREÇÃO APLICADA AQUI ---
+            // Em caso de erro interno (falha na geração/salvamento)
             displayWebhookResponse(
-                finalResult.error || "Erro no webhook",
+                finalResult.error || "Erro no processamento interno",
                 "error",
                 finalResult.image_url || produto.imagem,
                 true
@@ -1146,7 +1203,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         } catch (error) {
             console.error("Erro no processo do webhook:", error);
-            // --- CORREÇÃO APLICADA AQUI ---
+            // Em caso de erro de conexão/parsing
             displayWebhookResponse(
             `Erro ao processar ${productUrl}: ${error.message}`,
             "error",
@@ -1157,13 +1214,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (productQueue.length > 0) {
-        const processedCount = productQueue.length;
         productQueue = [];
         updateQueueDisplay();
-        showAlert(`✅ ${processedCount} produto${processedCount > 1 ? 's processados' : ' processado'} com sucesso!`, "success");
         }
 
-        loading.querySelector("p").textContent = "Processamento finalizado!";
+        loading.querySelector("p").textContent = `Processamento finalizado! ${totalProcessedCount} produtos processados.`;
         webhookBtn.disabled = false;
         
         setTimeout(() => {
@@ -1270,12 +1325,14 @@ document.addEventListener("DOMContentLoaded", function () {
             loading.style.display = "block";
             webhookMessageContent.innerHTML = "";
             webhookMessageSection.style.display = "block";
+            let totalProcessedCount = 0;
 
             for (let i = 0; i < amazonProductQueue.length; i++) {
                 const produto = amazonProductQueue[i];
                 loading.querySelector("p").textContent = `Processando Amazon ${i + 1} de ${amazonProductQueue.length}...`;
 
                 try {
+                    // 1. Processamento (Geração de Mensagem)
                     const response = await fetch('/webhook/processar', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1287,8 +1344,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     const data = await response.json();
                     if (!response.ok) throw new Error(data.error || 'Erro desconhecido no servidor.');
+                    
+                    totalProcessedCount++;
+                    const message = data.final_message;
+                    const imageUrl = data.image_url;
 
-                    displayWebhookResponse(data.final_message, 'success', data.image_url, true);
+                    // Exibir a mensagem gerada
+                    displayWebhookResponse(message, 'success', imageUrl, true);
+                    
+                    // ⭐ NOVO PASSO: Enviar a mensagem gerada via Baileys
+                    loading.querySelector("p").textContent = `Enviando Amazon ${i + 1} de ${amazonProductQueue.length} para o WhatsApp...`;
+
+                    const sendResult = await sendGeneratedMessage(message, imageUrl);
+
+                    if (sendResult.success) {
+                        console.log(`✅ Produto Amazon ${i + 1} enviado com sucesso via Baileys.`);
+                    } else {
+                        console.error(`❌ Produto Amazon ${i + 1} falhou no envio via Baileys: ${sendResult.error}`);
+                        showAlert(`Falha no envio do produto Amazon ${i + 1} para o WhatsApp.`, "error");
+                    }
 
                 } catch (error) {
                     console.error("Erro ao processar produto da Amazon:", error);
@@ -1300,7 +1374,7 @@ document.addEventListener("DOMContentLoaded", function () {
             atualizarFilaVisualAmazon();
             loading.style.display = "none";
             webhookBtn.disabled = false;
-            showAlert('Processamento da fila da Amazon concluído!', 'success');
+            showAlert(`Processamento da fila da Amazon concluído! ${totalProcessedCount} produtos processados.`, 'success');
         }
         
         if (amazonAddProductBtn) amazonAddProductBtn.addEventListener('click', adicionarProdutoFilaAmazon);
@@ -1501,7 +1575,7 @@ document.addEventListener("DOMContentLoaded", function () {
       </div>
       <div class="product-actions">
         <a href="${link}" target="_blank" class="btn-link">Ver Produto</a>
-        ${isDetailed ? '' : `<button class="btn" onclick="enviarParaWebhook('${JSON.stringify(produto).replace(/'/g, "\\'")}')">Enviar Webhook</button>`}
+        ${isDetailed ? '' : `<button class="btn" onclick="enviarParaWebhook('${JSON.stringify(produto).replace(/'/g, "\\'")}')">Gerar Mensagem</button>`}
       </div>
     `;
     
@@ -1511,9 +1585,9 @@ document.addEventListener("DOMContentLoaded", function () {
   window.enviarParaWebhook = function(produtoJson) {
     try {
       const produto = JSON.parse(produtoJson);
-      console.log('Enviando produto para webhook:', produto);
-      // Implementar lógica de envio para webhook aqui
-      showAlert('Funcionalidade de webhook será implementada em breve', 'info');
+      // Aqui, você pode implementar a chamada para `/processar_para_envio` com este produto
+      console.log('Gerando mensagem para produto:', produto);
+      showAlert('Funcionalidade de geração de mensagem será implementada em breve neste botão', 'info');
     } catch (error) {
       console.error('Erro ao processar produto para webhook:', error);
       showAlert('Erro ao processar produto', 'error');

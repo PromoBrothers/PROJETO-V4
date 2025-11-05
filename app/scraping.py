@@ -14,7 +14,28 @@ PROXY_PORT = os.getenv("PROXY_PORT")
 PROXY_USERNAME = os.getenv("PROXY_USERNAME")
 PROXY_PASSWORD = os.getenv("PROXY_PASSWORD")
 
-headers = {'User-Agent': USER_AGENT}
+# =========================================================================
+# ⭐ NOVO: COOKIES DE LOGIN DO MERCADO LIVRE
+# Estes cookies garantem que as requisições sejam feitas na sua sessão,
+# o que é crucial para links de afiliado, taxas e visualização correta.
+# [cite_start]Os dados foram extraídos das suas fontes[cite: 4, 5, 6].
+# =========================================================================
+ML_COOKIES = (
+    "_csrf=bKhKU-g6VetNitGbSos7ud5y; "
+    "ssid=ghy-092623-TUq9JJcPx2qXkkMm4UxZVdqXrGEJz7-__-404150719-__-1853637093730--RRR_0-RRR_0; "
+    "orguserid=HTddTt09dh04; "
+    "orguseridp=404150719; "
+    "nsa_rotok=eyJhbGciOiJSUzI1NiIsImtpZCI6IjMiLCJ0eXAiOiJKV1QifQ.eyJpZGVudGlmaWVyIjoiMzRjOWFmYTctNWExMS00M2QyLTk4MWItZGUxYjgyY2QxMmJhIiwicm90YXRpb25fZGF0ZSI6MTc2MjIxMjMyMSwiZXhwIjoxNzY0ODAzNzIxLCJqdGkiOiI5ZGU0ZmVlNC1lYzE2LTQ0ZTUtYjE2Yi1kMDg3YzAwNDJhMGIiLCJpYXQiOjE3NjIyMTE3MjEsInN1YiI6IjM0YzlhZmE3LTVhMTEtNDNkMi05ODFiLWRlMWI4MmNkMTJiYSJ9.cNvq922U-t2a7Ife9Viw9sNWgU3sOpltm3MSvrX0A75HHHN7E51-I9r_ABduvyk0X2l1U7lvT2cDPamxL5K5F9hEEnqn5hg6NhUMc_oi9o5TgeWbuFMvjUf8W4D81FHjqlCZ5h8QijgHaULIcOEH7gdOHMY7fYrxHvvucWiJmIsL-EKTpfaIWheow6y_1hJpOIFSqKyxeFs5rUSkJsyKnsHzI1b8jpfU1rME1R-IGSZZeW9FiA57FxCg7OOEo0KUG-T7t0sE1OQ9u7luNy3uIN6_vDEs6hGmByni1qn2roeUsuOrSUMu6zrIk51INI0uwKMgPFI8O7zZCaToqV2Gjg; "
+    "cookiesPreferencesLogged=%7B%22userId%22%3A404150719%2C%22categories%22%3A%7B%22advertising%22%3Atrue%2C%22functionality%22%3Atrue%2C%22performance%22%3Atrue%2C%22traceability%22%3Atrue%7D%7D; "
+    "hide-cookie-banner=404150719-COOKIE_PREFERENCES_ALREADY_SET; "
+    "ml_cart-quantity=1; "
+    "LAST_SEARCH=cv700m"
+)
+
+headers = {
+    'User-Agent': USER_AGENT,
+    'Cookie': ML_COOKIES # ⭐ Adiciona o header de Cookie
+}
 
 proxies = {}
 if PROXY_HOST and PROXY_PORT and PROXY_USERNAME and PROXY_PASSWORD:
@@ -38,6 +59,7 @@ def parse_price(price_str):
 def scrape_produto_especifico(url):
     """Realiza o scraping de uma página de produto específica do Mercado Livre com lógica aprimorada."""
     try:
+        # headers com cookie são usados aqui
         r = requests.get(url, headers=headers, proxies=proxies, timeout=20)
         r.raise_for_status()
 
@@ -370,6 +392,7 @@ def scrape_mercadolivre(produto, max_pages=3):
     for page in range(1, max_pages + 1):
         try:
             url_final = f'https://lista.mercadolivre.com.br/{produto_formatado}_Desde_{(page - 1) * 50 + 1}' if page > 1 else f'https://lista.mercadolivre.com.br/{produto_formatado}'
+            # headers com cookie são usados aqui
             r = requests.get(url_final, headers=headers, proxies=proxies, timeout=20)
             if r.status_code != 200: break
             site = BeautifulSoup(r.content, 'html.parser')

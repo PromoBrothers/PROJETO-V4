@@ -5,13 +5,14 @@ from functools import wraps
 import datetime
 import pytz
 import time
-import requests # Adicionado para tratar exceções de request
+import requests
+from urllib.parse import urlparse, parse_qs, urlunparse, urlencode # Importação adicionada para manipulação de URL
 import os
 import re
 import logging
 
 
-WHATSAPP_MONITOR_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001')# Criar logger
+WHATSAPP_MONITOR_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://localhost:3001')# Criar logger
 logger = logging.getLogger(__name__)
 
 # Importa as funções dos outros módulos
@@ -96,6 +97,69 @@ def logout():
     return redirect(url_for('main.login_page'))
 
 
+# ⭐ NOVA FUNÇÃO: Aplica o ID de afiliado do Mercado Livre na URL
+def aplicar_afiliado_ml(url: str) -> str:
+    """
+    Gera link de afiliado do Mercado Livre usando a API interna (cookies + cache inteligente).
+    Se falhar, usa o método tradicional (parâmetro mshops).
+
+    Performance:
+    - Primeira vez: ~5-10s (descobre qual combinação funciona)
+    - Próximas vezes: ~1s (usa cache) ⚡
+    """
+    logger.info(f'📥 aplicar_afiliado_ml chamado com URL: {url[:100] if url else "None"}...')
+
+    # Importar o módulo de afiliado ML
+    from .ml_affiliate import gerar_link_afiliado_ml
+
+    ml_affiliate = os.getenv("MERCADOLIVRE_AFFILIATE_ID", "")
+
+    # Se o ID não estiver configurado, retorna a URL original
+    if not ml_affiliate or ml_affiliate == "seu-id-mercadolivre":
+        logger.warning('⚠️ MERCADOLIVRE_AFFILIATE_ID não configurado.')
+        return url
+
+    # Aplica somente a links do Mercado Livre
+    logger.info(f'🔍 Verificando se é link ML... mercadolivre.com: {"mercadolivre.com" in url.lower()}, mlb-: {"mlb-" in url.lower()}')
+
+    if 'mercadolivre.com' in url.lower() or 'mlb-' in url.lower():
+        try:
+            # MÉTODO 1: Tentar gerar link via API (usando cookies e CSRF token + cache inteligente)
+            try:
+                affiliate_link = gerar_link_afiliado_ml(url)
+
+                if affiliate_link:
+                    logger.info(f'✅ Link de afiliado ML gerado via API: {affiliate_link[:80]}...')
+                    return affiliate_link
+                else:
+                    logger.info('ℹ️ API não disponível, usando método tradicional (mshops)...')
+            except Exception as e:
+                logger.warning(f'⚠️ Erro ao gerar link via API: {e}. Usando método tradicional...')
+
+            # MÉTODO 2 (FALLBACK): Injetar parâmetro mshops na URL
+            parsed_url = urlparse(url)
+            query = parse_qs(parsed_url.query)
+
+            # Se já houver um parâmetro 'mshops', assume que já é o link de afiliado e retorna
+            if 'mshops' in query or 'mshopps' in query:
+                return url
+
+            # Injetar o ID de afiliado
+            query['mshops'] = [ml_affiliate]
+
+            # Reconstruir o URL com o novo parâmetro
+            parsed_url = parsed_url._replace(query=urlencode(query, doseq=True))
+            fallback_url = urlunparse(parsed_url)
+
+            logger.info(f'✅ Link de afiliado ML gerado via método tradicional (mshops)')
+            return fallback_url
+
+        except Exception as e:
+            logger.error(f'❌ Erro ao injetar afiliado na URL {url}: {e}')
+            return url
+    return url
+
+
 def extrair_link_limpo_produto(url):
     """
     Acessa a página do produto via ScraperAPI e extrai o link do botão Compartilhar.
@@ -128,7 +192,8 @@ def extrair_link_limpo_produto(url):
                 # Usar ScraperAPI para evitar antibot
                 anti_bot = AntiBotManager()
                 logger.info('📡 Fazendo request via ScraperAPI para Mercado Livre...')
-                response = anti_bot.make_request_via_api(url)
+                # Tenta obter o link limpo com base no conteúdo da página
+                response = anti_bot.make_request_via_api(url) 
 
                 if response.status_code != 200:
                     logger.warning(f'⚠️ Status {response.status_code} ao acessar Mercado Livre')
@@ -137,7 +202,6 @@ def extrair_link_limpo_produto(url):
                 soup = BeautifulSoup(response.content, 'html.parser')
 
                 # SELETORES PARA O BOTÃO COMPARTILHAR DO MERCADO LIVRE
-                # Opção 1: Link com data-share-url ou similar
                 share_link = soup.find('a', {'data-testid': 'action-share'})
                 if share_link and share_link.get('href'):
                     link_limpo = share_link.get('href')
@@ -189,8 +253,6 @@ def substituir_links_afiliado(mensagem):
     Detecta links de produtos na mensagem e substitui por links de afiliado configurados.
     Suporta: Amazon, Mercado Livre, Shopee, Magazine Luiza, Americanas
     """
-    from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-
     # Tags de afiliado do .env
     amazon_tag = os.getenv("AMAZON_ASSOCIATES_TAG", "promobrothers-20")
     ml_affiliate = os.getenv("MERCADOLIVRE_AFFILIATE_ID", "")
@@ -224,9 +286,8 @@ def substituir_links_afiliado(mensagem):
         elif 'mercadolivre.com' in url_limpo.lower() or 'mlb-' in url_limpo.lower():
             plataforma = 'Mercado Livre'
             if ml_affiliate and ml_affiliate != "seu-id-mercadolivre":
-                # Adicionar ID de afiliado do Mercado Livre
-                separator = '&' if '?' in url_limpo else '?'
-                url_modificada = f"{url_limpo}{separator}mshops={ml_affiliate}"
+                # Adicionar ID de afiliado do Mercado Livre - USANDO A NOVA FUNÇÃO SIMPLIFICADA
+                url_modificada = aplicar_afiliado_ml(url_limpo)
 
         # Shopee
         elif 'shopee.com' in url.lower():
@@ -248,51 +309,86 @@ def substituir_links_afiliado(mensagem):
     return mensagem_modificada, links_substituidos
 
 
+def extrair_valor_numerico(preco_str):
+    """Função auxiliar para converter string de preço em float."""
+    if not preco_str:
+        return 0.0
+    try:
+        # Lógica robusta para tratar formatos como "1.079,10" e "1,079,10"
+        preco_limpo = str(preco_str).replace('R$', '').strip().replace('.', '').replace(',', '.')
+        return float(preco_limpo)
+    except (ValueError, TypeError):
+        return 0.0
+
 def formatar_mensagem_marketing(produto_dados):
     """
-    Formata a mensagem de marketing com base nas regras de categoria e promoção,
-    calculando o desconto sempre que possível.
-    """
-    def extrair_valor_numerico(preco_str):
-        """Função auxiliar para converter string de preço em float."""
-        if not preco_str:
-            return 0.0
-        try:
-            # Lógica robusta para tratar formatos como "1.079,10" e "1,079,10"
-            preco_limpo = str(preco_str).replace('R$', '').strip().replace('.', '').replace(',', '.')
-            return float(preco_limpo)
-        except (ValueError, TypeError):
-            return 0.0
-
-    titulo = produto_dados.get('titulo', '')
-    link = produto_dados.get('afiliado_link') or produto_dados.get('link', '')
-    preco_atual_str = produto_dados.get('preco_atual', '')
-    preco_original_str = produto_dados.get('preco_original')
-
-    preco_atual_num = extrair_valor_numerico(preco_atual_str)
-    preco_original_num = extrair_valor_numerico(preco_original_str)
+    Formata a mensagem de marketing com o NOVO PADRÃO do usuário:
     
-    desconto_num = 0
-    tem_promocao = False
+    🔥 {Titulo}
+    * {Vendedor ou Condição}
 
-    if preco_original_num > preco_atual_num > 0:
-        tem_promocao = True
-        desconto_num = round(((preco_original_num - preco_atual_num) / preco_original_num) * 100)
+    ✅ De {Preco Original} → Por {Preco Atual}
+    🎟️ Cupom: {Cupom Texto}
+    🛒 {Link Afiliado ou Produto}
+    
+    👥 Link do grupo: https://linktr.ee/promobrothers.shop
+    """
+    titulo = produto_dados.get('titulo', 'Produto em Destaque')
+    
+    # GARANTIA DO LINK DE AFILIADO/RASTREIO: 
+    # 1. Tenta o link de afiliado preenchido no formulário de cupom
+    # 2. Tenta o link de afiliado explícito do produto
+    # 3. Usa o link base do produto e aplica o ID de afiliado ML
+    
+    cupom_info = produto_dados.get('cupom_aplicado')
+    link_base = produto_dados.get('link', 'Link não disponível')
+    link_afiliado_expl = produto_dados.get('afiliado_link')
 
-    if tem_promocao and desconto_num > 0:
-        mensagem = (
-            f"⚡ *{titulo}*\n\n"
-            f"🔥 POR: *{preco_atual_str}*\n"
-            f"🛒 {link}\n\n"
-            f"👾 Grupo de ofertas: https://linktr.ee/promobrothers.shop"
-        )
+    link = (
+        (cupom_info.get('link_afiliado') if cupom_info and cupom_info.get('link_afiliado') else None)
+        or link_afiliado_expl
+        or link_base
+    )
+
+    # ⭐ IMPORTANTE: Aplica a função de afiliado do ML no link final antes de usar na mensagem
+    logger.info(f'🔗 Link ANTES de aplicar afiliado: {link[:100] if link else "None"}...')
+    link = aplicar_afiliado_ml(link)
+    logger.info(f'🔗 Link DEPOIS de aplicar afiliado: {link[:100] if link else "None"}...')
+    
+    # Preço atual é o preço com cupom se existir, senão o preço atual do scraping
+    preco_atual_str = produto_dados.get('preco_com_cupom') or produto_dados.get('preco_atual', 'Preço indisponível')
+    preco_original_str = produto_dados.get('preco_original')
+    
+    # Tenta obter info do vendedor/condição
+    vendedor_info = produto_dados.get('vendedor') or produto_dados.get('condicao') or 'Informação não disponível'
+    
+    # Informações de Cupom
+    
+    # Tenta definir o cupom
+    cupom_texto = 'SEM CUPOM' 
+    if cupom_info and cupom_info.get('texto'):
+        cupom_texto = cupom_info['texto']
+    elif produto_dados.get('cupons') and isinstance(produto_dados['cupons'], list) and produto_dados['cupons']:
+        cupom_texto = produto_dados['cupons'][0]
+    
+    
+    # MONTAGEM DA MENSAGEM
+    mensagem = f"🔥 {titulo}\n"
+    mensagem += f"* {vendedor_info}\n\n"
+    
+    # Bloco de Preços
+    if preco_original_str and preco_original_str != preco_atual_str:
+        mensagem += f"✅ De {preco_original_str} → Por {preco_atual_str}\n"
     else:
-        mensagem = (
-            f"⚡ *{titulo}*\n\n"
-            f"🔥 *{preco_atual_str}*\n"
-            f"🛒 {link}\n\n"
-            f"👾 Grupo de ofertas: https://linktr.ee/promobrothers.shop"
-        )
+        # Se não houver preço original/promoção, exibe só o preço atual
+        mensagem += f"✅ Preço: {preco_atual_str}\n"
+        
+    # Bloco de Cupom e Link
+    mensagem += f"🎟️ Cupom: {cupom_texto}\n"
+    mensagem += f"🛒 {link}\n\n"
+    
+    # Bloco final
+    mensagem += "👥 Link do grupo: https://linktr.ee/promobrothers.shop"
         
     return mensagem.strip()
 
@@ -397,8 +493,8 @@ def buscar_produto():
     except Exception as e:
         return jsonify({'error': f'Erro interno: {str(e)}'}), 500
 
-@main_bp.route('/webhook', methods=['POST'])
-def enviar_webhook():
+@main_bp.route('/processar_para_envio', methods=['POST']) # Rota renomeada de /webhook para /processar_para_envio
+def processar_para_envio():
     produto_para_salvar = {}
     try:
         data = request.get_json()
@@ -411,7 +507,11 @@ def enviar_webhook():
                 return jsonify({'error': 'Dados do produto não podem estar vazios'}), 400
             
             produto_para_salvar = produto_dados.copy()
-            produto_para_salvar['afiliado_link'] = afiliado_link
+            produto_para_salvar['afiliado_link'] = afiliado_link or produto_dados.get('link')
+            
+            # ⭐ Aplica o ID de afiliado na URL antes de processar/salvar
+            if 'mercadolivre.com' in produto_para_salvar.get('link', '').lower():
+                produto_para_salvar['link'] = aplicar_afiliado_ml(produto_para_salvar['link'])
 
             original_image_url = produto_para_salvar.get('imagem')
             if original_image_url:
@@ -419,31 +519,24 @@ def enviar_webhook():
                 if image_bytes:
                     produto_para_salvar['processed_image_url'] = services.upload_imagem_processada(image_bytes)
             
+            # GERAÇÃO DA MENSAGEM COM O NOVO PADRÃO
             mensagem_formatada = formatar_mensagem_marketing(produto_para_salvar)
-
-            # Preparar payload para n8n com imagem separada
-            payload = {
-                "message": mensagem_formatada,
-                "image_url": produto_para_salvar.get('processed_image_url') or produto_para_salvar.get('imagem'),
-                "produto_dados": produto_para_salvar
-            }
-
-            response = services.enviar_para_webhook(payload)
             
+            # SALVAR NO BANCO DE DADOS
             database.salvar_promocao(produto_para_salvar, final_message=mensagem_formatada)
 
+            # RETORNA A MENSAGEM GERADA E A IMAGEM (NÃO CHAMA WEBHOOK)
             return jsonify({
                 'success': True, 
-                'message': 'Webhook enviado.', 
+                'message': 'Produto processado. Mensagem gerada e salva no banco.', 
                 'final_message': mensagem_formatada,
                 'image_url': produto_para_salvar.get('processed_image_url') or original_image_url,
-                'webhook_status': response.status_code
             })
         else:
-            return jsonify({'error': 'Tipo de webhook inválido para esta operação'}), 400
+            return jsonify({'error': 'Tipo de processamento inválido'}), 400
         
     except Exception as e:
-        final_message_erro = f'Erro interno: {str(e)}'
+        final_message_erro = f'Erro interno durante o processamento: {str(e)}'
         if produto_para_salvar:
             database.salvar_promocao(produto_para_salvar, final_message=final_message_erro)
         return jsonify({'error': final_message_erro}), 500
@@ -458,9 +551,6 @@ def processar_produto_webhook():
         
         if not url_produto:
             return jsonify({'error': 'URL do produto é obrigatória'}), 400
-        
-        if not afiliado_link:
-            return jsonify({'error': 'Link de afiliado é obrigatório'}), 400
         
         # Detectar plataforma automaticamente
         platform = ScraperFactory.detect_platform_from_url(url_produto)
@@ -478,13 +568,13 @@ def processar_produto_webhook():
             produto_dados = scraper.scrape_product(url_produto, afiliado_link)
             response_time = time.time() - start_time
             
-            print(f"DEBUG: Produto dados antes da validação: {produto_dados}")
-            print(f"DEBUG: Blocked: {produto_dados.get('_blocked')}")
-            print(f"DEBUG: Fallback: {produto_dados.get('_fallback')}")
-            
             if not produto_dados:
                 return jsonify({'error': 'Produto não encontrado ou não foi possível extrair dados'}), 404
             
+            # ⭐ Aplica o ID de afiliado na URL antes de processar/salvar
+            if 'mercadolivre.com' in produto_dados.get('link', '').lower():
+                produto_dados['link'] = aplicar_afiliado_ml(produto_dados['link'])
+
             # Registrar métricas
             metrics_collector.record_scraping_metric(
                 platform=platform,
@@ -504,28 +594,18 @@ def processar_produto_webhook():
                 except Exception as e:
                     print(f"Erro ao processar imagem: {e}")
             
-            # Formatar mensagem de marketing
+            # Formatar mensagem de marketing com o NOVO PADRÃO
             mensagem_formatada = formatar_mensagem_marketing(produto_dados)
-
-            # Enviar para webhook com imagem separada
-            payload = {
-                "message": mensagem_formatada,
-                "image_url": produto_dados.get('processed_image_url') or produto_dados.get('imagem'),
-                "produto_dados": produto_dados
-            }
-
-            webhook_response = services.enviar_para_webhook(payload)
             
             # Salvar no banco de dados
             database.salvar_promocao(produto_dados, final_message=mensagem_formatada)
             
             return jsonify({
                 'success': True,
-                'message': 'Produto processado e webhook enviado com sucesso!',
+                'message': 'Produto processado. Mensagem gerada e salva no banco.',
                 'produto': produto_dados,
                 'final_message': mensagem_formatada,
                 'image_url': produto_dados.get('processed_image_url') or original_image_url,
-                'webhook_status': webhook_response.status_code,
                 'platform': platform,
                 'response_time': round(response_time, 2)
             })
@@ -638,6 +718,10 @@ def agendar_mensagem_whatsapp():
             "processed_image_url": imagem_url_final,  # URL do Supabase
             "fonte": "whatsapp"
         }
+        
+        # Gerar a mensagem final com o NOVO PADRÃO a partir do produto_dados (se houver preço/cupom na mensagem original)
+        # Como o whatsapp monitor envia uma mensagem já formatada (e queremos o novo padrão), 
+        # vou usar a mensagem_com_afiliado como base para formatar um item para aparecer na lista.
 
         # Salvar no banco SEM agendamento (para aparecer na lista de "não agendados")
         # A mensagem formatada com quebras de linha E links de afiliado substituídos
@@ -777,36 +861,35 @@ def enviar_produto_agendado(produto_id):
         produto_db = database.obter_produto_db(produto_id)
         if not produto_db:
             return jsonify({'error': 'Produto não encontrado'}), 404
+            
+        # Priorizar mensagem final salva (se editada)
         if produto_db.get('final_message'):
             mensagem_completa = produto_db.get('final_message')
+            image_url_final = produto_db.get('imagem_url') or produto_db.get('processed_image_url')
         else:
-            produto_para_formatar = {
-                'titulo': produto_db.get('titulo'),
-                'link': produto_db.get('link_produto'),
-                'link_afiliado': afiliado_link or produto_db.get('afiliado_link'),
-                'preco_atual': produto_db.get('preco_com_cupom') or produto_db.get('preco_atual'),
-                'preco_original': produto_db.get('preco_original'),
-                'desconto': produto_db.get('desconto'),
-                'tem_promocao': produto_db.get('tem_promocao')
-            }
+            # Recalcular a mensagem com o novo padrão, garantindo que todos os dados sejam passados
+            produto_para_formatar = produto_db.copy()
+            
+            # Se for Mercado Livre, garante o link de afiliado ML
+            if 'mercadolivre.com' in produto_para_formatar.get('link_produto', '').lower():
+                produto_para_formatar['link_produto'] = aplicar_afiliado_ml(produto_para_formatar.get('link_produto', ''))
+                # Atualiza também o campo de link de afiliado para o formatador
+                produto_para_formatar['afiliado_link'] = produto_para_formatar.get('link_produto') 
+            
+            produto_para_formatar['afiliado_link'] = afiliado_link or produto_para_formatar.get('afiliado_link')
+            produto_para_formatar['link'] = produto_para_formatar.get('link_produto') # Garantir link
+            
             mensagem_completa = formatar_mensagem_marketing(produto_para_formatar)
+            image_url_final = produto_db.get('imagem_url') or produto_db.get('processed_image_url')
 
-        # Adicionar URL da imagem ao payload
-        payload = {
-            "message": mensagem_completa.strip(),
-            "image_url": produto_db.get('processed_image_url') or produto_db.get('imagem_url')
-        }
-
-        response = services.enviar_para_webhook(payload)
-        if response.status_code in [200, 201, 202]:
-            return jsonify({
-                'success': True, 
-                'message': 'Produto enviado com sucesso!', 
-                'final_message': mensagem_completa,
-                'image_url': produto_db.get('imagem_url') or produto_db.get('processed_image_url')
-            })
-        else:
-            return jsonify({'error': f'Webhook retornou status {response.status_code}', 'webhook_response': response.text}), 400
+        # RETORNA A MENSAGEM GERADA E A IMAGEM (NÃO CHAMA WEBHOOK)
+        return jsonify({
+            'success': True, 
+            'message': 'Mensagem gerada com sucesso e pronta para envio!', 
+            'final_message': mensagem_completa.strip(),
+            'image_url': image_url_final
+        })
+            
     except Exception as e:
         return jsonify({'error': f'Erro interno: {str(e)}'}), 500
 
@@ -898,6 +981,10 @@ def scrape_unified():
             response_time = time.time() - start_time
             
             if product_data:
+                # ⭐ Aplica o ID de afiliado na URL para a resposta de sucesso
+                if 'mercadolivre.com' in product_data.get('link', '').lower():
+                    product_data['link'] = aplicar_afiliado_ml(product_data['link'])
+
                 # Registrar métricas
                 metrics_collector.record_scraping_metric(
                     platform=platform,
@@ -964,6 +1051,11 @@ def search_unified():
                         platform_products = scraper.scrape_search(query, max_pages)
                         response_time = time.time() - start_time
                         
+                        # ⭐ Aplica o ID de afiliado na URL dos resultados
+                        if platform_name.lower() == 'mercadolivre':
+                             for p in platform_products:
+                                 p['link'] = aplicar_afiliado_ml(p['link'])
+                        
                         # Registrar métricas
                         metrics_collector.record_scraping_metric(
                             platform=platform_name,
@@ -993,6 +1085,11 @@ def search_unified():
             start_time = time.time()
             products = scraper.scrape_search(query, max_pages)
             response_time = time.time() - start_time
+
+            # ⭐ Aplica o ID de afiliado na URL dos resultados
+            if platform.lower() == 'mercadolivre':
+                for p in products:
+                    p['link'] = aplicar_afiliado_ml(p['link'])
             
             # Registrar métricas
             metrics_collector.record_scraping_metric(
@@ -1135,7 +1232,70 @@ def clear_cache():
     except Exception as e:
         return jsonify({'error': f'Erro interno: {str(e)}'}), 500
 
-# === ROTAS DO WHATSAPP MONITOR ===
+# === ROTAS DO WHATSAPP MONITOR (BAILEYS PROXY) ===
+
+@main_bp.route('/whatsapp/send', methods=['POST'])
+def send_whatsapp_message():
+    """
+    Endpoint para enviar a mensagem formatada para o serviço Baileys/WhatsApp Monitor.
+    Recebe message e image_url geradas no processamento.
+    """
+    try:
+        data = request.get_json()
+        message = data.get('message')
+        image_url = data.get('imageUrl')
+        
+        # Define o grupo alvo a partir do env ou usa um placeholder
+        target_group = data.get('targetGroup') or os.getenv('WHATSAPP_DEFAULT_GROUP', '120363420970681294@g.us')
+
+        if not message:
+            return jsonify({'success': False, 'error': 'Mensagem é obrigatória'}), 400
+
+        # Payload para o serviço Baileys (O endpoint do monitor pode ter um /send-message)
+        baileys_payload = {
+            'target': target_group, 
+            'text': message,
+            'imageUrl': image_url 
+        }
+        
+        # Endpoint no serviço Baileys (Monitor)
+        # Assumindo que o serviço Baileys/Monitor tem um endpoint /send-message
+        baileys_url = f'{WHATSAPP_MONITOR_URL}/send-message' 
+
+        logger.info(f'📱 Enviando mensagem via Baileys para {target_group}...')
+        
+        # Faz o proxy da requisição
+        response = requests.post(baileys_url, json=baileys_payload, timeout=10)
+
+        # Retorna a resposta do serviço Baileys
+        # Se o Baileys retornar JSON:
+        try:
+            baileys_response_json = response.json()
+        except requests.exceptions.JSONDecodeError:
+            baileys_response_json = {'error': response.text}
+            
+        if response.status_code in [200, 201, 202]:
+             return jsonify({
+                'success': True,
+                'message': 'Mensagem enviada com sucesso para o WhatsApp!',
+                'baileys_response': baileys_response_json
+             }), 200
+        else:
+             return jsonify({
+                'success': False,
+                'error': 'Falha ao enviar mensagem via Baileys',
+                'status_code': response.status_code,
+                'baileys_response': baileys_response_json
+             }), response.status_code
+
+    except requests.exceptions.Timeout:
+        return jsonify({'success': False, 'error': 'Timeout ao tentar conectar com o serviço WhatsApp Monitor (Baileys)'}), 503
+    except requests.exceptions.ConnectionError:
+        return jsonify({'success': False, 'error': 'Serviço WhatsApp Monitor (Baileys) indisponível. Verifique se o serviço está online.'}), 503
+    except Exception as e:
+        logger.error(f'❌ Erro interno no envio via WhatsApp: {str(e)}')
+        return jsonify({'success': False, 'error': f'Erro interno: {str(e)}'}), 500
+
 
 @main_bp.route('/whatsapp-monitor')
 @login_required
@@ -1235,7 +1395,7 @@ def whatsapp_logout():
     """Proxy para fazer logout do WhatsApp"""
     try:
         # O valor de WHATSAPP_MONITOR_URL já foi corrigido no topo do arquivo.
-        WHATSAPP_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001')
+        WHATSAPP_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://localhost:3001')
 
         # Constrói a URL de forma segura (garantindo o scheme 'http://')
         full_url = f'{WHATSAPP_URL}/logout'
