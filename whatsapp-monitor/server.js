@@ -25,7 +25,7 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
-const FLASK_API = process.env.FLASK_API || 'http://localhost:5000';
+const FLASK_API = process.env.FLASK_API || 'http://qrcode:5000';
 
 // Suprimir erros de descriptografia e logs de sessão do console
 const originalConsoleError = console.error;
