@@ -39,6 +39,7 @@
           <a href="/index" class="active">Mercado Livre</a>
           <a href="/amazon">Amazon</a>
           <a href="/whatsapp-monitor">📱 WhatsApp Monitor</a>
+          <a href="/cupons-page">🎟️ Cupons</a>
         </nav>
       </div>
 
@@ -613,18 +614,21 @@
             
             <!-- Seção de Cupom -->
             <div class="cupom-section" style="margin-top: 20px; padding-top: 20px; border-top: 2px dashed #e1e8ed;">
-              <h4 style="margin-bottom: 15px; color: #333; display: flex; align-items: center; gap: 8px;">
-                🎟️ Adicionar Cupom de Desconto
+              <h4 style="margin-bottom: 15px; color: #333; display: flex; align-items: center; justify-content: space-between;">
+                <span style="display: flex; align-items: center; gap: 8px;">
+                  🎟️ Adicionar Cupom de Desconto
+                </span>
+                <a href="/cupons-page" target="_blank" style="font-size: 12px; color: #667eea; text-decoration: none;">
+                  Gerenciar Cupons →
+                </a>
               </h4>
-              
+
               <div class="form-row" style="display: flex; flex-direction: column; gap: 15px;">
-                <!-- Primeira linha: Texto do Cupom -->
+                <!-- Seletor de Cupom -->
                 <div class="form-group">
-                  <label for="cupomTexto">Texto do Cupom</label>
-                  <input
-                    type="text"
-                    id="cupomTexto"
-                    placeholder="Ex: DESCONTO10, PROMO2024"
+                  <label for="cupomSelect">Selecione um Cupom</label>
+                  <select
+                    id="cupomSelect"
                     style="
                       width: 100%;
                       padding: 10px;
@@ -632,96 +636,25 @@
                       border-radius: 8px;
                       border: 2px solid #e1e8ed;
                       font-family: inherit;
-                      text-transform: uppercase;
+                      background: white;
                     "
-                    oninput="this.value = this.value.toUpperCase(); calcularDesconto();"
-                  />
-                </div>
-                
-                <!-- Segunda linha: Tipo e Valor -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                  <div class="form-group">
-                    <label for="cupomTipo">Tipo de Desconto</label>
-                    <select
-                      id="cupomTipo"
-                      style="
-                        width: 100%;
-                        padding: 10px;
-                        font-size: 14px;
-                        border-radius: 8px;
-                        border: 2px solid #e1e8ed;
-                        font-family: inherit;
-                        background: white;
-                      "
-                      onchange="alterarTipoCupom(); calcularDesconto();"
-                    >
-                      <option value="porcentagem">% Porcentagem</option>
-                      <option value="valor">R$ Valor Fixo</option>
-                    </select>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="cupomValor" id="cupomValorLabel">Desconto (%)</label>
-                    <input
-                      type="number"
-                      id="cupomValor"
-                      placeholder="10"
-                      min="1"
-                      step="0.01"
-                      style="
-                        width: 100%;
-                        padding: 10px;
-                        font-size: 14px;
-                        border-radius: 8px;
-                        border: 2px solid #e1e8ed;
-                        font-family: inherit;
-                      "
-                      oninput="calcularDesconto();"
-                    />
-                  </div>
-                </div>
-                
-                <!-- Terceira linha: Link de Afiliado -->
-                <div class="form-group">
-                  <label for="cupomLinkAfiliado">🔗 Link de Afiliado (para usar na mensagem)</label>
-                  <input
-                    type="url"
-                    id="cupomLinkAfiliado"
-                    placeholder="https://seu-link-de-afiliado.com/produto"
-                    style="
-                      width: 100%;
-                      padding: 10px;
-                      font-size: 14px;
-                      border-radius: 8px;
-                      border: 2px solid #e1e8ed;
-                      font-family: inherit;
-                    "
-                  />
+                    onchange="selecionarCupom()"
+                  >
+                    <option value="">-- Nenhum cupom --</option>
+                  </select>
                   <small style="color: #666; margin-top: 5px; display: block;">
-                    Este link será usado na mensagem do cupom. Se vazio, usará o link original do produto.
+                    Escolha um cupom cadastrado ou deixe em branco para não usar cupom
                   </small>
                 </div>
-                
-                <button 
-                  type="button" 
-                  class="btn" 
-                  id="aplicarCupomBtn"
-                  onclick="aplicarCupom()"
-                  style="
-                    background-color: #ff6b6b;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    border: none;
-                    color: white;
-                    font-weight: 600;
-                    cursor: pointer;
-                    font-size: 14px;
-                    transition: all 0.3s ease;
-                    width: 100%;
-                  "
-                >
-                  🎟️ Aplicar Cupom ao Produto
-                </button>
+
+                <!-- Campos ocultos para armazenar dados do cupom -->
+                <input type="hidden" id="cupomTexto">
+                <input type="hidden" id="cupomValor">
+                <input type="hidden" id="cupomTipo" value="porcentagem">
+                <input type="hidden" id="cupomLimite">
+                <input type="hidden" id="cupomId">
+
+                <!-- Preview do cupom será exibido aqui -->
               </div>
               
               <div id="cupomPreview" style="

@@ -12,7 +12,7 @@ import re
 import logging
 
 
-WHATSAPP_MONITOR_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001')# Criar logger
+WHATSAPP_MONITOR_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://localhost:3001')# Criar logger
 logger = logging.getLogger(__name__)
 
 # Importa as funções dos outros módulos
@@ -396,6 +396,12 @@ def formatar_mensagem_marketing(produto_dados):
 @login_required
 def index():
     return render_template('index.html')
+
+@main_bp.route('/cupons-page')
+@login_required
+def cupons_page():
+    """Página de gerenciamento de cupons"""
+    return render_template('cupons.html')
 
 @main_bp.route('/amazon')
 @login_required
@@ -1436,7 +1442,7 @@ def whatsapp_logout():
     """Proxy para fazer logout do WhatsApp"""
     try:
         # O valor de WHATSAPP_MONITOR_URL já foi corrigido no topo do arquivo.
-        WHATSAPP_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001')
+        WHATSAPP_URL = os.getenv('WHATSAPP_MONITOR_URL', 'http://localhost:3001')
 
         # Constrói a URL de forma segura (garantindo o scheme 'http://')
         full_url = f'{WHATSAPP_URL}/logout'
@@ -1699,4 +1705,138 @@ def alternar_status_grupo_fixo_route(grupo_id):
 
     except Exception as e:
         print(f'Erro ao alternar status do grupo fixo: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# ============================================================================
+# ROTAS DE GERENCIAMENTO DE CUPONS
+# ============================================================================
+
+@main_bp.route('/cupons', methods=['GET'])
+@login_required
+def listar_cupons_route():
+    """Lista todos os cupons cadastrados."""
+    try:
+        cupons = database.listar_cupons()
+        return jsonify({
+            'success': True,
+            'cupons': cupons
+        })
+    except Exception as e:
+        print(f'Erro ao listar cupons: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/cupons', methods=['POST'])
+@login_required
+def adicionar_cupom_route():
+    """Adiciona um novo cupom."""
+    try:
+        data = request.get_json()
+        codigo = data.get('codigo')
+        porcentagem = data.get('porcentagem')
+        limite_valor = data.get('limite_valor')
+
+        if not codigo or porcentagem is None or limite_valor is None:
+            return jsonify({'success': False, 'error': 'codigo, porcentagem e limite_valor são obrigatórios'}), 400
+
+        resultado = database.adicionar_cupom(codigo, porcentagem, limite_valor)
+
+        if resultado['success']:
+            return jsonify(resultado)
+        else:
+            return jsonify(resultado), 400
+
+    except Exception as e:
+        print(f'Erro ao adicionar cupom: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/cupons/<int:cupom_id>', methods=['PUT'])
+@login_required
+def atualizar_cupom_route(cupom_id):
+    """Atualiza um cupom existente."""
+    try:
+        data = request.get_json()
+        codigo = data.get('codigo')
+        porcentagem = data.get('porcentagem')
+        limite_valor = data.get('limite_valor')
+
+        if not codigo or porcentagem is None or limite_valor is None:
+            return jsonify({'success': False, 'error': 'codigo, porcentagem e limite_valor são obrigatórios'}), 400
+
+        resultado = database.atualizar_cupom(cupom_id, codigo, porcentagem, limite_valor)
+
+        if resultado['success']:
+            return jsonify(resultado)
+        else:
+            return jsonify(resultado), 400
+
+    except Exception as e:
+        print(f'Erro ao atualizar cupom: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/cupons/<int:cupom_id>', methods=['DELETE'])
+@login_required
+def remover_cupom_route(cupom_id):
+    """Remove um cupom."""
+    try:
+        resultado = database.remover_cupom(cupom_id)
+
+        if resultado['success']:
+            return jsonify(resultado)
+        else:
+            return jsonify(resultado), 400
+
+    except Exception as e:
+        print(f'Erro ao remover cupom: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/cupons/<int:cupom_id>/toggle', methods=['PUT'])
+@login_required
+def alternar_status_cupom_route(cupom_id):
+    """Ativa ou desativa um cupom."""
+    try:
+        data = request.get_json()
+        ativo = data.get('ativo', True)
+
+        resultado = database.alternar_status_cupom(cupom_id, ativo)
+
+        if resultado['success']:
+            return jsonify(resultado)
+        else:
+            return jsonify(resultado), 400
+
+    except Exception as e:
+        print(f'Erro ao alternar status do cupom: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/cupons/ativos', methods=['GET'])
+@login_required
+def listar_cupons_ativos_route():
+    """Lista apenas cupons ativos."""
+    try:
+        cupons = database.listar_cupons_ativos()
+        return jsonify({
+            'success': True,
+            'cupons': cupons
+        })
+    except Exception as e:
+        print(f'Erro ao listar cupons ativos: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/cupons/calcular', methods=['POST'])
+@login_required
+def calcular_valor_com_cupom_route():
+    """Calcula valor final com cupom aplicado."""
+    try:
+        data = request.get_json()
+        preco_original = data.get('preco_original')
+        cupom_id = data.get('cupom_id')
+
+        if preco_original is None or cupom_id is None:
+            return jsonify({'success': False, 'error': 'preco_original e cupom_id são obrigatórios'}), 400
+
+        resultado = database.calcular_valor_com_cupom(float(preco_original), cupom_id)
+        return jsonify(resultado)
+
+    except Exception as e:
+        print(f'Erro ao calcular valor com cupom: {str(e)}')
         return jsonify({'success': False, 'error': str(e)}), 500

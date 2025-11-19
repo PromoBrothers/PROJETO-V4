@@ -199,13 +199,26 @@ window.openEditarForm = function (produtoId) {
   document.getElementById("editarImagemUrl").value = "";
   document.getElementById("editarMensagem").value = "";
   
+  // Limpar campos de cupom
   if (document.getElementById("cupomTexto")) {
     document.getElementById("cupomTexto").value = "";
     document.getElementById("cupomValor").value = "";
-    document.getElementById("cupomLinkAfiliado").value = "";
-    document.getElementById("cupomPreview").style.display = "none";
+    document.getElementById("cupomLimite").value = "";
+    document.getElementById("cupomId").value = "";
     document.getElementById("cupomTipo").value = "porcentagem";
-    alterarTipoCupom();
+
+    // Resetar select de cupom
+    const cupomSelect = document.getElementById("cupomSelect");
+    if (cupomSelect) {
+      cupomSelect.value = "";
+    }
+
+    // Limpar preview
+    const cupomPreview = document.getElementById("cupomPreview");
+    if (cupomPreview) {
+      cupomPreview.style.display = "none";
+      cupomPreview.innerHTML = "";
+    }
   }
 
   updateImagePreview();
@@ -215,9 +228,16 @@ window.openEditarForm = function (produtoId) {
     .then((data) => {
       if (data.success) {
         const produto = data.produto;
-        
+
         produtoAtualData = produto;
-        
+
+        console.log('📦 Produto carregado:', {
+          preco_atual: produto.preco_atual,
+          preco_original: produto.preco_original,
+          preco_promocional: produto.preco_promocional,
+          preco_com_cupom: produto.preco_com_cupom
+        });
+
         document.getElementById("editarImagemUrl").value =
           produto.imagem_url || "";
         document.getElementById("editarMensagem").value =
@@ -1406,7 +1426,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (editarForm) {
       editarForm.addEventListener("submit", async function (e) {
         e.preventDefault();
-        
+
         const produtoId = document.getElementById('editarProdutoId').value;
         const imagemUrl = document.getElementById('editarImagemUrl').value.trim();
         const mensagem = document.getElementById('editarMensagem').value.trim();
@@ -1418,13 +1438,51 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const dadosParaAtualizar = {};
-        
+
         // Só adiciona campos que não estão vazios
         if (imagemUrl) {
             dadosParaAtualizar.imagem_url = imagemUrl;
         }
         if (mensagem) {
             dadosParaAtualizar.final_message = mensagem;
+        }
+
+        // 🎟️ ADICIONAR DADOS DO CUPOM (se selecionado)
+        const cupomId = document.getElementById('cupomId') ? document.getElementById('cupomId').value : '';
+        const cupomTexto = document.getElementById('cupomTexto') ? document.getElementById('cupomTexto').value : '';
+
+        if (cupomId && cupomTexto) {
+            const cupomValor = document.getElementById('cupomValor').value;
+            const cupomLimite = document.getElementById('cupomLimite').value;
+
+            // Montar objeto cupom_info
+            dadosParaAtualizar.cupom_info = JSON.stringify({
+                cupom_id: cupomId,
+                codigo: cupomTexto,
+                porcentagem: parseFloat(cupomValor),
+                limite_valor: parseFloat(cupomLimite)
+            });
+
+            // Calcular e adicionar preco_com_cupom
+            if (produtoAtualData && produtoAtualData.preco_atual) {
+                const extrairPreco = (precoStr) => {
+                    if (!precoStr) return null;
+                    const numeroStr = precoStr.toString().replace(/[R$\s]/g, '').replace(',', '.');
+                    const numero = parseFloat(numeroStr);
+                    return isNaN(numero) ? null : numero;
+                };
+
+                const precoBase = extrairPreco(produtoAtualData.preco_atual);
+                if (precoBase) {
+                    const porcentagem = parseFloat(cupomValor);
+                    const limite = parseFloat(cupomLimite);
+                    let desconto = precoBase * (porcentagem / 100);
+                    if (desconto > limite) {
+                        desconto = limite;
+                    }
+                    dadosParaAtualizar.preco_com_cupom = precoBase - desconto;
+                }
+            }
         }
 
         // Verifica se há pelo menos um campo para atualizar
@@ -2716,3 +2774,241 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 console.log('✅ Sistema de grupos fixos carregado');
+
+// ============================================================================
+// SISTEMA DE CUPONS
+// ============================================================================
+
+let cuponsDisponiveis = [];
+
+/**
+ * Carrega cupons ativos do servidor
+ */
+async function carregarCuponsAtivos() {
+  try {
+    const response = await fetch('/cupons/ativos');
+    const data = await response.json();
+
+    if (data.success) {
+      cuponsDisponiveis = data.cupons;
+      preencherSelectCupons();
+      console.log(`✅ ${cuponsDisponiveis.length} cupons ativos carregados`);
+    }
+  } catch (error) {
+    console.error('Erro ao carregar cupons:', error);
+  }
+}
+
+/**
+ * Preenche o select de cupons com os cupons disponíveis
+ */
+function preencherSelectCupons() {
+  const select = document.getElementById('cupomSelect');
+  if (!select) return;
+
+  // Limpa opções existentes (mantém apenas a primeira)
+  while (select.options.length > 1) {
+    select.remove(1);
+  }
+
+  // Adiciona cupons
+  cuponsDisponiveis.forEach(cupom => {
+    const option = document.createElement('option');
+    option.value = cupom.id;
+    option.textContent = `${cupom.codigo} - ${cupom.porcentagem}% (máx R$ ${cupom.limite_valor.toFixed(2)})`;
+    option.dataset.codigo = cupom.codigo;
+    option.dataset.porcentagem = cupom.porcentagem;
+    option.dataset.limite = cupom.limite_valor;
+    select.appendChild(option);
+  });
+}
+
+/**
+ * Quando seleciona um cupom no dropdown
+ */
+function selecionarCupom() {
+  const select = document.getElementById('cupomSelect');
+  const selectedOption = select.options[select.selectedIndex];
+
+  if (!select.value) {
+    // Nenhum cupom selecionado - limpar campos
+    document.getElementById('cupomTexto').value = '';
+    document.getElementById('cupomValor').value = '';
+    document.getElementById('cupomLimite').value = '';
+    document.getElementById('cupomId').value = '';
+    document.getElementById('cupomTipo').value = 'porcentagem';
+    atualizarPreviewComCupom(null);
+    return;
+  }
+
+  // Preencher campos hidden com dados do cupom
+  const cupomId = select.value;
+  const codigo = selectedOption.dataset.codigo;
+  const porcentagem = selectedOption.dataset.porcentagem;
+  const limite = selectedOption.dataset.limite;
+
+  document.getElementById('cupomTexto').value = codigo;
+  document.getElementById('cupomValor').value = porcentagem;
+  document.getElementById('cupomLimite').value = limite;
+  document.getElementById('cupomId').value = cupomId;
+  document.getElementById('cupomTipo').value = 'porcentagem';
+
+  console.log(`✅ Cupom selecionado: ${codigo} (${porcentagem}% - máx R$ ${limite})`);
+
+  // Calcular e atualizar preview
+  calcularEAtualizarPreviewCupom();
+}
+
+/**
+ * Calcula o desconto e atualiza o preview da mensagem
+ */
+function calcularEAtualizarPreviewCupom() {
+  const cupomId = document.getElementById('cupomId').value;
+
+  if (!cupomId || !produtoAtualData) {
+    atualizarPreviewComCupom(null);
+    return;
+  }
+
+  // Função para extrair número de string de preço (ex: "R$ 599,00" -> 599.00)
+  const extrairPreco = (precoStr) => {
+    if (!precoStr) return null;
+    const numeroStr = precoStr.toString().replace(/[R$\s]/g, '').replace(',', '.');
+    const numero = parseFloat(numeroStr);
+    return isNaN(numero) ? null : numero;
+  };
+
+  // Usar preco_atual (que já é o preço correto do produto)
+  const precoBase = extrairPreco(produtoAtualData.preco_atual);
+
+  if (!precoBase) {
+    console.error('❌ Não foi possível extrair preço');
+    atualizarPreviewComCupom(null);
+    return;
+  }
+
+  const porcentagem = parseFloat(document.getElementById('cupomValor').value);
+  const limite = parseFloat(document.getElementById('cupomLimite').value);
+  const codigo = document.getElementById('cupomTexto').value;
+
+  console.log('💰 Calculando cupom:', {
+    preco_atual_str: produtoAtualData.preco_atual,
+    preco_base_numero: precoBase,
+    porcentagem,
+    limite
+  });
+
+  // Calcular desconto
+  let desconto = precoBase * (porcentagem / 100);
+  if (desconto > limite) {
+    desconto = limite;
+  }
+
+  const valorFinal = precoBase - desconto;
+
+  atualizarPreviewComCupom({
+    codigo,
+    precoOriginal: precoBase,
+    desconto,
+    valorFinal,
+    porcentagem,
+    limite
+  });
+}
+
+/**
+ * Atualiza o preview da mensagem com cupom
+ */
+function atualizarPreviewComCupom(cupomData) {
+  const previewElement = document.getElementById('cupomPreview');
+  if (!previewElement) return;
+
+  if (!cupomData) {
+    previewElement.style.display = 'none';
+    previewElement.innerHTML = '';
+
+    // 🔄 RESTAURAR MENSAGEM ORIGINAL (sem cupom)
+    const mensagemTextarea = document.getElementById('editarMensagem');
+    if (mensagemTextarea && produtoAtualData && produtoAtualData.final_message) {
+      mensagemTextarea.value = produtoAtualData.final_message;
+    }
+    return;
+  }
+
+  previewElement.style.display = 'block';
+  previewElement.innerHTML = `
+    <div style="
+      background: #f0f9ff;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+    ">
+      <div style="font-weight: 600; color: #667eea; margin-bottom: 10px;">
+        💰 Preview do Cupom:
+      </div>
+      <div style="color: #666; font-size: 14px; line-height: 1.6;">
+        <div>🏷️ Preço Original: <span style="text-decoration: line-through;">R$ ${cupomData.precoOriginal.toFixed(2)}</span></div>
+        <div>🎟️ Cupom: <strong>${cupomData.codigo}</strong> (${cupomData.porcentagem}%)</div>
+        <div>💸 Desconto: R$ ${cupomData.desconto.toFixed(2)}</div>
+        <div style="font-size: 16px; font-weight: 600; color: #10b981; margin-top: 8px;">
+          ✅ Preço Final: R$ ${cupomData.valorFinal.toFixed(2)}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 🎟️ ATUALIZAR MENSAGEM NO TEXTAREA COM CUPOM
+  const mensagemTextarea = document.getElementById('editarMensagem');
+  if (mensagemTextarea && produtoAtualData) {
+    const mensagemOriginal = produtoAtualData.final_message || '';
+
+    // Reformatar mensagem substituindo preço e cupom
+    let novaMensagem = mensagemOriginal;
+
+    // Substituir linha "De R$ XXX → Por R$ YYY"
+    const regexPreco = /De R\$ [\d,.]+ → Por R\$ [\d,.]+/g;
+    const novaLinhaPreco = `De R$ ${cupomData.precoOriginal.toFixed(2).replace('.', ',')} → Por R$ ${cupomData.valorFinal.toFixed(2).replace('.', ',')}`;
+
+    if (regexPreco.test(mensagemOriginal)) {
+      novaMensagem = novaMensagem.replace(regexPreco, novaLinhaPreco);
+    }
+
+    // Substituir linha "Cupom: XXX"
+    const regexCupom = /🎟️ Cupom: .+/g;
+    const novaLinhaCupom = `🎟️ Cupom: ${cupomData.codigo}`;
+
+    if (regexCupom.test(mensagemOriginal)) {
+      novaMensagem = novaMensagem.replace(regexCupom, novaLinhaCupom);
+    } else {
+      // Se não tem linha de cupom, adicionar depois da linha de preço
+      novaMensagem = novaMensagem.replace(regexPreco, `${novaLinhaPreco}\n${novaLinhaCupom}`);
+    }
+
+    mensagemTextarea.value = novaMensagem;
+  }
+}
+
+// Carregar cupons quando a página carregar
+document.addEventListener('DOMContentLoaded', () => {
+  carregarCuponsAtivos();
+
+  // Observer para recarregar cupons quando abrir modal de edição
+  const editModal = document.getElementById('editarModal');
+  if (editModal) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.target.style.display === 'block') {
+          carregarCuponsAtivos();
+        }
+      });
+    });
+
+    observer.observe(editModal, {
+      attributes: true,
+      attributeFilter: ['style']
+    });
+  }
+});
+
+console.log('✅ Sistema de cupons carregado');

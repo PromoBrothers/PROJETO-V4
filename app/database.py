@@ -304,3 +304,118 @@ def listar_grupos_fixos_ativos():
         return []
 
 
+# ============================================================================
+# FUNÇÕES DE GERENCIAMENTO DE CUPONS
+# ============================================================================
+
+def listar_cupons():
+    """Lista todos os cupons cadastrados."""
+    try:
+        response = supabase.table("cupons").select("*").order("criado_em", desc=True).execute()
+        return response.data
+    except Exception as e:
+        print(f"Erro ao listar cupons: {e}")
+        return []
+
+def adicionar_cupom(codigo, porcentagem, limite_valor):
+    """Adiciona um novo cupom."""
+    try:
+        # Verificar se o cupom já existe
+        existing = supabase.table("cupons").select("*").eq("codigo", codigo).execute()
+
+        if existing.data and len(existing.data) > 0:
+            return {"success": False, "error": "Cupom já existe com este código"}
+
+        data = {
+            "codigo": codigo.upper(),
+            "porcentagem": float(porcentagem),
+            "limite_valor": float(limite_valor),
+            "ativo": True
+        }
+        response = supabase.table("cupons").insert(data).execute()
+        return {"success": True, "data": response.data}
+    except Exception as e:
+        print(f"Erro ao adicionar cupom: {e}")
+        return {"success": False, "error": str(e)}
+
+def atualizar_cupom(cupom_id, codigo, porcentagem, limite_valor):
+    """Atualiza um cupom existente."""
+    try:
+        data = {
+            "codigo": codigo.upper(),
+            "porcentagem": float(porcentagem),
+            "limite_valor": float(limite_valor),
+            "atualizado_em": datetime.datetime.now().isoformat()
+        }
+        response = supabase.table("cupons").update(data).eq("id", cupom_id).execute()
+        return {"success": True, "data": response.data}
+    except Exception as e:
+        print(f"Erro ao atualizar cupom: {e}")
+        return {"success": False, "error": str(e)}
+
+def remover_cupom(cupom_id):
+    """Remove um cupom."""
+    try:
+        response = supabase.table("cupons").delete().eq("id", cupom_id).execute()
+        return {"success": True, "data": response.data}
+    except Exception as e:
+        print(f"Erro ao remover cupom: {e}")
+        return {"success": False, "error": str(e)}
+
+def alternar_status_cupom(cupom_id, ativo):
+    """Ativa ou desativa um cupom."""
+    try:
+        response = supabase.table("cupons").update({
+            "ativo": ativo,
+            "atualizado_em": datetime.datetime.now().isoformat()
+        }).eq("id", cupom_id).execute()
+        return {"success": True, "data": response.data}
+    except Exception as e:
+        print(f"Erro ao alternar status do cupom: {e}")
+        return {"success": False, "error": str(e)}
+
+def listar_cupons_ativos():
+    """Lista apenas os cupons ativos."""
+    try:
+        response = supabase.table("cupons").select("*").eq("ativo", True).order("codigo").execute()
+        return response.data
+    except Exception as e:
+        print(f"Erro ao listar cupons ativos: {e}")
+        return []
+
+def calcular_valor_com_cupom(preco_original, cupom_id):
+    """Calcula o valor final com cupom aplicado."""
+    try:
+        # Buscar cupom
+        cupom_response = supabase.table("cupons").select("*").eq("id", cupom_id).eq("ativo", True).execute()
+
+        if not cupom_response.data or len(cupom_response.data) == 0:
+            return {"success": False, "error": "Cupom não encontrado ou inativo"}
+
+        cupom = cupom_response.data[0]
+        porcentagem = cupom['porcentagem']
+        limite_valor = cupom['limite_valor']
+
+        # Calcular desconto
+        desconto = preco_original * (porcentagem / 100)
+
+        # Aplicar limite se necessário
+        if desconto > limite_valor:
+            desconto = limite_valor
+
+        valor_final = preco_original - desconto
+
+        return {
+            "success": True,
+            "preco_original": preco_original,
+            "desconto": desconto,
+            "valor_final": valor_final,
+            "cupom_codigo": cupom['codigo'],
+            "porcentagem": porcentagem,
+            "limite_valor": limite_valor
+        }
+    except Exception as e:
+        print(f"Erro ao calcular valor com cupom: {e}")
+        return {"success": False, "error": str(e)}
+
+
