@@ -2508,7 +2508,7 @@ async function carregarGruposDisponiveis() {
   lista.innerHTML = '';
 
   try {
-    const response = await fetch('http://localhost:3001/groups');
+    const response = await fetch('/whatsapp/groups');
     const result = await response.json();
 
     loading.style.display = 'none';
@@ -2574,7 +2574,7 @@ async function carregarGruposDisponiveis() {
         <p>❌ Erro ao carregar grupos WhatsApp</p>
         <small>${error.message}</small>
         <br><br>
-        <small>Certifique-se de que o servidor WhatsApp está rodando em localhost:3001</small>
+        <small>Certifique-se de que o WhatsApp Monitor está conectado</small>
       </div>
     `;
     showAlert('Erro ao carregar grupos: ' + error.message, 'error');

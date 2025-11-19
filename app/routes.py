@@ -1316,7 +1316,7 @@ def whatsapp_status():
 def whatsapp_qr():
     """Proxy para QR Code do WhatsApp"""
     try:
-        # WHATSAPP_MONITOR_URL deve ser 'http://localhost:3001'
+        # WHATSAPP_MONITOR_URL vem da variável de ambiente
         response = requests.get(f'{WHATSAPP_MONITOR_URL}/qr', timeout=5)
         
         # Tenta ler o JSON (o erro 'Unexpected token <' foi causado por um erro 404/500 no Flask)

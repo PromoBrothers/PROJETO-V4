@@ -19234,3 +19234,8 @@ ImportError: cannot import name 'extrair_dados_mercadolivre' from 'app.scraping'
 2025-11-18 23:29:34,707 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
 2025-11-18 23:30:04,993 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
 2025-11-18 23:30:35,198 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-18 23:31:05,593 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-18 23:31:35,799 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-18 23:32:06,132 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-18 23:32:36,265 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-18 23:33:06,373 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
