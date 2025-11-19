@@ -80,7 +80,15 @@
       "Bash(py:*)",
       "Bash(where:*)",
       "Bash(python3:*)",
-      "Bash(OTIMIZADO.md)"
+      "Bash(OTIMIZADO.md)",
+      "Bash(npm --version:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(\".env.example\" 2)",
+      "Bash(nul)",
+      "Bash(git check-ignore:*)",
+      "Bash(python3.11:*)",
+      "Bash(if exist \"c:\\Users\\Joao_\\OneDrive\\Documentos\\GitHub\\PROJETO-V4\\test_ml_formatacao.py\" del \"c:\\Users\\Joao_\\OneDrive\\Documentos\\GitHub\\PROJETO-V4\\test_ml_formatacao.py\")"
     ],
     "deny": [],
     "ask": []

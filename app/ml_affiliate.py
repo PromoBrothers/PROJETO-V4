@@ -71,6 +71,12 @@ class MercadoLivreAffiliate:
                     key, value = cookie_pair.strip().split("=", 1)
                     cookies[key] = value
 
+        # Avisar se não há cookies configurados
+        if not cookies:
+            logger.warning('⚠️ COOKIES DO MERCADO LIVRE NÃO CONFIGURADOS!')
+            logger.warning('📝 Configure os cookies no arquivo .env para gerar links de afiliado.')
+            logger.warning('📚 Veja instruções em: .env.example')
+
         return cookies
 
     def _try_generate_link(self, endpoint: str, payload: dict, headers: dict) -> Optional[str]:
@@ -121,10 +127,16 @@ class MercadoLivreAffiliate:
                 elif isinstance(response_data, dict) and 'affiliateLink' in response_data:
                     affiliate_link = response_data['affiliateLink']
 
+                if affiliate_link:
+                    logger.info(f'✅ API retornou link: {affiliate_link}')
+                else:
+                    logger.warning(f'⚠️ API retornou 200 mas sem link válido. Response: {response_data}')
+
                 return affiliate_link
 
             elif response.status_code == 401:
-                logger.error('❌ Erro 401: Cookies expirados')
+                logger.error('❌ Erro 401: Cookies expirados ou inválidos')
+                logger.error('📝 Renove os cookies no .env seguindo: CONFIGURAR_COOKIES_ML.md')
                 return None
 
             elif response.status_code == 403:

@@ -645,6 +645,7 @@ function createAgendamentoCard(produto) {
         <div class="product-actions">
             <button class="btn btn-reagendar" onclick="openAgendamentoForm('${produto.id}')">${produto.agendamento ? 'Reagendar' : 'Agendar'}</button>
             <button class="btn btn-editar" onclick="openEditarForm('${produto.id}')">Editar</button>
+            <button class="btn btn-primary" onclick="abrirModalEnvio('${produto.id}')" style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); border: none;">📤 Enviar Agora</button>
             <button class="btn btn-excluir" onclick="deletarAgendamento('${produto.id}', this)">Excluir</button>
         </div>
       `;
@@ -2035,3 +2036,683 @@ async function uploadImageToSupabase(base64Image, fileName) {
     return null;
   }
 }
+
+// ============================================
+// SISTEMA DE ENVIO DE MENSAGENS PARA GRUPOS
+// ============================================
+
+let produtoAtualEnvio = null;
+let gruposDisponiveis = [];
+let gruposSelecionados = new Set();
+
+/**
+ * Abre o modal de envio para um produto específico
+ */
+async function abrirModalEnvio(produtoId) {
+  try {
+    console.log('📤 Abrindo modal de envio para produto:', produtoId);
+
+    // Verificar se elementos do modal existem
+    const modal = document.getElementById('modalEnviarGrupos');
+    const tituloEl = document.getElementById('produtoTituloEnvio');
+    const precoEl = document.getElementById('produtoPrecoEnvio');
+
+    if (!modal) {
+      console.error('❌ Modal não encontrado no DOM');
+      alert('❌ Erro: Modal de envio não foi carregado. Recarregue a página.');
+      return;
+    }
+
+    if (!tituloEl || !precoEl) {
+      console.error('❌ Elementos do produto não encontrados:', { tituloEl, precoEl });
+      alert('❌ Erro: Elementos do modal não foram carregados. Recarregue a página.');
+      return;
+    }
+
+    // Buscar informações do produto
+    const response = await fetch(`/produtos/${produtoId}`);
+    const data = await response.json();
+
+    if (!data.success) {
+      alert('❌ Erro ao carregar produto: ' + (data.error || 'Desconhecido'));
+      return;
+    }
+
+    produtoAtualEnvio = data.produto;
+    console.log('✅ Produto carregado:', produtoAtualEnvio);
+
+    // Preencher informações do produto
+    tituloEl.textContent = produtoAtualEnvio.titulo || produtoAtualEnvio.link_produto || 'Sem título';
+    precoEl.textContent = produtoAtualEnvio.preco_atual || produtoAtualEnvio.preco_com_cupom || 'Preço não disponível';
+
+    // Carregar grupos
+    await carregarGruposWhatsApp();
+
+    // Mostrar modal
+    modal.style.display = 'flex';
+
+  } catch (error) {
+    console.error('❌ Erro ao abrir modal:', error);
+    alert('❌ Erro ao abrir modal de envio: ' + error.message);
+  }
+}
+
+/**
+ * Fecha o modal de envio
+ */
+function fecharModalEnvio() {
+  document.getElementById('modalEnviarGrupos').style.display = 'none';
+  gruposSelecionados.clear();
+  produtoAtualEnvio = null;
+  console.log('✅ Modal fechado');
+}
+
+/**
+ * Carrega lista de grupos do WhatsApp
+ */
+async function carregarGruposWhatsApp() {
+  const listaGrupos = document.getElementById('listaGruposEnvio');
+  listaGrupos.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">🔄 Carregando grupos...</p>';
+
+  try {
+    console.log('📡 Buscando grupos do WhatsApp e grupos fixos...');
+
+    // Buscar grupos do WhatsApp e grupos fixos em paralelo
+    const [gruposResponse, gruposFixosResponse] = await Promise.all([
+      fetch('/whatsapp/groups'),
+      fetch('/grupos-fixos')
+    ]);
+
+    const data = await gruposResponse.json();
+    const gruposFixosData = await gruposFixosResponse.json();
+
+    console.log('📱 Resposta dos grupos:', data);
+    console.log('📌 Grupos fixos:', gruposFixosData);
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    if (!data.groups || data.groups.length === 0) {
+      listaGrupos.innerHTML = `
+        <div style="text-align: center; padding: 30px; color: #999;">
+          <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
+          <p style="font-size: 16px; margin-bottom: 10px;">Nenhum grupo encontrado</p>
+          <p style="font-size: 13px; color: #666;">Verifique se o WhatsApp está conectado</p>
+          <button onclick="window.location.href='/whatsapp-monitor'" class="btn btn-primary" style="margin-top: 15px;">
+            📱 Ir para WhatsApp Monitor
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    gruposDisponiveis = data.groups;
+
+    // Criar set com IDs dos grupos fixos ativos
+    const gruposFixosAtivos = new Set(
+      (gruposFixosData.grupos || [])
+        .filter(g => g.ativo)
+        .map(g => g.grupo_id)
+    );
+
+    console.log(`✅ ${gruposDisponiveis.length} grupos carregados, ${gruposFixosAtivos.size} grupos fixos ativos`);
+
+    // Renderizar lista de grupos
+    listaGrupos.innerHTML = '';
+
+    data.groups.forEach((grupo, index) => {
+      const isGrupoFixo = gruposFixosAtivos.has(grupo.id);
+
+      const grupoDiv = document.createElement('div');
+      grupoDiv.className = 'grupo-item-envio';
+      grupoDiv.onclick = (e) => {
+        if (e.target.tagName !== 'INPUT') {
+          toggleGrupo(grupo.id);
+        }
+      };
+
+      grupoDiv.innerHTML = `
+        <input
+          type="checkbox"
+          id="grupo-${grupo.id}"
+          ${isGrupoFixo ? 'checked' : ''}
+          onchange="toggleGrupo('${grupo.id}')"
+          onclick="event.stopPropagation()"
+        />
+        <div class="grupo-info-envio">
+          <div class="grupo-nome-envio">
+            ${grupo.name}
+            ${grupo.monitored ? '<span class="grupo-monitorado-badge">Monitorado</span>' : ''}
+            ${isGrupoFixo ? '<span class="grupo-fixo-badge">📌 Grupo Fixo</span>' : ''}
+          </div>
+          <div class="grupo-participantes-envio">
+            👥 ${grupo.participants} participantes
+          </div>
+        </div>
+      `;
+
+      listaGrupos.appendChild(grupoDiv);
+
+      // Se for grupo fixo, adicionar aos selecionados
+      if (isGrupoFixo) {
+        gruposSelecionados.add(grupo.id);
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Erro ao carregar grupos:', error);
+    listaGrupos.innerHTML = `
+      <div style="text-align: center; padding: 30px; color: #f44336;">
+        <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
+        <p style="font-size: 16px; margin-bottom: 10px;">Erro ao carregar grupos</p>
+        <p style="font-size: 13px; color: #666; margin-bottom: 15px;">${error.message}</p>
+        <button onclick="carregarGruposWhatsApp()" class="btn btn-primary">
+          🔄 Tentar Novamente
+        </button>
+      </div>
+    `;
+  }
+}
+
+/**
+ * Toggle seleção de grupo
+ */
+function toggleGrupo(grupoId) {
+  const checkbox = document.getElementById(`grupo-${grupoId}`);
+
+  if (gruposSelecionados.has(grupoId)) {
+    gruposSelecionados.delete(grupoId);
+    checkbox.checked = false;
+    console.log('➖ Grupo desmarcado:', grupoId);
+  } else {
+    gruposSelecionados.add(grupoId);
+    checkbox.checked = true;
+    console.log('✅ Grupo selecionado:', grupoId);
+  }
+
+  atualizarResumoSelecao();
+}
+
+/**
+ * Atualiza resumo de grupos selecionados
+ */
+function atualizarResumoSelecao() {
+  const total = gruposSelecionados.size;
+  const resumo = document.getElementById('resumoSelecaoEnvio');
+  const totalSpan = document.getElementById('totalGruposSelecionados');
+
+  if (!resumo || !totalSpan) {
+    console.warn('⚠️ Elementos de resumo não encontrados');
+    return;
+  }
+
+  totalSpan.textContent = total;
+
+  if (total > 0) {
+    resumo.style.display = 'block';
+  } else {
+    resumo.style.display = 'none';
+  }
+}
+
+/**
+ * Envia mensagem para grupos selecionados
+ */
+async function enviarParaGruposSelecionados() {
+  if (gruposSelecionados.size === 0) {
+    alert('⚠️ Selecione pelo menos um grupo');
+    return;
+  }
+
+  if (!produtoAtualEnvio) {
+    alert('❌ Produto não encontrado');
+    return;
+  }
+
+  // Confirmar envio
+  const produtoNome = produtoAtualEnvio.titulo || produtoAtualEnvio.link_produto || 'Produto';
+  const confirmar = confirm(
+    `📤 Enviar mensagem para ${gruposSelecionados.size} grupo(s)?\n\n` +
+    `Produto: ${produtoNome.substring(0, 60)}${produtoNome.length > 60 ? '...' : ''}`
+  );
+
+  if (!confirmar) return;
+
+  const btnEnviar = document.getElementById('btnEnviarMensagem');
+  const textoOriginal = btnEnviar.innerHTML;
+  btnEnviar.disabled = true;
+  btnEnviar.innerHTML = '⏳ Enviando...';
+
+  try {
+    console.log('📤 Enviando mensagem...');
+    console.log('  Produto ID:', produtoAtualEnvio.id);
+    console.log('  Grupos:', Array.from(gruposSelecionados));
+
+    const response = await fetch('/enviar-mensagem', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        produto_id: produtoAtualEnvio.id,
+        grupos: Array.from(gruposSelecionados)
+      })
+    });
+
+    const result = await response.json();
+    console.log('📨 Resultado do envio:', result);
+
+    if (result.success) {
+      alert(
+        `✅ ${result.message}\n\n` +
+        `Enviado com sucesso: ${result.detalhes.total_enviado}\n` +
+        `Falhas: ${result.detalhes.total_falhou}`
+      );
+
+      fecharModalEnvio();
+
+      // Atualizar lista de produtos se estiver na aba de agendamento
+      if (typeof listarProdutosAgendados === 'function') {
+        listarProdutosAgendados();
+      }
+    } else {
+      alert(`❌ Erro ao enviar: ${result.error}`);
+    }
+
+  } catch (error) {
+    console.error('❌ Erro ao enviar mensagem:', error);
+    alert(`❌ Erro ao enviar mensagem: ${error.message}`);
+  } finally {
+    btnEnviar.disabled = false;
+    btnEnviar.innerHTML = textoOriginal;
+  }
+}
+
+console.log('✅ Sistema de envio de mensagens carregado');
+
+// ============================================================================
+// SISTEMA DE GRUPOS FIXOS PARA AGENDAMENTO AUTOMÁTICO
+// ============================================================================
+
+/**
+ * Carrega e exibe a lista de grupos fixos
+ */
+async function carregarGruposFixos() {
+  console.log('📋 Carregando grupos fixos...');
+  const container = document.getElementById('listaGruposFixos');
+
+  if (!container) {
+    console.warn('⚠️ Container de grupos fixos não encontrado');
+    return;
+  }
+
+  container.innerHTML = '<p style="text-align: center; color: #999;">Carregando grupos fixos...</p>';
+
+  try {
+    const response = await fetch('/grupos-fixos');
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Erro ao carregar grupos fixos');
+    }
+
+    const grupos = result.grupos || [];
+
+    if (grupos.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 30px; color: #999;">
+          <div style="font-size: 48px; margin-bottom: 10px;">📱</div>
+          <p style="margin: 0; font-size: 14px;">Nenhum grupo fixo configurado</p>
+          <small>Adicione grupos para receber mensagens agendadas automaticamente</small>
+        </div>
+      `;
+      return;
+    }
+
+    // Renderiza a lista de grupos
+    container.innerHTML = grupos.map(grupo => `
+      <div class="grupo-fixo-item" style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        border: 1px solid #e1e8ed;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background: white;
+        transition: all 0.2s;
+      " onmouseover="this.style.borderColor='#667eea'" onmouseout="this.style.borderColor='#e1e8ed'">
+        <div style="flex: 1;">
+          <div style="font-weight: 600; color: #333; margin-bottom: 5px;">
+            📱 ${grupo.grupo_nome}
+          </div>
+          <div style="font-size: 12px; color: #666; font-family: monospace;">
+            ID: ${grupo.grupo_id}
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 24px;">
+            <input
+              type="checkbox"
+              ${grupo.ativo ? 'checked' : ''}
+              onchange="alternarStatusGrupoFixo('${grupo.grupo_id}', this.checked)"
+              style="opacity: 0; width: 0; height: 0;"
+            >
+            <span style="
+              position: absolute;
+              cursor: pointer;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background-color: ${grupo.ativo ? '#4CAF50' : '#ccc'};
+              transition: .4s;
+              border-radius: 24px;
+            ">
+              <span style="
+                position: absolute;
+                content: '';
+                height: 18px;
+                width: 18px;
+                left: ${grupo.ativo ? '26px' : '3px'};
+                bottom: 3px;
+                background-color: white;
+                transition: .4s;
+                border-radius: 50%;
+                display: block;
+              "></span>
+            </span>
+          </label>
+          <button
+            onclick="confirmarRemoverGrupoFixo('${grupo.grupo_id}', '${grupo.grupo_nome.replace(/'/g, "\\'")}')"
+            style="
+              background-color: #e74c3c;
+              color: white;
+              border: none;
+              padding: 8px 12px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 12px;
+              font-weight: 600;
+              transition: all 0.2s;
+            "
+            onmouseover="this.style.backgroundColor='#c0392b'"
+            onmouseout="this.style.backgroundColor='#e74c3c'"
+          >
+            🗑️ Remover
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    console.log(`✅ ${grupos.length} grupos fixos carregados`);
+
+  } catch (error) {
+    console.error('❌ Erro ao carregar grupos fixos:', error);
+    container.innerHTML = `
+      <div style="text-align: center; padding: 20px; color: #e74c3c;">
+        <p>❌ Erro ao carregar grupos fixos</p>
+        <small>${error.message}</small>
+      </div>
+    `;
+    showAlert('Erro ao carregar grupos fixos: ' + error.message, 'error');
+  }
+}
+
+/**
+ * Abre modal para adicionar grupo fixo
+ */
+function abrirModalAdicionarGrupoFixo() {
+  const modal = document.getElementById('modalAdicionarGrupoFixo');
+  if (modal) {
+    modal.style.display = 'block';
+  }
+}
+
+/**
+ * Fecha modal de adicionar grupo fixo
+ */
+function fecharModalAdicionarGrupoFixo() {
+  const modal = document.getElementById('modalAdicionarGrupoFixo');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+
+  // Limpa a lista de grupos disponíveis
+  const lista = document.getElementById('listaGruposDisponiveis');
+  if (lista) {
+    lista.innerHTML = `
+      <p style="text-align: center; color: #999; padding: 20px;">
+        Clique em "Carregar Grupos WhatsApp" para listar os grupos disponíveis
+      </p>
+    `;
+  }
+}
+
+/**
+ * Carrega lista de grupos WhatsApp disponíveis
+ */
+async function carregarGruposDisponiveis() {
+  console.log('📱 Carregando grupos WhatsApp disponíveis...');
+
+  const lista = document.getElementById('listaGruposDisponiveis');
+  const loading = document.getElementById('loadingGruposDisponiveis');
+
+  if (!lista || !loading) {
+    console.warn('⚠️ Elementos não encontrados');
+    return;
+  }
+
+  loading.style.display = 'block';
+  lista.innerHTML = '';
+
+  try {
+    const response = await fetch('http://localhost:3001/groups');
+    const result = await response.json();
+
+    loading.style.display = 'none';
+
+    // A API do WhatsApp retorna diretamente {"groups": [...]}
+    const grupos = result.groups || [];
+
+    if (grupos.length === 0) {
+      lista.innerHTML = `
+        <p style="text-align: center; color: #999; padding: 20px;">
+          Nenhum grupo WhatsApp encontrado
+        </p>
+      `;
+      return;
+    }
+
+    // Renderiza a lista de grupos disponíveis
+    lista.innerHTML = grupos.map(grupo => `
+      <div style="
+        padding: 15px;
+        border: 1px solid #e1e8ed;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+      " onclick="adicionarGrupoFixoSelecionado('${grupo.id}', '${(grupo.name || grupo.subject || 'Sem nome').replace(/'/g, "\\'")}')">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="flex: 1;">
+            <div style="font-weight: 600; color: #333; margin-bottom: 5px;">
+              ${grupo.name || grupo.subject || 'Sem nome'}
+            </div>
+            <div style="font-size: 12px; color: #666;">
+              ${grupo.size || grupo.participants?.length || 0} participantes
+            </div>
+          </div>
+          <button
+            onclick="event.stopPropagation(); adicionarGrupoFixoSelecionado('${grupo.id}', '${(grupo.name || grupo.subject || 'Sem nome').replace(/'/g, "\\'")}')"
+            style="
+              background-color: #667eea;
+              color: white;
+              border: none;
+              padding: 8px 16px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 12px;
+              font-weight: 600;
+            "
+          >
+            ➕ Adicionar
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    console.log(`✅ ${grupos.length} grupos WhatsApp carregados`);
+
+  } catch (error) {
+    console.error('❌ Erro ao carregar grupos WhatsApp:', error);
+    loading.style.display = 'none';
+    lista.innerHTML = `
+      <div style="text-align: center; padding: 20px; color: #e74c3c;">
+        <p>❌ Erro ao carregar grupos WhatsApp</p>
+        <small>${error.message}</small>
+        <br><br>
+        <small>Certifique-se de que o servidor WhatsApp está rodando em localhost:3001</small>
+      </div>
+    `;
+    showAlert('Erro ao carregar grupos: ' + error.message, 'error');
+  }
+}
+
+/**
+ * Adiciona um grupo selecionado à lista de grupos fixos
+ */
+async function adicionarGrupoFixoSelecionado(grupoId, grupoNome) {
+  console.log(`➕ Adicionando grupo fixo: ${grupoNome} (${grupoId})`);
+
+  try {
+    const response = await fetch('/grupos-fixos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        grupo_id: grupoId,
+        grupo_nome: grupoNome
+      })
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Erro ao adicionar grupo fixo');
+    }
+
+    showAlert(`✅ Grupo "${grupoNome}" adicionado com sucesso!`, 'success');
+
+    // Fecha o modal
+    fecharModalAdicionarGrupoFixo();
+
+    // Recarrega a lista de grupos fixos
+    await carregarGruposFixos();
+
+  } catch (error) {
+    console.error('❌ Erro ao adicionar grupo fixo:', error);
+    showAlert('Erro ao adicionar grupo: ' + error.message, 'error');
+  }
+}
+
+/**
+ * Alterna o status ativo/inativo de um grupo fixo
+ */
+async function alternarStatusGrupoFixo(grupoId, ativo) {
+  console.log(`🔄 Alternando status do grupo ${grupoId} para ${ativo ? 'ativo' : 'inativo'}`);
+
+  try {
+    const response = await fetch(`/grupos-fixos/${grupoId}/toggle`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ ativo })
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Erro ao alternar status');
+    }
+
+    showAlert(
+      `✅ Grupo ${ativo ? 'ativado' : 'desativado'} com sucesso!`,
+      'success'
+    );
+
+  } catch (error) {
+    console.error('❌ Erro ao alternar status:', error);
+    showAlert('Erro ao alternar status: ' + error.message, 'error');
+    // Recarrega para reverter o switch
+    await carregarGruposFixos();
+  }
+}
+
+/**
+ * Confirma e remove um grupo fixo
+ */
+function confirmarRemoverGrupoFixo(grupoId, grupoNome) {
+  const confirmar = confirm(
+    `❌ Deseja realmente remover o grupo "${grupoNome}" da lista de grupos fixos?\n\n` +
+    'Ele não receberá mais as mensagens agendadas automaticamente.'
+  );
+
+  if (confirmar) {
+    removerGrupoFixo(grupoId);
+  }
+}
+
+/**
+ * Remove um grupo fixo
+ */
+async function removerGrupoFixo(grupoId) {
+  console.log(`🗑️ Removendo grupo fixo: ${grupoId}`);
+
+  try {
+    const response = await fetch(`/grupos-fixos/${grupoId}`, {
+      method: 'DELETE'
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Erro ao remover grupo fixo');
+    }
+
+    showAlert('✅ Grupo removido com sucesso!', 'success');
+
+    // Recarrega a lista de grupos fixos
+    await carregarGruposFixos();
+
+  } catch (error) {
+    console.error('❌ Erro ao remover grupo fixo:', error);
+    showAlert('Erro ao remover grupo: ' + error.message, 'error');
+  }
+}
+
+// Carrega grupos fixos quando a aba de configurações for aberta
+document.addEventListener('DOMContentLoaded', () => {
+  // Observer para detectar quando a aba de configurações é aberta
+  const configTab = document.getElementById('tab-config');
+  if (configTab) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.target.classList.contains('active')) {
+          carregarGruposFixos();
+        }
+      });
+    });
+
+    observer.observe(configTab, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  }
+});
+
+console.log('✅ Sistema de grupos fixos carregado');

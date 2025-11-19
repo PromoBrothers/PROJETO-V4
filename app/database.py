@@ -230,4 +230,58 @@ def listar_pastas_bucket(bucket_name="imagens", pasta_pai=""):
         print(f"Erro ao listar pastas do bucket: {e}")
         return []
 
+# ============================================================================
+# FUNÇÕES PARA GERENCIAR GRUPOS FIXOS DE AGENDAMENTO
+# ============================================================================
+
+def listar_grupos_fixos():
+    """Lista todos os grupos fixos cadastrados para agendamentos automáticos."""
+    try:
+        response = supabase.table("grupos_fixos_agendamento").select("*").order("criado_em", desc=False).execute()
+        return response.data
+    except Exception as e:
+        print(f"Erro ao listar grupos fixos: {e}")
+        return []
+
+def adicionar_grupo_fixo(grupo_id, grupo_nome):
+    """Adiciona um novo grupo fixo para receber agendamentos automáticos."""
+    try:
+        data = {
+            "grupo_id": grupo_id,
+            "grupo_nome": grupo_nome,
+            "ativo": True
+        }
+        response = supabase.table("grupos_fixos_agendamento").insert(data).execute()
+        return {"success": True, "data": response.data}
+    except Exception as e:
+        print(f"Erro ao adicionar grupo fixo: {e}")
+        return {"success": False, "error": str(e)}
+
+def remover_grupo_fixo(grupo_id):
+    """Remove um grupo fixo da lista de agendamentos automáticos."""
+    try:
+        response = supabase.table("grupos_fixos_agendamento").delete().eq("grupo_id", grupo_id).execute()
+        return {"success": True, "data": response.data}
+    except Exception as e:
+        print(f"Erro ao remover grupo fixo: {e}")
+        return {"success": False, "error": str(e)}
+
+def alternar_status_grupo_fixo(grupo_id, ativo):
+    """Ativa ou desativa um grupo fixo."""
+    try:
+        response = supabase.table("grupos_fixos_agendamento").update({"ativo": ativo, "atualizado_em": datetime.datetime.now().isoformat()}).eq("grupo_id", grupo_id).execute()
+        return {"success": True, "data": response.data}
+    except Exception as e:
+        print(f"Erro ao alternar status do grupo fixo: {e}")
+        return {"success": False, "error": str(e)}
+
+def listar_grupos_fixos_ativos():
+    """Lista apenas os grupos fixos ativos."""
+    try:
+        response = supabase.table("grupos_fixos_agendamento").select("*").eq("ativo", True).execute()
+        return response.data
+    except Exception as e:
+        print(f"Erro ao listar grupos fixos ativos: {e}")
+        return []
+
 

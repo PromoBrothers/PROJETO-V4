@@ -10,7 +10,7 @@ const {
     fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,
     downloadMediaMessage
-} = require('@whiskeysockets/baileys');
+} = require('baileys');
 const express = require('express');
 const cors = require('cors');
 const QRCode = require('qrcode');
@@ -26,6 +26,32 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 const FLASK_API = process.env.FLASK_API || 'http://localhost:5000';
+
+// Suprimir erros de descriptografia e logs de sessão do console
+const originalConsoleError = console.error;
+const originalConsoleLog = console.log;
+
+console.error = (...args) => {
+    const message = args.join(' ');
+    // Ignorar erros Bad MAC e erros de descriptografia
+    if (message.includes('Bad MAC') ||
+        message.includes('Failed to decrypt') ||
+        message.includes('Session error')) {
+        return;
+    }
+    originalConsoleError.apply(console, args);
+};
+
+console.log = (...args) => {
+    const message = args.join(' ');
+    // Ignorar logs verbosos de sessão
+    if (message.includes('Closing session') ||
+        message.includes('Closing open session in favor of incoming prekey bundle') ||
+        message.includes('SessionEntry')) {
+        return;
+    }
+    originalConsoleLog.apply(console, args);
+};
 
 // Cache para QR Code
 const qrCodeCache = new NodeCache({ stdTTL: 300 });
@@ -181,18 +207,38 @@ async function connectToWhatsApp() {
 
     // Monitorar mensagens dos grupos
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
+        console.log(`📨 Mensagens recebidas: ${messages.length}, tipo: ${type}`);
+
         if (type !== 'notify') return;
 
         for (const message of messages) {
             try {
+                // Ignorar mensagens sem conteúdo descriptografado (sessões corrompidas)
+                if (!message.message) {
+                    console.log('⚠️ Mensagem sem conteúdo - ignorando (pode ser erro de descriptografia)');
+                    continue;
+                }
+
                 // Ignorar mensagens próprias
                 if (message.key.fromMe) continue;
 
                 const chatId = message.key.remoteJid;
 
                 // Verificar se é de um grupo monitorado
-                if (!chatId.includes('@g.us')) continue;
-                if (!monitoredGroups.has(chatId)) continue;
+                if (!chatId.includes('@g.us')) {
+                    console.log(`⏭️ Não é grupo: ${chatId}`);
+                    continue;
+                }
+
+                console.log(`📱 Mensagem do grupo: ${chatId}`);
+                console.log(`📋 Grupos monitorados: ${Array.from(monitoredGroups).join(', ')}`);
+
+                if (!monitoredGroups.has(chatId)) {
+                    console.log(`⏭️ Grupo não monitorado: ${chatId}`);
+                    continue;
+                }
+
+                console.log(`✅ Grupo monitorado! Processando mensagem...`);
 
                 // Extrair texto da mensagem
                 const text = message.message?.conversation ||

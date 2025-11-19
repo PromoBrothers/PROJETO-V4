@@ -1476,3 +1476,186 @@ def upload_image():
             'success': False,
             'error': f'Erro interno: {str(e)}'
         }), 500
+
+# === ROTAS DE ENVIO DE MENSAGENS ===
+
+@main_bp.route('/enviar-mensagem', methods=['POST'])
+def enviar_mensagem_manual():
+    """Envia mensagem manualmente para grupos selecionados"""
+    try:
+        from .scheduler import message_scheduler
+
+        data = request.get_json()
+        produto_id = data.get('produto_id')
+        grupos = data.get('grupos', [])
+
+        if not produto_id:
+            return jsonify({'success': False, 'error': 'produto_id é obrigatório'}), 400
+
+        if not grupos or not isinstance(grupos, list):
+            return jsonify({'success': False, 'error': 'grupos deve ser uma lista não vazia'}), 400
+
+        logger.info(f'📤 Enviando mensagem manual do produto {produto_id} para {len(grupos)} grupo(s)')
+
+        # Enviar mensagem
+        resultado = message_scheduler.send_message_now(produto_id, grupos)
+
+        if resultado['success']:
+            return jsonify({
+                'success': True,
+                'message': f'Mensagem enviada para {resultado["total_enviado"]} grupo(s)',
+                'detalhes': resultado
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': resultado.get('error', 'Erro desconhecido')
+            }), 500
+
+    except Exception as e:
+        logger.error(f'❌ Erro ao enviar mensagem: {str(e)}')
+        import traceback
+        logger.error(traceback.format_exc())
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/scheduler/status', methods=['GET'])
+def scheduler_status():
+    """Retorna status do scheduler de mensagens"""
+    try:
+        from .scheduler import message_scheduler
+
+        return jsonify({
+            'success': True,
+            'running': message_scheduler.running,
+            'check_interval': message_scheduler.check_interval,
+            'whatsapp_url': message_scheduler.whatsapp_url
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/configurar-grupos-auto', methods=['POST'])
+def configurar_grupos_auto():
+    """Configura quais grupos recebem mensagens agendadas automaticamente"""
+    try:
+        data = request.get_json()
+        grupos = data.get('grupos', [])
+
+        if not isinstance(grupos, list):
+            return jsonify({'success': False, 'error': 'grupos deve ser uma lista'}), 400
+
+        # Salvar configuração no .env ou banco de dados
+        # Por enquanto, vamos salvar em um arquivo JSON
+        import json
+        config_file = 'app/config/auto_send_groups.json'
+
+        os.makedirs(os.path.dirname(config_file), exist_ok=True)
+
+        with open(config_file, 'w', encoding='utf-8') as f:
+            json.dump({'grupos': grupos}, f, indent=2)
+
+        logger.info(f'✅ Configurados {len(grupos)} grupos para envio automático')
+
+        return jsonify({
+            'success': True,
+            'message': f'{len(grupos)} grupo(s) configurado(s) para envio automático'
+        })
+
+    except Exception as e:
+        logger.error(f'❌ Erro ao configurar grupos: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/configurar-grupos-auto', methods=['GET'])
+def obter_grupos_auto():
+    """Obtém configuração de grupos para envio automático"""
+    try:
+        import json
+        config_file = 'app/config/auto_send_groups.json'
+
+        if os.path.exists(config_file):
+            with open(config_file, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                return jsonify({
+                    'success': True,
+                    'grupos': config.get('grupos', [])
+                })
+        else:
+            return jsonify({
+                'success': True,
+                'grupos': []
+            })
+
+    except Exception as e:
+        logger.error(f'❌ Erro ao obter grupos: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# ============================================================================
+# ROTAS PARA GERENCIAR GRUPOS FIXOS DE AGENDAMENTO
+# ============================================================================
+
+@main_bp.route('/grupos-fixos', methods=['GET'])
+def listar_grupos_fixos_route():
+    """Lista todos os grupos fixos cadastrados."""
+    try:
+        grupos = database.listar_grupos_fixos()
+        return jsonify({
+            'success': True,
+            'grupos': grupos
+        })
+    except Exception as e:
+        print(f'Erro ao listar grupos fixos: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/grupos-fixos', methods=['POST'])
+def adicionar_grupo_fixo_route():
+    """Adiciona um novo grupo fixo."""
+    try:
+        data = request.get_json()
+        grupo_id = data.get('grupo_id')
+        grupo_nome = data.get('grupo_nome')
+
+        if not grupo_id or not grupo_nome:
+            return jsonify({'success': False, 'error': 'grupo_id e grupo_nome são obrigatórios'}), 400
+
+        resultado = database.adicionar_grupo_fixo(grupo_id, grupo_nome)
+
+        if resultado['success']:
+            return jsonify(resultado)
+        else:
+            return jsonify(resultado), 400
+
+    except Exception as e:
+        print(f'Erro ao adicionar grupo fixo: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/grupos-fixos/<string:grupo_id>', methods=['DELETE'])
+def remover_grupo_fixo_route(grupo_id):
+    """Remove um grupo fixo."""
+    try:
+        resultado = database.remover_grupo_fixo(grupo_id)
+
+        if resultado['success']:
+            return jsonify(resultado)
+        else:
+            return jsonify(resultado), 400
+
+    except Exception as e:
+        print(f'Erro ao remover grupo fixo: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/grupos-fixos/<string:grupo_id>/toggle', methods=['PUT'])
+def alternar_status_grupo_fixo_route(grupo_id):
+    """Ativa ou desativa um grupo fixo."""
+    try:
+        data = request.get_json()
+        ativo = data.get('ativo', True)
+
+        resultado = database.alternar_status_grupo_fixo(grupo_id, ativo)
+
+        if resultado['success']:
+            return jsonify(resultado)
+        else:
+            return jsonify(resultado), 400
+
+    except Exception as e:
+        print(f'Erro ao alternar status do grupo fixo: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500

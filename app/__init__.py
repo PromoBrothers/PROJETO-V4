@@ -28,4 +28,9 @@ def create_app():
     from . import routes
     app.register_blueprint(routes.main_bp)
 
+    # Iniciar scheduler de mensagens automáticas
+    from .scheduler import message_scheduler
+    message_scheduler.start()
+    print('✅ Scheduler de mensagens iniciado', file=sys.stderr)
+
     return app
