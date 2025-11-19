@@ -32,7 +32,7 @@ class MessageScheduler:
         self.running = False
         self.thread = None
         self.check_interval = 30  # Verificar a cada 30 segundos
-        self.whatsapp_url = os.getenv('WHATSAPP_MONITOR_URL', 'http://localhost:3001')
+        self.whatsapp_url = os.getenv('WHATSAPP_MONITOR_URL', 'http://qrcode:3001')
         self.timezone = pytz.timezone('America/Sao_Paulo')
 
     def start(self):
