@@ -19661,3 +19661,142 @@ ImportError: cannot import name 'extrair_dados_mercadolivre' from 'app.scraping'
 2025-11-19 10:41:11,973 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
 2025-11-19 10:41:19,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:41:19] "GET /whatsapp/status HTTP/1.1" 200 -
 2025-11-19 10:41:19,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:41:19] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:41:42,142 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:42:12,257 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:42:19,015 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:19] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:19,016 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:19] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:42:19,611 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:19] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:23,247 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:23] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:26,236 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:26] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:26,236 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:26] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:42:29,243 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:29] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:32,240 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:32] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:35,220 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:35] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:36,250 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:36] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:42:38,237 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:38] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:41,240 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:41] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:42,389 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:42:44,245 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:44] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:46,245 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:46] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:42:47,234 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:47] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:50,233 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:50] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:53,233 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:53] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:56,227 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:56] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:42:56,244 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:56] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:42:59,232 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:42:59] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:02,254 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:02] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:05,240 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:05] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:06,237 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:06] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:43:08,236 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:08] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:11,242 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:11] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:12,530 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:43:14,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:14] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:15,625 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:15] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:43:17,241 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:17] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:20,233 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:20] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:23,233 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:23] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:26,225 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:26] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:43:26,232 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:26] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:29,231 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:29] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:32,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:32] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:35,240 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:35] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:36,237 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:36] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:43:38,222 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:38] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:41,236 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:41] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:42,630 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:43:44,229 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:44] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:46,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:46] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:43:47,236 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:47] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:50,243 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:50] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:53,242 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:53] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:56,221 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:56] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:43:56,221 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:56] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:43:59,226 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:43:59] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:02,225 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:02] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:05,241 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:05] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:06,247 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:06] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:44:08,244 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:08] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:11,234 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:11] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:12,750 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:44:14,243 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:14] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:19,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:19] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:44:19,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:19] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:24,504 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:24] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:25,612 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:25] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:25,714 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:44:25,720 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:25] "GET /produtos?plataforma=whatsapp&agendado=true&order=desc HTTP/1.1" 200 -
+2025-11-19 10:44:27,277 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:44:27,277 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:27] "GET /produtos?agendado=true&order=desc HTTP/1.1" 200 -
+2025-11-19 10:44:28,068 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=is.null&order=created_at.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:44:28,069 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:28] "GET /produtos?agendado=false&order=desc HTTP/1.1" 200 -
+2025-11-19 10:44:28,615 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:28] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:32,240 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:32] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:35,225 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:35] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:38,222 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:38] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:41,232 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:41] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:42,862 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:44:44,236 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:44] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:47,238 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:47] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:50,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:50] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:53,245 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:53] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:56,245 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:56] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:44:59,235 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:44:59] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:02,235 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:02] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:05,239 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:05] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:07,621 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:07] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:11,232 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:11] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:12,990 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:45:14,231 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:14] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:17,260 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:17] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:20,238 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:20] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:23,238 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:23] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:26,237 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:26] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:29,238 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:29] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:32,236 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:32] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:35,243 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:35] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:38,225 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:38] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:41,257 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:41] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:43,284 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:45:44,234 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:44] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:47,240 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:47] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:50,223 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:50] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:53,237 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:53] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:56,258 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:56] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:45:59,253 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:45:59] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:02,243 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:02] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:05,236 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:05] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:08,222 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:08] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:11,234 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:11] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:13,410 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:46:14,234 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:14] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:17,247 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:17] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:20,233 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:20] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:23,232 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:23] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:26,225 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:26] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:29,231 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:29] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:32,220 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:32] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:35,237 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:35] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:38,236 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:46:38] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:46:43,546 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:47:13,678 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:47:19,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:47:19] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:47:43,960 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:48:14,122 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:48:19,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:48:19] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:48:44,240 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:48:53,358 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:48:53] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:48:56,283 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:48:56] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:48:59,240 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:48:59] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:02,237 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:02] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:05,236 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:05] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:08,235 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:08] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:11,242 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:11] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:14,234 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:14] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:14,359 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:49:17,233 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:17] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:20,233 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:20] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:23,246 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:23] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:26,244 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:26] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:29,231 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:29] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:32,237 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:32] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:49:35,234 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:49:35] "GET /whatsapp/status HTTP/1.1" 200 -
