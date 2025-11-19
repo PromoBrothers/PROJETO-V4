@@ -88,7 +88,11 @@
       "Bash(nul)",
       "Bash(git check-ignore:*)",
       "Bash(python3.11:*)",
-      "Bash(if exist \"c:\\Users\\Joao_\\OneDrive\\Documentos\\GitHub\\PROJETO-V4\\test_ml_formatacao.py\" del \"c:\\Users\\Joao_\\OneDrive\\Documentos\\GitHub\\PROJETO-V4\\test_ml_formatacao.py\")"
+      "Bash(if exist \"c:\\Users\\Joao_\\OneDrive\\Documentos\\GitHub\\PROJETO-V4\\test_ml_formatacao.py\" del \"c:\\Users\\Joao_\\OneDrive\\Documentos\\GitHub\\PROJETO-V4\\test_ml_formatacao.py\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(if exist \"whatsapp-monitor\\nul\" del \"whatsapp-monitor\\nul\")",
+      "Bash(git push)"
     ],
     "deny": [],
     "ask": []

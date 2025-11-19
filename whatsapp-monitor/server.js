@@ -56,6 +56,9 @@ console.log = (...args) => {
 // Cache para QR Code
 const qrCodeCache = new NodeCache({ stdTTL: 300 });
 
+// Cache para retry de mensagens (evita erro "No sessions")
+const msgRetryCounterCache = new NodeCache();
+
 let sock;
 let qrCodeData = null;
 let isConnected = false;
@@ -108,15 +111,26 @@ async function connectToWhatsApp() {
         const isAuthenticated = !!state.creds?.registered;
         console.log(`🔐 Autenticado: ${isAuthenticated}`);
 
+        // Criar logger para o socket
+        const socketLogger = P({ level: 'silent' });
+
         sock = makeWASocket({
             version,
-            logger: P({ level: 'silent' }),
+            logger: socketLogger,
             printQRInTerminal: true,
             auth: {
                 creds: state.creds,
-                keys: makeCacheableSignalKeyStore(state.keys, P({ level: 'silent' })),
+                // IMPORTANTE: makeCacheableSignalKeyStore precisa do logger para funcionar corretamente
+                keys: makeCacheableSignalKeyStore(state.keys, socketLogger),
             },
-            browser: ['Promo Brothers', 'Chrome', '10.0']
+            browser: ['Promo Brothers', 'Chrome', '10.0'],
+            // Cache para retry de mensagens (ESSENCIAL para evitar "No sessions")
+            msgRetryCounterCache,
+            // Configurações adicionais para evitar erros de sessão
+            getMessage: async (key) => {
+                // Retorna mensagem vazia se não encontrar (evita crash)
+                return { conversation: '' };
+            }
         });
 
         console.log('✅ Socket criado com sucesso');

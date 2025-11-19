@@ -19325,3 +19325,339 @@ ImportError: cannot import name 'extrair_dados_mercadolivre' from 'app.scraping'
 2025-11-19 00:15:18,662 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
 2025-11-19 00:15:48,820 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
 2025-11-19 00:16:18,918 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:16:49,014 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:17:19,173 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:17:49,261 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:18:19,407 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:18:49,515 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:19:19,613 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:19:50,904 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:20:21,022 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:20:51,145 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:21:21,237 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:21:51,340 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:22:21,470 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:22:51,650 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:23:21,839 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:23:51,946 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:24:22,060 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:24:52,184 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:25:22,289 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:25:52,396 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:26:22,507 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:26:52,608 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:27:22,757 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:27:52,849 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:28:22,942 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:28:53,045 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:29:30,702 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.191:5000
+2025-11-19 00:29:30,703 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-19 00:29:30,747 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:30] "GET / HTTP/1.1" 200 -
+2025-11-19 00:29:30,853 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:30] "GET /static/style.css HTTP/1.1" 200 -
+2025-11-19 00:29:30,919 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:30] "GET /static/script.js HTTP/1.1" 200 -
+2025-11-19 00:29:31,073 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:29:33,037 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:29:33,039 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:33] "GET /produtos?status=agendado&ordem=desc HTTP/1.1" 200 -
+2025-11-19 00:29:34,544 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/grupos_fixos_agendamento?select=%2A&order=criado_em.asc "HTTP/2 200 OK"
+2025-11-19 00:29:34,546 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:34] "GET /grupos-fixos HTTP/1.1" 200 -
+2025-11-19 00:29:34,597 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/grupos_fixos_agendamento?select=%2A&order=criado_em.asc "HTTP/2 200 OK"
+2025-11-19 00:29:34,599 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:34] "GET /grupos-fixos HTTP/1.1" 200 -
+2025-11-19 00:29:35,094 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:35] "GET /whatsapp-monitor HTTP/1.1" 200 -
+2025-11-19 00:29:35,122 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:35] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2025-11-19 00:29:35,683 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:35] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-11-19 00:29:38,390 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:38] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 00:29:41,629 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:41] "GET /amazon HTTP/1.1" 200 -
+2025-11-19 00:29:41,658 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:41] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2025-11-19 00:29:41,658 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:41] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2025-11-19 00:29:42,384 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:42] "GET / HTTP/1.1" 200 -
+2025-11-19 00:29:42,412 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:42] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2025-11-19 00:29:42,412 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:42] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2025-11-19 00:29:42,768 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:42] "[35m[1mGET /whatsapp/messages?limit=50 HTTP/1.1[0m" 503 -
+2025-11-19 00:29:44,086 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 00:29:44] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 00:30:01,346 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:30:31,447 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:31:01,629 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:31:31,731 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:32:01,837 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:32:31,955 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:33:02,072 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:33:32,702 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:34:02,907 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:34:33,072 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:35:03,218 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:35:33,436 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:36:03,558 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:36:33,659 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:37:03,958 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:37:34,071 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:38:04,176 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:38:34,276 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:39:04,385 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:39:34,496 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:40:04,592 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:40:34,687 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:41:04,805 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:41:34,936 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:42:05,037 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:42:35,132 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:43:05,283 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:43:35,384 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:44:05,484 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:44:35,788 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:45:05,912 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:45:36,009 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:46:06,136 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:46:36,256 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:47:06,357 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:47:36,468 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:48:06,640 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:48:36,738 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:49:06,841 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:49:36,943 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:50:07,260 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:50:37,346 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:51:07,436 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:51:37,539 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:52:07,887 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:52:38,044 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:53:08,141 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:53:38,242 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:54:08,338 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:55:18,786 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:55:49,045 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:56:22,951 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:57:25,152 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:57:55,324 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:58:25,506 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:58:55,615 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:59:25,726 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 00:59:55,886 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 01:00:26,244 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 01:00:56,356 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 01:01:26,635 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:22:41,212 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.134:5000
+2025-11-19 10:22:41,212 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-19 10:22:41,561 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:22:53,586 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:22:53] "GET /amazon HTTP/1.1" 200 -
+2025-11-19 10:22:53,700 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:22:53] "GET /static/script.js HTTP/1.1" 200 -
+2025-11-19 10:22:53,700 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:22:53] "GET /static/style.css HTTP/1.1" 200 -
+2025-11-19 10:23:11,682 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:23:32,448 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:23:32] "GET / HTTP/1.1" 200 -
+2025-11-19 10:23:32,488 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:23:32] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2025-11-19 10:23:32,489 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:23:32] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2025-11-19 10:23:41,829 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:24:11,923 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:24:42,048 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:25:12,197 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:25:12,532 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:25:12] "POST /produto HTTP/1.1" 200 -
+2025-11-19 10:25:18,476 - httpx - INFO - HTTP Request: POST https://cfacybymuscwcpgmbjkz.supabase.co/storage/v1/object/imagens-produtos/processed_da8d048c-b051-43d0-bdfe-d3dae8d900d6.jpg "HTTP/2 400 Bad Request"
+2025-11-19 10:25:19,377 - httpx - INFO - HTTP Request: POST https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes "HTTP/2 201 Created"
+2025-11-19 10:25:19,377 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:25:19] "POST /processar_para_envio HTTP/1.1" 200 -
+2025-11-19 10:25:22,094 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:25:22] "[35m[1mPOST /whatsapp/send HTTP/1.1[0m" 503 -
+2025-11-19 10:25:42,301 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:26:12,410 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:26:42,527 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:27:12,694 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:27:42,830 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:28:12,934 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:28:43,035 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:29:13,134 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:29:43,242 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:30:13,380 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:30:43,531 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:31:13,662 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:31:43,935 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:32:14,081 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:32:44,483 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:33:14,626 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:33:44,913 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:34:15,041 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:34:45,176 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:34:45,944 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:34:45,944 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:34:45] "GET /produtos?status=agendado&ordem=desc HTTP/1.1" 200 -
+2025-11-19 10:34:47,291 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/grupos_fixos_agendamento?select=%2A&order=criado_em.asc "HTTP/2 200 OK"
+2025-11-19 10:34:47,291 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:34:47] "GET /grupos-fixos HTTP/1.1" 200 -
+2025-11-19 10:34:47,383 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/grupos_fixos_agendamento?select=%2A&order=criado_em.asc "HTTP/2 200 OK"
+2025-11-19 10:34:47,388 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:34:47] "GET /grupos-fixos HTTP/1.1" 200 -
+2025-11-19 10:34:49,707 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:34:49] "GET /whatsapp-monitor HTTP/1.1" 200 -
+2025-11-19 10:34:49,731 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:34:49] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2025-11-19 10:34:49,988 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:34:49] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-11-19 10:34:52,667 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:34:52] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:34:58,351 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:34:58] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:01,920 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:01] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:04,902 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:04] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:07,903 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:07] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:10,906 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:10] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:13,895 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:13] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:15,327 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:35:16,911 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:16] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:19,895 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:19] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:22,912 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:22] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:25,918 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:25] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:27,634 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:27] "GET /whatsapp-monitor HTTP/1.1" 200 -
+2025-11-19 10:35:27,656 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:27] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2025-11-19 10:35:28,851 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:28] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:32,386 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:32] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:38,910 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:38] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:41,906 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:41] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:44,900 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:44] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:45,611 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:35:47,917 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:47] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:50,927 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:50] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:35:53,896 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:35:53] "[35m[1mGET /whatsapp/status HTTP/1.1[0m" 503 -
+2025-11-19 10:36:06,012 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.134:5000
+2025-11-19 10:36:06,012 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-19 10:36:06,161 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:06] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:06,181 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:06] "GET /whatsapp/qr HTTP/1.1" 200 -
+2025-11-19 10:36:06,345 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:36:08,409 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:08] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:08,431 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:08] "GET /whatsapp/qr HTTP/1.1" 200 -
+2025-11-19 10:36:11,401 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:11] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:11,411 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:11] "GET /whatsapp/qr HTTP/1.1" 200 -
+2025-11-19 10:36:14,413 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:14] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:14,421 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:14] "GET /whatsapp/qr HTTP/1.1" 200 -
+2025-11-19 10:36:17,416 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:17] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:17,434 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:17] "GET /whatsapp/qr HTTP/1.1" 200 -
+2025-11-19 10:36:20,411 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:20] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:20,434 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:20] "GET /whatsapp/qr HTTP/1.1" 200 -
+2025-11-19 10:36:23,411 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:23] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:26,412 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:26] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:29,405 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:29] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:32,396 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:32] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:35,404 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:35] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:36,471 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:36:38,409 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:38] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:39,127 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:39] "GET /whatsapp/groups HTTP/1.1" 200 -
+2025-11-19 10:36:40,708 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:40] "GET /whatsapp/groups HTTP/1.1" 200 -
+2025-11-19 10:36:41,403 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:41] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:43,659 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:36:43,660 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:43] "GET /produtos?plataforma=whatsapp&agendado=true&order=desc HTTP/1.1" 200 -
+2025-11-19 10:36:44,403 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:44] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:45,761 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:36:45,769 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:45] "GET /produtos?agendado=true&order=desc HTTP/1.1" 200 -
+2025-11-19 10:36:47,408 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:47] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:47,723 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=is.null&order=created_at.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:36:47,723 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:47] "GET /produtos?agendado=false&order=desc HTTP/1.1" 200 -
+2025-11-19 10:36:50,414 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:50] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:53,433 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:53] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:36:56,073 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:56] "[33mPOST /produtos/2645/agendar HTTP/1.1[0m" 404 -
+2025-11-19 10:36:56,414 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:36:56] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:37:00,246 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:00] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:37:01,399 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:01] "[33mPOST /produtos/2645/agendar HTTP/1.1[0m" 404 -
+2025-11-19 10:37:01,806 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:01] "[33mPOST /produtos/2645/agendar HTTP/1.1[0m" 404 -
+2025-11-19 10:37:02,001 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:02] "[33mPOST /produtos/2645/agendar HTTP/1.1[0m" 404 -
+2025-11-19 10:37:02,161 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:02] "[33mPOST /produtos/2645/agendar HTTP/1.1[0m" 404 -
+2025-11-19 10:37:02,406 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:02] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:37:06,237 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:06] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:37:06,601 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:37:09,224 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:09] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:37:11,420 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:11] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:37:12,154 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:12] "GET / HTTP/1.1" 200 -
+2025-11-19 10:37:12,276 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:12] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2025-11-19 10:37:12,279 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:12] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2025-11-19 10:37:12,839 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:37:12,840 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:12] "GET /produtos?status=agendado&ordem=desc HTTP/1.1" 200 -
+2025-11-19 10:37:15,711 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=is.null&order=created_at.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:37:15,711 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:15] "GET /produtos?status=nao-agendado&ordem=desc HTTP/1.1" 200 -
+2025-11-19 10:37:16,846 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&id=eq.2645 "HTTP/2 200 OK"
+2025-11-19 10:37:16,847 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:16] "GET /produtos/2645 HTTP/1.1" 200 -
+2025-11-19 10:37:23,741 - httpx - INFO - HTTP Request: PATCH https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?id=eq.2645 "HTTP/2 200 OK"
+2025-11-19 10:37:23,741 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:23] "POST /agendar_produto/2645 HTTP/1.1" 200 -
+2025-11-19 10:37:23,801 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=is.null&order=created_at.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:37:23,801 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:23] "GET /produtos?status=nao-agendado&ordem=desc HTTP/1.1" 200 -
+2025-11-19 10:37:36,861 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:37:36,921 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/grupos_fixos_agendamento?select=%2A&ativo=eq.True "HTTP/2 200 OK"
+2025-11-19 10:37:38,781 - app.scheduler - INFO - [OK] Mensagem enviada com sucesso para 120363041167443411@g.us
+2025-11-19 10:37:40,848 - httpx - INFO - HTTP Request: PATCH https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?id=eq.2645 "HTTP/2 200 OK"
+2025-11-19 10:37:51,707 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:37:51,708 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:51] "GET /produtos?status=agendado&ordem=desc HTTP/1.1" 200 -
+2025-11-19 10:37:52,692 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=is.null&order=created_at.desc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:37:52,692 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:52] "GET /produtos?status=nao-agendado&ordem=desc HTTP/1.1" 200 -
+2025-11-19 10:37:54,768 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&id=eq.2645 "HTTP/2 200 OK"
+2025-11-19 10:37:54,768 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:54] "GET /produtos/2645 HTTP/1.1" 200 -
+2025-11-19 10:37:54,824 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/grupos_fixos_agendamento?select=%2A&order=criado_em.asc "HTTP/2 200 OK"
+2025-11-19 10:37:54,824 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:54] "GET /grupos-fixos HTTP/1.1" 200 -
+2025-11-19 10:37:56,377 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:37:56] "GET /whatsapp/groups HTTP/1.1" 200 -
+2025-11-19 10:37:58,491 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&id=eq.2645 "HTTP/2 200 OK"
+2025-11-19 10:37:59,494 - app.scheduler - INFO - [OK] Mensagem enviada com sucesso para 120363041167443411@g.us
+2025-11-19 10:38:01,495 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:01] "POST /enviar-mensagem HTTP/1.1" 200 -
+2025-11-19 10:38:10,956 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:38:25,313 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:25] "GET /whatsapp-monitor HTTP/1.1" 200 -
+2025-11-19 10:38:25,337 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:25] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2025-11-19 10:38:25,591 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:25] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:38:26,096 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:26] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:38:29,236 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:29] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:38:32,045 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:32] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:38:34,603 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:34] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:38:35,602 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:35] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:38:37,612 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:37] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:38:40,614 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:40] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:38:41,081 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:38:41,551 - app.routes - INFO -   - Grupo: TESTE EMPRESA
+2025-11-19 10:38:41,551 - app.routes - INFO -   - Tem imagem: True
+2025-11-19 10:38:41,551 - app.routes - INFO -   - Tamanho mensagem: 248 caracteres
+2025-11-19 10:38:41,557 - app.anti_bot - INFO - Fazendo requisição para https://mercadolivre.com/sec/2toe7B2 via ScraperAPI...
+2025-11-19 10:38:42,523 - app.anti_bot - ERROR - Erro ao fazer requisição via ScraperAPI: 403 Client Error: Forbidden for url: http://api.scraperapi.com/?api_key=d60dc3c32e98c9bb7a4f1ab88ae5c2a3&url=https%3A%2F%2Fmercadolivre.com%2Fsec%2F2toe7B2&render=true
+2025-11-19 10:38:42,523 - app.anti_bot - WARNING - Tentando requisição direta como fallback...
+2025-11-19 10:38:43,613 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:43] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:38:46,245 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:46] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:38:47,235 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:47] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:38:48,536 - app.anti_bot - WARNING - Possível bloqueio detectado na tentativa 1
+2025-11-19 10:38:50,242 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:50] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:38:53,234 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:53] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:38:56,237 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:56] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:38:56,237 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:56] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:38:57,011 - app.anti_bot - WARNING - Possível bloqueio detectado na tentativa 2
+2025-11-19 10:38:59,245 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:38:59] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:02,243 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:02] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:05,246 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:05] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:06,206 - app.anti_bot - WARNING - Possível bloqueio detectado na tentativa 3
+2025-11-19 10:39:06,255 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:06] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:39:08,231 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:08] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:10,615 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:10] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:11,180 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:39:13,130 - httpx - INFO - HTTP Request: POST https://cfacybymuscwcpgmbjkz.supabase.co/storage/v1/object/imagens_melhoradas_tech/whatsapp/mensagem-do-teste-empresa_20251119_103912.jpg "HTTP/2 200 OK"
+2025-11-19 10:39:13,211 - httpx - INFO - HTTP Request: POST https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes "HTTP/2 201 Created"
+2025-11-19 10:39:13,214 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:13] "POST /agendar HTTP/1.1" 200 -
+2025-11-19 10:39:14,245 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:14] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:16,223 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:16] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:39:17,221 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:17] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:20,233 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:20] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:23,232 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:23] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:26,231 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:26] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:39:26,243 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:26] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:29,234 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:29] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:32,224 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:32] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:35,224 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:35] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:36,229 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:36] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:39:38,241 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:38] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:41,235 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:41] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:41,331 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:39:44,225 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:44] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:46,247 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:46] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:39:47,234 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:47] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:50,232 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:50] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:53,232 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:53] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:56,225 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:56] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:39:56,227 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:56] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:39:59,244 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:39:59] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:40:02,249 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:40:02] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:40:05,248 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:40:05] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:40:06,243 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:40:06] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:40:08,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:40:08] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:40:11,476 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:40:19,227 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:40:19] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:40:19,231 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:40:19] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
+2025-11-19 10:40:41,591 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:41:11,973 - httpx - INFO - HTTP Request: GET https://cfacybymuscwcpgmbjkz.supabase.co/rest/v1/promocoes?select=%2A&agendamento=not.is.null&order=agendamento.asc&limit=200 "HTTP/2 200 OK"
+2025-11-19 10:41:19,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:41:19] "GET /whatsapp/status HTTP/1.1" 200 -
+2025-11-19 10:41:19,230 - werkzeug - INFO - 127.0.0.1 - - [19/Nov/2025 10:41:19] "GET /whatsapp/messages?limit=50 HTTP/1.1" 200 -
