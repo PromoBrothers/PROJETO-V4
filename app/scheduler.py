@@ -115,6 +115,11 @@ class MessageScheduler:
     def _send_scheduled_message(self, produto: Dict) -> bool:
         """Envia mensagem agendada para o WhatsApp"""
         try:
+            # Verificar se WhatsApp está conectado
+            if not self._check_whatsapp_connection():
+                logger.warning('⚠️ WhatsApp não está conectado. Pulando envio.')
+                return False
+
             # Obter grupos configurados para envio automático
             grupos_destino = self._get_target_groups()
 
@@ -145,6 +150,18 @@ class MessageScheduler:
 
         except Exception as e:
             logger.error(f'❌ Erro ao enviar mensagem agendada: {e}')
+            return False
+
+    def _check_whatsapp_connection(self) -> bool:
+        """Verifica se o WhatsApp está conectado"""
+        try:
+            response = requests.get(f'{self.whatsapp_url}/status', timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('connected', False)
+            return False
+        except Exception as e:
+            logger.warning(f'⚠️ Não foi possível verificar status do WhatsApp: {e}')
             return False
 
     def _get_target_groups(self) -> List[str]:
@@ -196,11 +213,20 @@ class MessageScheduler:
                 timeout=30
             )
 
+            # Verificar se há sessão ativa
+            if response.status_code == 500:
+                error_data = response.json() if response.headers.get('content-type') == 'application/json' else {}
+                if error_data.get('error') == 'No sessions':
+                    raise Exception('WhatsApp não está conectado. Escaneie o QR Code primeiro.')
+
             if response.status_code not in [200, 201]:
                 raise Exception(f'Erro ao enviar: {response.status_code} - {response.text}')
 
             logger.info(f'[OK] Mensagem enviada com sucesso para {group_id}')
 
+        except requests.exceptions.RequestException as e:
+            logger.error(f'[ERRO] Erro de conexão com WhatsApp Monitor: {e}')
+            raise Exception(f'WhatsApp Monitor não está acessível: {e}')
         except Exception as e:
             logger.error(f'[ERRO] Erro ao enviar para WhatsApp: {e}')
             raise

@@ -70,10 +70,10 @@ services:
     networks:
       - scraper-network
 
-  # Serviço 1: QR Code - Apenas para escanear e conectar
-  qrcode:
+  # WhatsApp Monitor - QR Code + Processamento de mensagens
+  whatsapp-monitor:
     build: ./whatsapp-monitor
-    container_name: qrcode
+    container_name: whatsapp-monitor
     ports:
       - "3001:3001"
     environment:
@@ -82,29 +82,9 @@ services:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_KEY=${SUPABASE_KEY}
     volumes:
-      # Persistir sessão do WhatsApp (compartilhada com whatsapp-monitor)
+      # Persistir sessão do WhatsApp
       - whatsapp-session:/app/auth_info_baileys
     restart: unless-stopped
-    networks:
-      - scraper-network
-
-  # Serviço 2: WhatsApp Monitor - Processa mensagens do sistema
-  whatsapp-monitor:
-    build: ./whatsapp-monitor
-    container_name: whatsapp-monitor
-    ports:
-      - "3002:3001"
-    environment:
-      - PORT=3001
-      - FLASK_API=http://scraper-promo:5000
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
-    volumes:
-      # Mesma sessão do QR Code
-      - whatsapp-session:/app/auth_info_baileys
-    restart: unless-stopped
-    depends_on:
-      - qrcode
     networks:
       - scraper-network
 
