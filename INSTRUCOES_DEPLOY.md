@@ -125,7 +125,6 @@ curl http://localhost:3001/status
 # Acesse http://SEU_IP:3001/qr e escaneie novamente
 
 # 3. Verificar logs
-docker-compose logs -f qrcode
 docker-compose logs -f whatsapp-monitor
 ```
 
@@ -139,7 +138,6 @@ docker-compose logs -f whatsapp-monitor
 docker-compose ps
 
 # Reiniciar se necessário
-docker-compose restart qrcode
 docker-compose restart whatsapp-monitor
 ```
 
@@ -169,9 +167,6 @@ docker-compose logs -f
 ```bash
 # Flask (scraper)
 docker-compose logs -f scraper-promo
-
-# QR Code
-docker-compose logs -f qrcode
 
 # WhatsApp Monitor
 docker-compose logs -f whatsapp-monitor
@@ -245,7 +240,6 @@ docker-compose config
 3. Verifique a conectividade:
 ```bash
 curl http://localhost:3001/status
-curl http://localhost:3002/status
 curl http://localhost/
 ```
 

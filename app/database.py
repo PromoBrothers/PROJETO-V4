@@ -246,16 +246,35 @@ def listar_grupos_fixos():
 def adicionar_grupo_fixo(grupo_id, grupo_nome):
     """Adiciona um novo grupo fixo para receber agendamentos automáticos."""
     try:
-        data = {
-            "grupo_id": grupo_id,
-            "grupo_nome": grupo_nome,
-            "ativo": True
-        }
-        response = supabase.table("grupos_fixos_agendamento").insert(data).execute()
-        return {"success": True, "data": response.data}
+        # Verificar se o grupo já existe
+        existing = supabase.table("grupos_fixos_agendamento").select("*").eq("grupo_id", grupo_id).execute()
+
+        if existing.data and len(existing.data) > 0:
+            # Grupo já existe, apenas atualizar o nome e ativar
+            response = supabase.table("grupos_fixos_agendamento").update({
+                "grupo_nome": grupo_nome,
+                "ativo": True,
+                "atualizado_em": datetime.datetime.now().isoformat()
+            }).eq("grupo_id", grupo_id).execute()
+            return {"success": True, "data": response.data, "message": "Grupo atualizado e ativado"}
+        else:
+            # Grupo não existe, inserir novo
+            data = {
+                "grupo_id": grupo_id,
+                "grupo_nome": grupo_nome,
+                "ativo": True
+            }
+            response = supabase.table("grupos_fixos_agendamento").insert(data).execute()
+            return {"success": True, "data": response.data, "message": "Grupo adicionado"}
     except Exception as e:
-        print(f"Erro ao adicionar grupo fixo: {e}")
-        return {"success": False, "error": str(e)}
+        error_msg = str(e)
+        print(f"❌ Erro ao adicionar grupo fixo: {error_msg}")
+
+        # Verificar se é erro de JSON
+        if "Expecting value" in error_msg:
+            return {"success": False, "error": "Erro de comunicação com o banco de dados. Verifique as credenciais do Supabase."}
+
+        return {"success": False, "error": error_msg}
 
 def remover_grupo_fixo(grupo_id):
     """Remove um grupo fixo da lista de agendamentos automáticos."""

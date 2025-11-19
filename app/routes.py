@@ -1357,11 +1357,37 @@ def whatsapp_monitor_group():
     """Proxy para adicionar grupo ao monitoramento (rota que o JS chama)"""
     try:
         data = request.get_json()
-        # Proxy para o serviço Node.js. Assumindo que o Node.js tem um endpoint /monitor
-        response = requests.post(f'{WHATSAPP_MONITOR_URL}/monitor', json=data, timeout=5)
-        return jsonify(response.json())
+
+        # Verificar se WhatsApp está conectado antes de tentar adicionar grupo
+        try:
+            status_response = requests.get(f'{WHATSAPP_MONITOR_URL}/status', timeout=5)
+            status_data = status_response.json()
+            if not status_data.get('connected', False):
+                return jsonify({'success': False, 'error': 'WhatsApp não está conectado. Escaneie o QR Code primeiro.'}), 400
+        except:
+            pass  # Continua mesmo se não conseguir verificar status
+
+        # Proxy para o serviço Node.js
+        response = requests.post(f'{WHATSAPP_MONITOR_URL}/monitor', json=data, timeout=10)
+
+        # Verificar se a resposta é JSON válido
+        if response.status_code == 200:
+            try:
+                return jsonify(response.json())
+            except requests.exceptions.JSONDecodeError:
+                logger.error(f'Resposta não é JSON válido: {response.text[:500]}')
+                return jsonify({'success': False, 'error': 'Resposta inválida do WhatsApp Monitor'}), 503
+        else:
+            logger.error(f'Erro HTTP {response.status_code}: {response.text[:500]}')
+            return jsonify({'success': False, 'error': f'Erro HTTP {response.status_code}'}), response.status_code
+
+    except requests.exceptions.Timeout:
+        return jsonify({'success': False, 'error': 'Timeout ao conectar com WhatsApp Monitor'}), 503
+    except requests.exceptions.ConnectionError:
+        return jsonify({'success': False, 'error': 'WhatsApp Monitor não está acessível'}), 503
     except Exception as e:
-        return jsonify({'error': f'Erro ao adicionar grupo: {str(e)}'}), 503
+        logger.error(f'Erro ao adicionar grupo: {str(e)}')
+        return jsonify({'success': False, 'error': f'Erro ao adicionar grupo: {str(e)}'}), 503
 
 @main_bp.route('/whatsapp/unmonitor', methods=['POST'])
 def whatsapp_unmonitor():
@@ -1369,16 +1395,31 @@ def whatsapp_unmonitor():
     try:
         data = request.get_json()
         group_id = data.get('groupId')
-        
+
         if not group_id:
             return jsonify({'success': False, 'error': 'ID do grupo ausente'}), 400
 
-        # Proxy para o serviço Node.js. Assumindo que o Node.js tem um endpoint /unmonitor
-        response = requests.post(f'{WHATSAPP_MONITOR_URL}/unmonitor', json={'groupId': group_id}, timeout=5)
-        
-        return jsonify(response.json())
+        # Proxy para o serviço Node.js
+        response = requests.post(f'{WHATSAPP_MONITOR_URL}/unmonitor', json={'groupId': group_id}, timeout=10)
+
+        # Verificar se a resposta é JSON válido
+        if response.status_code in [200, 404]:
+            try:
+                return jsonify(response.json())
+            except requests.exceptions.JSONDecodeError:
+                logger.error(f'Resposta não é JSON válido: {response.text[:500]}')
+                return jsonify({'success': False, 'error': 'Resposta inválida do WhatsApp Monitor'}), 503
+        else:
+            logger.error(f'Erro HTTP {response.status_code}: {response.text[:500]}')
+            return jsonify({'success': False, 'error': f'Erro HTTP {response.status_code}'}), response.status_code
+
+    except requests.exceptions.Timeout:
+        return jsonify({'success': False, 'error': 'Timeout ao conectar com WhatsApp Monitor'}), 503
+    except requests.exceptions.ConnectionError:
+        return jsonify({'success': False, 'error': 'WhatsApp Monitor não está acessível'}), 503
     except Exception as e:
-        return jsonify({'error': f'Erro ao remover grupo: {str(e)}'}), 503
+        logger.error(f'Erro ao remover grupo: {str(e)}')
+        return jsonify({'success': False, 'error': f'Erro ao remover grupo: {str(e)}'}), 503
 
 @main_bp.route('/whatsapp/messages', methods=['GET'])
 def whatsapp_messages():
